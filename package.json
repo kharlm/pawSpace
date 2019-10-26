@@ -15,6 +15,8 @@
     "react": "16.6.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-35.0.0.tar.gz",
     "react-native-elements": "^1.2.0",
+    "react-native-masonry": "^0.5.0-alpha.5",
+    "react-native-masonry-list": "^2.13.0",
     "react-navigation": "^3.0.9",
     "react-redux": "^6.0.0",
     "redux": "^4.0.1",

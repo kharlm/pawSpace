@@ -84,6 +84,7 @@ export const dogsignup = () => {
 	export const doglogin = () => {
 		return async (dispatch, getState) => {
 			try {
+				console.log("function working")
 				const { id} = getState().dog
 				const dogQuery = await db.collection('dogs').doc(id).get()
 				let dog = dogQuery.data()
@@ -102,6 +103,11 @@ export const dogsignup = () => {
 			try {
 				const dogQuery = await db.collection('dogs').doc(id).get()
 				let dog = dogQuery.data()
+				    
+				let res = JSON.stringify(dog);
+
+      
+				//console.log("DOG TRY"+res)
 	
 		/*  let posts = []
 		  const postsQuery = await db.collection('posts').where('id', '==', id).get()
@@ -113,11 +119,12 @@ export const dogsignup = () => {
 	
 				if(type === 'DOGLOGIN'){
 					dispatch({type: 'DOGLOGIN', payload: dog })
-				} else {
+				} /*else {
 					dispatch({type: 'GET_PROFILE', payload: dog })
 				}
+				*/
 			} catch (e) {
-				console.log("in get user");
+				console.log("in get DOG");
 				alert(e)
 			}
 		}

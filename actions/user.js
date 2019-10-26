@@ -2,6 +2,7 @@ import firebase from 'firebase';
 import { orderBy, groupBy, values } from 'lodash'
 import { allowNotifications, sendNotification } from './'
 import db from '../config/firebase';
+import {getDog} from '../actions/dog'
 
 export const updateEmail = (email) => {
 	return {type: 'UPDATE_EMAIL', payload: email}
@@ -25,6 +26,11 @@ export const login = () => {
 			const { email, password } = getState().user
 			const response = await firebase.auth().signInWithEmailAndPassword(email, password)
 			dispatch(getUser(response.user.uid))
+			const userQuery = await db.collection('users').doc(response.user.uid).get()
+			let user = userQuery.data()
+			dispatch(getDog(user.dogs[0]))
+			
+
 			dispatch(allowNotifications())
 		} catch (e) {
 			console.log("in login");
@@ -70,6 +76,9 @@ export const getUser = (uid, type) => {
 		try {
 			const userQuery = await db.collection('users').doc(uid).get()
 			let user = userQuery.data()
+			let res = JSON.stringify(user);
+
+			console.log('USER QUERY'+res);
 
       let posts = []
       const postsQuery = await db.collection('posts').where('uid', '==', uid).get()

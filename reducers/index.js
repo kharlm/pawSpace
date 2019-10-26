@@ -1,5 +1,25 @@
 import { combineReducers } from 'redux'
 
+const user = (state = {}, action) => {
+  switch (action.type) {
+    case 'LOGIN':
+      return action.payload
+    case 'UPDATE_EMAIL':
+      return { ...state, email: action.payload }
+    case 'UPDATE_PASSWORD':
+      return { ...state, password: action.payload }
+    case 'UPDATE_USERNAME':
+      return { ...state, username: action.payload }
+    case 'UPDATE_PHOTO':
+      return { ...state, photo: action.payload }
+    case 'UPDATE_PHOTO':
+      return { ...state, photo: action.payload }
+    case 'GET_TOKEN': 
+      return { ...state, token: action.payload }
+    default:
+      return state
+  }
+}
 
 const dog = (state = {}, action) => {
   switch (action.type) {
@@ -24,26 +44,6 @@ const dog = (state = {}, action) => {
   }
 }
 
-const user = (state = {}, action) => {
-  switch (action.type) {
-    case 'LOGIN':
-      return action.payload
-    case 'UPDATE_EMAIL':
-      return { ...state, email: action.payload }
-    case 'UPDATE_PASSWORD':
-      return { ...state, password: action.payload }
-    case 'UPDATE_USERNAME':
-      return { ...state, username: action.payload }
-    case 'UPDATE_PHOTO':
-      return { ...state, photo: action.payload }
-    case 'UPDATE_PHOTO':
-      return { ...state, photo: action.payload }
-    case 'GET_TOKEN': 
-      return { ...state, token: action.payload }
-    default:
-      return state
-  }
-}
 
 const profile = (state = {}, action) => {
   switch (action.type) {

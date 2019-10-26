@@ -3,12 +3,90 @@ import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View, Button, Image, FlatList, TouchableOpacity } from 'react-native';
+import { Text, View, Button, Image, FlatList, TouchableOpacity,TextInput, SafeAreaView, ScrollView } from 'react-native';
 import { getPosts, likePost, unlikePost } from '../actions/post'
+import Adopt from "./Adopt";
 import moment from 'moment'
 
 class Home extends React.Component {
 
+  componentDidMount() {
+    this.props.getPosts()
+  }
+
+  likePost = (post) => {
+    const { uid } = this.props.user
+    if(post.likes.includes(uid)){
+      this.props.unlikePost(post)
+    } else {
+      this.props.likePost(post)
+    }
+  }
+
+  navigateMap = (item) => {
+    this.props.navigation.navigate('Map', { 
+      location: item.postLocation 
+    })
+  }
+ 
+  render(){
+    if(this.props.post === null) return null
+    return(
+      <ScrollView scrollEventThrottle={16}>
+      <View style={{ flex: 1, backgroundColor: "white", paddingTop: 20 }}>
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: "700",
+            paddingHorizontal: 20
+          }}
+        >
+          Dogs in your area up for adoption
+        </Text>
+        <View style={{ height: 130, marginTop: 20 }}>
+  <ScrollView
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <Adopt
+      imageUri={require("../images/profile2.jpg")}
+      name="Ruby"
+    />
+    <Adopt
+      imageUri={require("../images/user-profile.jpg")}
+      name="Max"
+    />
+    <Adopt
+      imageUri={require("../images/profile4.jpg")}
+      name="Ruby"
+    />
+     <Adopt
+      imageUri={require("../images/profile3.jpg")}
+      name="Bunny"
+    />
+
+    
+  </ScrollView>
+</View>
+<View style={{ marginTop: 40, paddingHorizontal: 20 }}>
+     <Text style={{ fontSize: 24, fontWeight: "700" }}>
+       Introducing Airbnb Plus
+     </Text>
+     <Text style={{ fontWeight: "100", marginTop: 10 }}>
+       A new selection of homes verified for quality & comfort
+</Text>
+      </View>
+      </View>
+
+      
+    </ScrollView>
+    
+
+    )
+    
+  }
+}
+/*
   componentDidMount() {
     this.props.getPosts()
   }
@@ -73,6 +151,7 @@ class Home extends React.Component {
     );
   }
 }
+*/
 
 const mapDispatchToProps = (dispatch) => {
   return bindActionCreators({ getPosts, likePost, unlikePost }, dispatch)

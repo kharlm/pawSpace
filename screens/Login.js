@@ -12,10 +12,17 @@ class Login extends React.Component {
   componentDidMount = () => {
     firebase.auth().onAuthStateChanged((user) => {
       if(user){
+        
+        
+        
         this.props.getUser(user.uid, 'LOGIN')
+        if(this.props.user && global.foo!="dogsignup"){
+         
+        let res = JSON.stringify(this.props.user);
 
-        if(this.props.user!=null && global.foo!="dogsignup"){
-          console.log("Second if ------");
+      
+        console.log("USER:"+res)
+         
           this.props.navigation.navigate('Home')
         }
       }
