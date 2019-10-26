@@ -3,7 +3,7 @@ import ENV from '../env';
 require('firebase/firestore')
 
 const config = {
-  apiKey: "",
+  apiKey: "AIzaSyA1AKubWzMdb3NsBfazu3-XXN8-wBwaknM",
   authDomain:  "pawspace-1151b.firebaseapp.com",
   databaseURL: "https://pawspace-1151b.firebaseio.com",
   projectId: "pawspace-1151b",
