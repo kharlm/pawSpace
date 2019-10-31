@@ -104,7 +104,8 @@ export const dogsignup = () => {
 				const dogQuery = await db.collection('dogs').doc(id).get()
 				let dog = dogQuery.data()
 				    
-				let res = JSON.stringify(dog);
+				//let res = JSON.stringify(dog);
+				console.log("GET DOG");
 
       
 				//console.log("DOG TRY"+res)
@@ -117,12 +118,13 @@ export const dogsignup = () => {
 		  */
 		 // user.posts = orderBy(posts, 'date','desc')
 	
-				if(type === 'DOGLOGIN'){
+				//if(type === 'DOGLOGIN'){
 					dispatch({type: 'DOGLOGIN', payload: dog })
-				} /*else {
-					dispatch({type: 'GET_PROFILE', payload: dog })
-				}
-				*/
+				//} else {
+					//console.log("inside GET_DOGPROFILE");
+					//dispatch({type: 'GET_DOGPROFILE', payload: dog })
+				//}
+				
 			} catch (e) {
 				console.log("in get DOG");
 				alert(e)

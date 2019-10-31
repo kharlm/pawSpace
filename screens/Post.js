@@ -3,7 +3,9 @@ import styles from '../styles'
 import ENV from '../env';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { ImagePicker, Location, Permissions } from 'expo';
+import * as ImagePicker from 'expo-image-picker'
+import * as Location from 'expo-location'
+import * as Permissions from 'expo-permissions'
 import { NavigationEvents } from 'react-navigation';
 import { updateDescription, updateLocation, uploadPost, updatePhoto } from '../actions/post'
 import { FlatList, Modal, SafeAreaView, Text, View, TextInput, Image, TouchableOpacity } from 'react-native';

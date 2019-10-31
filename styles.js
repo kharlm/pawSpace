@@ -77,6 +77,7 @@ export default styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     margin: 10,
+    marginLeft: 30,
     backgroundColor: '#adadad'
   },
   squareLarge: {
@@ -112,4 +113,16 @@ export default styles = StyleSheet.create({
     borderRadius: 5,
     width: 125
   },
+  homeImage: {
+    flex: 1,
+    height: 450,
+    width: "87%",
+    resizeMode: "cover",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#dddddd",
+    borderRadius: 25,
+    marginLeft: 27
+    
+  }
 });

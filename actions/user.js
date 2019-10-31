@@ -76,9 +76,9 @@ export const getUser = (uid, type) => {
 		try {
 			const userQuery = await db.collection('users').doc(uid).get()
 			let user = userQuery.data()
-			let res = JSON.stringify(user);
+			//let res = JSON.stringify(user);
 
-			console.log('USER QUERY'+res);
+			///console.log('USER QUERY'+res);
 
       let posts = []
       const postsQuery = await db.collection('posts').where('uid', '==', uid).get()
@@ -88,8 +88,10 @@ export const getUser = (uid, type) => {
       user.posts = orderBy(posts, 'date','asc')
 
 			if(type === 'LOGIN'){
+				console.log("TEST1")
 				dispatch({type: 'LOGIN', payload: user })
 			} else {
+				
 				dispatch({type: 'GET_PROFILE', payload: user })
 			}
 		} catch (e) {

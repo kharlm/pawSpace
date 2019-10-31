@@ -16,7 +16,9 @@ class Login extends React.Component {
         
         
         this.props.getUser(user.uid, 'LOGIN')
+      
         if(this.props.user && global.foo!="dogsignup"){
+          
          
         let res = JSON.stringify(this.props.user);
 

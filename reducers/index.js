@@ -54,6 +54,16 @@ const profile = (state = {}, action) => {
   }
 }
 
+const dogprofile = (state = {}, action) => {
+  switch (action.type) {
+    case 'GET_DOGPROFILE':
+      return action.payload
+    default:
+      return state
+  }
+}
+
+
 const messages = (state = {}, action) => {
   switch (action.type) {
     case 'GET_MESSAGES':
@@ -97,7 +107,8 @@ const rootReducer = combineReducers({
   post,
   modal,
   profile,
-  messages
+  messages,
+  dogprofile
 })
 
 export default rootReducer

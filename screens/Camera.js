@@ -4,7 +4,8 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { uploadPhoto } from '../actions/index';
 import { updatePhoto } from '../actions/post';
-import { Camera, Permissions, ImageManipulator } from 'expo';
+import { Camera, Permissions} from 'expo';
+import * as ImageManipulator from 'expo-image-manipulator'
 import { Ionicons } from '@expo/vector-icons'
 import { Text, View, SafeAreaView, TouchableOpacity } from 'react-native';
 

@@ -5,8 +5,11 @@ import { bindActionCreators } from 'redux'
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View, Button, Image, FlatList, TouchableOpacity,TextInput, SafeAreaView, ScrollView } from 'react-native';
 import { getPosts, likePost, unlikePost } from '../actions/post'
+import { getUser } from '../actions/user'
+
 import Adopt from "./Adopt";
 import moment from 'moment'
+
 
 class Home extends React.Component {
 
@@ -21,6 +24,12 @@ class Home extends React.Component {
     } else {
       this.props.likePost(post)
     }
+  }
+  goToUser = (user) => {
+    this.props.getUser(user.uid)
+    
+    this.props.navigation.navigate('Profile')
+   
   }
 
   navigateMap = (item) => {
@@ -69,15 +78,55 @@ class Home extends React.Component {
   </ScrollView>
 </View>
 <View style={{ marginTop: 40, paddingHorizontal: 20 }}>
-     <Text style={{ fontSize: 24, fontWeight: "700" }}>
-       Introducing Airbnb Plus
+     <Text style={{ fontSize: 24, fontWeight: "700", marginLeft:10 }}>
+       Dogs you follow
      </Text>
      <Text style={{ fontWeight: "100", marginTop: 10 }}>
-       A new selection of homes verified for quality & comfort
+       
 </Text>
       </View>
       </View>
-
+      <View style={styles.container}>
+        <FlatList
+          onRefresh={() => this.props.getPosts()}
+          refreshing={false}
+          data={this.props.post.feed}
+          keyExtractor={(item) => item.id}
+          renderItem={({item}) => {
+            const liked = item.likes.includes(this.props.user.uid)
+            return (
+              <View>
+                <View style={[styles.row, styles.space]}>
+                  <View style={[styles.row, styles.center]}>
+                  <TouchableOpacity onPress={() => this.goToUser(item)} >
+                    <Image style={styles.roundImage} source={{uri: this.props.post.feed}}/>
+                  </TouchableOpacity>
+                    <View>
+                      <Text style={styles.bold}>{item.username}</Text>
+                      <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
+                      <TouchableOpacity onPress={() => this.navigateMap(item)} >
+                        <Text>{item.postLocation ? item.postLocation.name : null}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  <Ionicons style={{margin: 5,marginRight:35}} name='ios-flag' size={25} />
+                </View>
+                <TouchableOpacity onPress={() => this.likePost(item)} >
+                  <Image style={styles.homeImage} source={{uri: item.postPhoto}}/>
+                </TouchableOpacity>
+                <View style={styles.row}>
+                  <Ionicons style={{marginLeft: 50, marginTop: 5}} color={liked ? '#db565b' : '#000'} name={ liked ? 'ios-heart' : 'ios-heart-empty'} size={25} />
+                  <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
+                    <Ionicons style={{marginLeft: 130, marginTop: 5}} name='ios-chatbubbles' size={25} />
+                  </TouchableOpacity>
+                  <Ionicons style={{marginLeft: 130, marginTop: 5}} name='ios-send' size={25} />
+                </View>
+                <Text style={{marginLeft: 50, marginTop: 5, marginBottom: 10}}>{item.postDescription}</Text>
+              </View>
+            )
+          }}
+        />
+      </View>
       
     </ScrollView>
     
@@ -154,7 +203,7 @@ class Home extends React.Component {
 */
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ getPosts, likePost, unlikePost }, dispatch)
+  return bindActionCreators({ getPosts, likePost, unlikePost, getUser}, dispatch)
 }
 
 const mapStateToProps = (state) => {

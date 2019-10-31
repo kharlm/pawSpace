@@ -29,7 +29,7 @@ class DogSignup extends React.Component {
       
   }
 
-  openLibrary = async () => {
+ /* openLibrary = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
     if (status === 'granted') {
       const image = await ImagePicker.launchImageLibraryAsync()
@@ -39,6 +39,7 @@ class DogSignup extends React.Component {
       }
     }
   }
+  */
 
   render() {
     const { routeName } = this.props.navigation.state
