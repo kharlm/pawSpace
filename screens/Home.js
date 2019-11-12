@@ -3,19 +3,103 @@ import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View, Button, Image, FlatList, TouchableOpacity,TextInput, SafeAreaView, ScrollView } from 'react-native';
-import { getPosts, likePost, unlikePost } from '../actions/post'
+import { Text, View, Button, Image, FlatList, TouchableOpacity,TextInput, SafeAreaView, ScrollView,Alert} from 'react-native';
+import { getPosts, likePost, unlikePost,getAdopt } from '../actions/post'
 import { getUser } from '../actions/user'
-
+import * as Permissions from 'expo-permissions'
+import * as Location from 'expo-location'
+const PET_API = 'http://api.petfinder.com/pet.getRandom?key=' + 'm0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs' + '&animal=cat&location=' + '34758' + '&output=basic&format=json'
 import Adopt from "./Adopt";
+const GOOGLE_API = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
 import moment from 'moment'
 
 
 class Home extends React.Component {
-
+ 
   componentDidMount() {
     this.props.getPosts()
+    this.getAdopt3()
+   
   }
+
+  getAdopt3 = async() =>{
+    fetch('https://api.petfinder.com/v2/oauth2/token', {
+method: 'POST',
+headers: {
+Accept: 'application/json',
+'Content-Type': 'application/json',
+},
+body: JSON.stringify({ "grant_type": "client_credentials", "client_id": "m0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs", "client_secret": "0b4EiJpPbarSYF3CDJTjGxYI0Ccx5kj67kOSc1u4" }),
+}).then((response) => response.json())
+.then((responseJson) => {
+let res = JSON.stringify(responseJson.access_token)
+//console.log("Response: "+res)
+this.getAdopt2(responseJson.access_token)
+return responseJson;
+})
+.catch((error) => {
+console.error(error);
+})
+}
+  
+  
+ 
+/*getAdopt1 = async() => {
+  var form = new FormData();
+
+form.append('grant_type', 'client_credentials');
+form.append('client_id', 'm0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs');
+form.append('client_secret', '0b4EiJpPbarSYF3CDJTjGxYI0Ccx5kj67kOSc1u4');
+
+fetch('https://api.petfinder.com/v2/oauth2/token', {
+  method: 'POST',
+  body: form,
+}).then(response => {
+  console.log(response)
+  //this.getAdopt2(response._bodyBlob._data.blobId)
+}).catch(error => {
+  console.error(error);
+})
+}
+*/
+
+getAdopt2 = async(a) => {
+  fetch('https://api.petfinder.com/v2/animals?type=dog&location=78249&limit=5', {
+    method: 'GET',
+    headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'Authorization':'Bearer ' +a
+    },
+    }).then((response) => response.json())
+    .then((responseJson) => {
+    //let res = JSON.stringify(responseJson)
+    console.log(responseJson)
+    
+    return responseJson;
+    })
+    .catch((error) => {
+    console.error(error);
+    })
+ 
+}
+
+  getAdopt = async () => {
+    //const permission = await Permissions.askAsync(Permissions.LOCATION)
+    //console.log("outside if")
+    //if (permission.status === 'granted') {
+      //const location = await Location.getCurrentPositionAsync()
+    // const location1 = await Location.reverseGeocodeAsync(location);
+      const url = "https://api.adoptapet.com/search/pets_at_shelters?key=A34F48&v=1&output=xml&shelter_id=2342&shelter_id=17293&shelter_id=8323"
+      const response = await fetch(url)
+      //const data = await response.json()
+      let res = JSON.stringify(response)
+     
+      
+ 
+     console.log(response)
+    }
+  
 
   likePost = (post) => {
     const { uid } = this.props.user
@@ -37,6 +121,8 @@ class Home extends React.Component {
       location: item.postLocation 
     })
   }
+
+  
  
   render(){
     if(this.props.post === null) return null
@@ -203,7 +289,7 @@ class Home extends React.Component {
 */
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ getPosts, likePost, unlikePost, getUser}, dispatch)
+  return bindActionCreators({ getPosts, likePost, unlikePost, getUser,getAdopt}, dispatch)
 }
 
 const mapStateToProps = (state) => {

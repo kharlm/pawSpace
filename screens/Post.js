@@ -10,6 +10,7 @@ import { NavigationEvents } from 'react-navigation';
 import { updateDescription, updateLocation, uploadPost, updatePhoto } from '../actions/post'
 import { FlatList, Modal, SafeAreaView, Text, View, TextInput, Image, TouchableOpacity } from 'react-native';
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
+
 import { uploadPhoto } from '../actions'
 
 class Post extends React.Component {
@@ -67,11 +68,12 @@ class Post extends React.Component {
   getLocations = async () => {
     const permission = await Permissions.askAsync(Permissions.LOCATION)
     if (permission.status === 'granted') {
-      const location = await Location.getCurrentPositionAsync()
+     
      // const location1 = await Location.reverseGeocodeAsync(location);
       const url = `${GOOGLE_API}?location=${location.coords.latitude},${location.coords.longitude}&rankby=distance&key=${'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'}`
       const response = await fetch(url)
       const data = await response.json()
+      
       this.setState({ locations: data.results })
     }
   }

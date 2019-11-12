@@ -5,6 +5,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import orderBy from 'lodash/orderBy'
 import { sendNotification } from './'
 
+
 export const updateDescription = (input) => {
 	return {type: 'UPDATE_DESCRIPTION', payload: input}
 }

@@ -12,11 +12,18 @@ import {getDog} from '../actions/dog'
 let user={}
 class Profile extends React.Component {
  
-  
-  componentDidMount = () => {
+  constructor() {
+    super();
+    this.state={
+      foo: 'bar'
+  }
+    
+  }
+ 
+  componentWillMount = () => {
 
     console.log("in mount")
-    this.props.getDog(user.dogs[0], 'DOGLOGIN')
+    //this.props.getDog(user.dogs[0], 'DOGLOGIN')
     /*
     
     const { state, navigate } = this.props.navigation
