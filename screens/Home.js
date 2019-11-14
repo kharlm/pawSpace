@@ -15,74 +15,64 @@ import moment from 'moment'
 
 
 class Home extends React.Component {
+  
+  constructor(props) {
+    super(props);
+   this.state={
+    loading: false,
+     dataSource:[]
+   }
+  }
  
   componentDidMount() {
+    console.log("mount")
     this.props.getPosts()
-    this.getAdopt3()
+    this.getAdoptToken()
    
   }
-
-  getAdopt3 = async() =>{
+  getAdoptToken = async () => {
     fetch('https://api.petfinder.com/v2/oauth2/token', {
-method: 'POST',
-headers: {
-Accept: 'application/json',
-'Content-Type': 'application/json',
-},
-body: JSON.stringify({ "grant_type": "client_credentials", "client_id": "m0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs", "client_secret": "0b4EiJpPbarSYF3CDJTjGxYI0Ccx5kj67kOSc1u4" }),
-}).then((response) => response.json())
-.then((responseJson) => {
-let res = JSON.stringify(responseJson.access_token)
-//console.log("Response: "+res)
-this.getAdopt2(responseJson.access_token)
-return responseJson;
-})
-.catch((error) => {
-console.error(error);
-})
-}
-  
-  
- 
-/*getAdopt1 = async() => {
-  var form = new FormData();
-
-form.append('grant_type', 'client_credentials');
-form.append('client_id', 'm0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs');
-form.append('client_secret', '0b4EiJpPbarSYF3CDJTjGxYI0Ccx5kj67kOSc1u4');
-
-fetch('https://api.petfinder.com/v2/oauth2/token', {
-  method: 'POST',
-  body: form,
-}).then(response => {
-  console.log(response)
-  //this.getAdopt2(response._bodyBlob._data.blobId)
-}).catch(error => {
-  console.error(error);
-})
-}
-*/
-
-getAdopt2 = async(a) => {
-  fetch('https://api.petfinder.com/v2/animals?type=dog&location=78249&limit=5', {
-    method: 'GET',
-    headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'Authorization':'Bearer ' +a
-    },
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ "grant_type": "client_credentials", "client_id": "m0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs", "client_secret": "0b4EiJpPbarSYF3CDJTjGxYI0Ccx5kj67kOSc1u4" }),
     }).then((response) => response.json())
-    .then((responseJson) => {
-    //let res = JSON.stringify(responseJson)
-    console.log(responseJson)
-    
-    return responseJson;
-    })
-    .catch((error) => {
-    console.error(error);
-    })
- 
-}
+      .then((responseJson) => {
+        let res = JSON.stringify(responseJson.access_token)
+        //console.log("Response: "+res)
+        this.getAdoptResponse(responseJson.access_token)
+        return responseJson;
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+  }
+
+  getAdoptResponse = async (a) => {
+    fetch('https://api.petfinder.com/v2/animals?type=dog&location=78249&limit=5', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + a
+      },
+    }).then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          dataSource: responseJson,
+          loading: true
+         })
+         console.log(this.state.dataSource.animals[0].photos[0])
+       
+       return responseJson;
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+
+  }
 
   getAdopt = async () => {
     //const permission = await Permissions.askAsync(Permissions.LOCATION)
@@ -122,10 +112,18 @@ getAdopt2 = async(a) => {
     })
   }
 
-  
+ 
  
   render(){
-    if(this.props.post === null) return null
+   
+      if(this.state.loading){
+        console.log("inloading")
+       
+        console.log(this.state.dataSource.animals[0].name.toString())
+        
+      }
+    
+    if(this.props.post === null || this.state.loading===false) return null
     return(
       <ScrollView scrollEventThrottle={16}>
       <View style={{ flex: 1, backgroundColor: "white", paddingTop: 20 }}>
@@ -142,22 +140,27 @@ getAdopt2 = async(a) => {
   <ScrollView
     horizontal={true}
     showsHorizontalScrollIndicator={false}
+    data = {this.state.dataSource}
   >
     <Adopt
-      imageUri={require("../images/profile2.jpg")}
-      name="Ruby"
+      imageUri={this.state.dataSource.animals[0].photos[0].medium}
+      name={this.state.dataSource.animals[0].name}
+      breed={this.state.dataSource.animals[0].breeds.primary}
     />
     <Adopt
-      imageUri={require("../images/user-profile.jpg")}
-      name="Max"
+      imageUri={this.state.dataSource.animals[1].photos[0].medium}
+      name={this.state.dataSource.animals[1].name}
+      breed={this.state.dataSource.animals[1].breeds.primary}
     />
     <Adopt
-      imageUri={require("../images/profile4.jpg")}
-      name="Ruby"
+      imageUri={this.state.dataSource.animals[2].photos[0].medium}
+      name={this.state.dataSource.animals[2].name}
+      breed={this.state.dataSource.animals[2].breeds.primary}
     />
      <Adopt
-      imageUri={require("../images/profile3.jpg")}
-      name="Bunny"
+      imageUri={this.state.dataSource.animals[3].photos[0].medium}
+      name={this.state.dataSource.animals[3].name}
+      breed={this.state.dataSource.animals[3].breeds.primary}
     />
 
     

@@ -15,12 +15,13 @@ class Adopt extends Component {
       >
         <View style={{ flex: 2 }}>
           <Image
-            source={this.props.imageUri}
+            source={{uri:this.props.imageUri}}
             style={{ flex: 1, width: null, height: null, resizeMode: "cover" }}
           />
         </View>
         <View style={{ flex: 1, paddingLeft: 10, paddingTop: 10 }}>
-          <Text>{this.props.name}</Text>
+          <Text style={{fontWeight: 'bold'}}>{this.props.name}</Text>
+          <Text style={{fontSize: 12}}>{this.props.breed}</Text>
         </View>
       </View>
     );
