@@ -28,7 +28,7 @@ export const login = () => {
 			dispatch(getUser(response.user.uid))
 			const userQuery = await db.collection('users').doc(response.user.uid).get()
 			let user = userQuery.data()
-			dispatch(getDog(user.dogs[0]))
+			//dispatch(getDog(user.dogs[0]))
 			
 
 			dispatch(allowNotifications())
@@ -73,6 +73,7 @@ export const facebookLogin = () => {
 
 export const getUser = (uid, type) => {
 	return async (dispatch, getState) => {
+		console.log("GET USER 1")
 		try {
 			const userQuery = await db.collection('users').doc(uid).get()
 			let user = userQuery.data()
@@ -88,9 +89,15 @@ export const getUser = (uid, type) => {
       user.posts = orderBy(posts, 'date','asc')
 
 			if(type === 'LOGIN'){
-				console.log("TEST1")
+				
+				
+				getDog(user.dogs[0],'DOGLOGIN')
 				dispatch({type: 'LOGIN', payload: user })
+				
+			
 			} else {
+				console.log("in get profile")
+				//console.log(user)
 				
 				dispatch({type: 'GET_PROFILE', payload: user })
 			}

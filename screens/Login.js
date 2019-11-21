@@ -6,32 +6,84 @@ import { connect } from 'react-redux'
 import { Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { updateEmail, updatePassword, login, getUser, facebookLogin} from '../actions/user'
 import {getDog} from '../actions/dog'
+import db from '../config/firebase'
 
 class Login extends React.Component {
+ 
+  constructor(props) {
+    super(props);
+    this.state = {
+      userData: {},
+      loading: true
+
+    }
+  }
 
   componentDidMount = () => {
     firebase.auth().onAuthStateChanged((user) => {
       if(user){
         
-        
-        
-        this.props.getUser(user.uid, 'LOGIN')
+       // this.props.getUser(user.uid, 'GET_PROFILE')
       
-        if(this.props.user && global.foo!="dogsignup"){
-          
-         
-        let res = JSON.stringify(this.props.user);
+        
+        
 
       
-        console.log("USER:"+res)
-         
+        if(this.props.user && global.foo!="dogsignup"){
+          this.getUserData(user.uid)
+          
+          
+          user = this.props.getUser(user.uid, 'LOGIN')
+
           this.props.navigation.navigate('Home')
         }
       }
     })
+     //let res = JSON.stringify("");
+    
+      
+       // console.log("USER:"+res)
+    
+   
+  }
+
+   getUserData = async (id) => {
+     
+    let dog1;
+     try{
+      console.log("in get dog data")
+       const userQuery = await db.collection ('users').doc(id).get()
+        user1 = userQuery.data()
+        let res = JSON.stringify(user1.dogs[0]);
+        
+        this.props.getDog(user1.dogs[0], 'GET_DOGPROFILE')
+       
+        this.setState({
+          userData: user1,
+          loading: false
+        })
+        
+
+     }
+     catch(e){
+       alert(e)
+     }
+
+     let res1 = JSON.stringify(this.state.loading);
+      
+
+
   }
 
   render() {
+    let res1 = JSON.stringify(this.state.loading);
+
+    
+    if(this.state.loading===true){
+     // console.log("Dog"+this.state.userData)
+   
+
+  }
     return (
       <View style={[styles.container, styles.center]}>
         <Image style={{width: 300, height: 100}} source={require('../assets/logo.jpg')} />
@@ -70,6 +122,7 @@ const mapDispatchToProps = (dispatch) => {
 const mapStateToProps = (state) => {
   return {
     user: state.user,
+    profile: state.profile,
     dogname: state.dogname,
     dog: state.dog
 

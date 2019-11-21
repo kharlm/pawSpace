@@ -46,6 +46,7 @@ const dog = (state = {}, action) => {
 
 
 const profile = (state = {}, action) => {
+  console.log("in action")
   switch (action.type) {
     case 'GET_PROFILE':
       return action.payload

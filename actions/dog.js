@@ -4,6 +4,7 @@ import { allowNotifications, sendNotification } from './'
 import db from '../config/firebase';
 import uuid from 'uuid'
 
+
 export const updateDogname = (dogname) => {
 	return {type: 'UPDATE_DOGNAME', payload: dogname}
 }
@@ -82,6 +83,7 @@ export const dogsignup = () => {
 	}
 
 	export const doglogin = () => {
+		
 		return async (dispatch, getState) => {
 			try {
 				console.log("function working")
@@ -104,8 +106,8 @@ export const dogsignup = () => {
 				const dogQuery = await db.collection('dogs').doc(id).get()
 				let dog = dogQuery.data()
 				    
-				//let res = JSON.stringify(dog);
-				console.log("GET DOG");
+				let res = JSON.stringify(dog);
+				
 
       
 				//console.log("DOG TRY"+res)
@@ -118,12 +120,13 @@ export const dogsignup = () => {
 		  */
 		 // user.posts = orderBy(posts, 'date','desc')
 	
-				//if(type === 'DOGLOGIN'){
+				if(type === 'DOGLOGIN'){
+					
 					dispatch({type: 'DOGLOGIN', payload: dog })
-				//} else {
-					//console.log("inside GET_DOGPROFILE");
-					//dispatch({type: 'GET_DOGPROFILE', payload: dog })
-				//}
+				} else {
+					
+					dispatch({type: 'GET_DOGPROFILE', payload: dog })
+				}
 				
 			} catch (e) {
 				console.log("in get DOG");

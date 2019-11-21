@@ -9,40 +9,37 @@ import Masonry from "react-native-masonry";
 const  { width,height } = Dimensions.get('window');
 import {getDog} from '../actions/dog'
 
-let user={}
+
 class Profile extends React.Component {
  
-  constructor() {
-    super();
-    this.state={
-      foo: 'bar'
-  }
     
+  constructor(props) {
+    console.log("in constructor")
+    super(props);
+    this.state = {
+      userData: {},
+      loading: true
+
+    }
   }
  
-  componentWillMount = () => {
-
-    console.log("in mount")
+  componentDidMount = () => {
+   
     //this.props.getDog(user.dogs[0], 'DOGLOGIN')
-    /*
     
-    const { state, navigate } = this.props.navigation
-    if(state.routeName === 'Profile'){
-      user = this.props.profile
-      console.log("inside profile if");
-      //dog = this.props.dogprofile
-    } else {
-      user = this.props.user
-     // dog = this.props.dog
-    }
+    
+  
     
     console.log("In mount")
-    this.props.getUser(user.uid)
-    let res = JSON.stringify(user.dogs[0]);
-   console.log("hello"+res);
-    this.props.getDog(user.dogs[0], 'DOGLOGIN')
+    //this.props.getUser(user.uid)
+    //let res = JSON.stringify(this.props.profile);
 
-    */
+  //dog= this.props.getDog(user.dogs[0], 'DOGLOGIN')
+   //let res1 = JSON.stringify(dog);
+  
+    //console.log(res1)
+
+    
     
   }
   follow = (user) => {
@@ -57,21 +54,20 @@ class Profile extends React.Component {
        
 
   render() {
-   // let user = {}
+
    console.log("render")
     let dog = {}
-   
-   // let profileImage = require('./images/user-profile.jpg'); 
    const { state, navigate } = this.props.navigation
     if(state.routeName === 'Profile'){
       console.log("in prop profile")
       user = this.props.profile
+      let res = JSON.stringify(user)
       
-      dog = this.props.dogprofile
+      dog = this.props.dog
     } else {
       user = this.props.user
       console.log("in ELSE profile")
-     // dog = this.props.dog
+      dog = this.props.dogprofile
     }
     
    
@@ -95,13 +91,13 @@ class Profile extends React.Component {
         >
           <Text
             style={styles1.paragraph}
-          >      {this.props.dog.name}
-        {"\n"}{this.props.dog.breed}</Text>
+          >      {dog.name}
+        {"\n"}{dog.breed}</Text>
         </ImageBackground>
       </View >
       <View style={styles1.headercontainer}>
         <Text style={styles1.paragraph1}>Story</Text>
-        <Text style={styles1.body}>{this.props.dog.story}</Text>
+        <Text style={styles1.body}>{dog.story}</Text>
       </View>
 
       <View style={styles1.midinfo}>
@@ -112,19 +108,19 @@ class Profile extends React.Component {
                 
                 <View style={styles1.infoview}>
                 <Text style={styles1.infoone}>Age</Text>
-                <Text style={styles1.infotwo}>{this.props.dog.age}</Text>
+                <Text style={styles1.infotwo}>{dog.age}</Text>
                 </View>
 
             </View>
             <View style={styles1.midinfo}>
                 <View style ={[styles1.infoview, styles1.leftbar]}>
                     <Text style={styles1.infoone}>Gender</Text>
-                    <Text style={styles1.infotwo}>{this.props.dog.gender}</Text>
+                    <Text style={styles1.infotwo}>{dog.gender}</Text>
                 </View>   
                 
                 <View style={styles1.infoview}>
                 <Text style={styles1.infoone}>DogTag</Text>
-                <Text style={styles1.infotwo}>{this.props.dog.dogtag}</Text>
+                <Text style={styles1.infotwo}>{dog.dogtag}</Text>
                 </View>
 
             </View>
@@ -356,8 +352,9 @@ const mapStateToProps = (state) => {
   return {
     user: state.user,
     profile: state.profile,
-    dog: state.dog,
-    dogprofile: state.dogprofile
+    dogprofile: state.dogprofile,
+    dog: state.dog
+
   }
 }
 
