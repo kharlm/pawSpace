@@ -101,12 +101,17 @@ export const dogsignup = () => {
 	
 
 	export const getDog = (id, type) => {
+		console.log("type"+type)
+		console.log("Dog in dog profile")
 		return async (dispatch, getState) => {
+			console.log("Dog in dog profile1")
 			try {
+				
 				const dogQuery = await db.collection('dogs').doc(id).get()
 				let dog = dogQuery.data()
 				    
 				let res = JSON.stringify(dog);
+				
 				
 
       
@@ -121,9 +126,11 @@ export const dogsignup = () => {
 		 // user.posts = orderBy(posts, 'date','desc')
 	
 				if(type === 'DOGLOGIN'){
+					console.log("in dog login")
 					
 					dispatch({type: 'DOGLOGIN', payload: dog })
 				} else {
+					
 					
 					dispatch({type: 'GET_DOGPROFILE', payload: dog })
 				}

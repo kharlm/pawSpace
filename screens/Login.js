@@ -25,16 +25,21 @@ class Login extends React.Component {
         
        // this.props.getUser(user.uid, 'GET_PROFILE')
       
+          //let res =JSON.stringify(user)
         
-        
-
+          //console.log("firebase user"+res)
       
         if(this.props.user && global.foo!="dogsignup"){
           this.getUserData(user.uid)
           
           
           user = this.props.getUser(user.uid, 'LOGIN')
+         
+        //let res = JSON.stringify("");
 
+      
+       // console.log("USER:"+res)
+         
           this.props.navigation.navigate('Home')
         }
       }

@@ -8,6 +8,7 @@ import { followUser, unfollowUser, getUser } from '../actions/user'
 import Masonry from "react-native-masonry";
 const  { width,height } = Dimensions.get('window');
 import {getDog} from '../actions/dog'
+import { GeofencingRegionState } from 'expo-location';
 
 
 class Profile extends React.Component {
@@ -55,7 +56,7 @@ class Profile extends React.Component {
 
   render() {
 
-   console.log("render")
+  
     let dog = {}
    const { state, navigate } = this.props.navigation
     if(state.routeName === 'Profile'){
@@ -63,11 +64,11 @@ class Profile extends React.Component {
       user = this.props.profile
       let res = JSON.stringify(user)
       
-      dog = this.props.dog
-    } else {
-      user = this.props.user
-      console.log("in ELSE profile")
       dog = this.props.dogprofile
+    } else {
+      console.log("in else profile")
+      user = this.props.user
+      dog = this.props.dog
     }
     
    

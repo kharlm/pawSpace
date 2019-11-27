@@ -4,7 +4,7 @@ const  { width } = Dimensions.get('window');
 export default styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#dedede'
   },
   coverPhoto: {
     flex: 1,

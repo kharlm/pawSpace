@@ -73,8 +73,9 @@ export const facebookLogin = () => {
 
 export const getUser = (uid, type) => {
 	return async (dispatch, getState) => {
-		console.log("GET USER 1")
+		
 		try {
+			console.log("GET USER 1")
 			const userQuery = await db.collection('users').doc(uid).get()
 			let user = userQuery.data()
 			//let res = JSON.stringify(user);
@@ -89,10 +90,11 @@ export const getUser = (uid, type) => {
       user.posts = orderBy(posts, 'date','asc')
 
 			if(type === 'LOGIN'){
+				let res = JSON.stringify(user.dogs[0])
+				console.log("fix"+res)
 				
-				
-				getDog(user.dogs[0],'DOGLOGIN')
 				dispatch({type: 'LOGIN', payload: user })
+				dispatch(getDog(user.dogs[0],'DOGLOGIN'))
 				
 			
 			} else {
@@ -100,6 +102,8 @@ export const getUser = (uid, type) => {
 				//console.log(user)
 				
 				dispatch({type: 'GET_PROFILE', payload: user })
+				console.log(user.dogs[0])
+				dispatch(getDog(user.dogs[0],'GET_DOGPROFILE'))
 			}
 		} catch (e) {
 			console.log("in get user");

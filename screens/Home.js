@@ -207,13 +207,13 @@ class Home extends React.Component {
   render() {
     if(this.props.userprofile.dogs){
       console.log("in method")
-      getDog(this.props.userprofile.dogs[0],'DOGLOGIN')
+    //  getDog(this.props.userprofile.dogs[0],'DOGLOGIN')
     }
 
     if (this.props.post === null || this.state.loading===false) return null
     return (
-      <ScrollView scrollEventThrottle={16}>
-        <View style={{ flex: 1, backgroundColor: "white", paddingTop: 20 }}>
+      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#dedede"}}>
+        <View style={{ flex: 1, backgroundColor: "#dedede", paddingTop: 20 }}>
           <Text
             style={{
               fontSize: 24,
@@ -231,17 +231,17 @@ class Home extends React.Component {
             >
               <Adopt
 
-                imageUri={this.state.dataSource.animals[0].photos[0].medium}
+                imageUri={this.state.dataSource.animals[2].photos[0].medium}
                 name={this.state.dataSource.animals[0].name}
                 breed={this.state.dataSource.animals[0].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[1].photos[0].medium}
+                imageUri={this.state.dataSource.animals[2].photos[0].medium}
                 name={this.state.dataSource.animals[1].name}
                 breed={this.state.dataSource.animals[1].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[1].photos[0].medium}
+                imageUri={this.state.dataSource.animals[2].photos[0].medium}
                 name={this.state.dataSource.animals[2].name}
                 breed={this.state.dataSource.animals[2].breeds.primary}
               />
