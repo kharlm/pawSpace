@@ -31,8 +31,8 @@ export const updateDogtag = (dogtag) => {
     
 }
 
-export const updateStory = (story) => {
-    return {type: 'UPDATE_STORY', payload: story}
+export const updateBio = (bio) => {
+    return {type: 'UPDATE_BIO', payload: bio}
     
 }
 
@@ -43,6 +43,7 @@ export const dogsignup = () => {
 		const { uid} = getState().user
 			
 		try {
+			console.log("Inside try of dog sign up")
 			const id = uuid.v4()	
 			db.collection('users').doc(uid).update({
 				dogs: firebase.firestore.FieldValue.arrayUnion(id)
@@ -56,22 +57,29 @@ export const dogsignup = () => {
 			const response = await firebase.auth().createUserWithEmailAndPassword(email, password)
 			*/
 		
-			const {dogname,breed,age,gender,weight,dogtag,story } = getState().dog
+			const {dogname,breed,age,gender,weight,dogtag,bio,photo } = getState().dog
 		
-			
+			if(id){
 				const dog = {
-					name: dogname,
+					dogname: dogname,
 					breed: breed,
 					age: age,
 					gender: gender,
 					weight: weight,
 					dogtag: dogtag,
-					story: story,
-					id: id
-				}
+					bio: bio,
+					dogId: id,
+					followers: [],
+					following: [],
+					photo: ''
+				
+			}
+				
+				
 				db.collection('dogs').doc(id).set(dog)
 				//db.collection('users').doc(response.user.uid).set(user)
 				dispatch({type: 'DOGLOGIN', payload: dog})
+		}
 
 			
 		} catch (e) {
@@ -87,11 +95,12 @@ export const dogsignup = () => {
 		return async (dispatch, getState) => {
 			try {
 				console.log("function working")
-				const { id} = getState().dog
-				const dogQuery = await db.collection('dogs').doc(id).get()
+				const { dogId} = getState().dog
+				console.log("dog id"+dogId)
+				const dogQuery = await db.collection('dogs').doc(dogId).get()
 				let dog = dogQuery.data()
 	
-				dispatch(getDog(dog.id))
+				dispatch(getDog(dog.dogId))
 			} catch (e) {
 				console.log("in Dog login");
 				alert(e)
@@ -100,14 +109,14 @@ export const dogsignup = () => {
 	}
 	
 
-	export const getDog = (id, type) => {
+	export const getDog = (dogId, type) => {
 		console.log("type"+type)
 		console.log("Dog in dog profile")
 		return async (dispatch, getState) => {
 			console.log("Dog in dog profile1")
 			try {
 				
-				const dogQuery = await db.collection('dogs').doc(id).get()
+				const dogQuery = await db.collection('dogs').doc(dogId).get()
 				let dog = dogQuery.data()
 				    
 				let res = JSON.stringify(dog);
@@ -143,18 +152,22 @@ export const dogsignup = () => {
 	}
 	export const updateDog = () => {
 		return async ( dispatch, getState )  => {
-		  const {dogname,breed,age,gender,weight,dogtag,story,id } = getState().dog
+		  const {dogname,breed,age,gender,weight,dogtag,bio,dogId } = getState().dog
 		  try {
 				const {dog} = getState()
-			db.collection('dogs').doc(dog.id).update({
+			db.collection('dogs').doc(dog.dogId).update({
 				name: dogname,
 				breed: breed,
 				age: age,
 				gender: gender,
 				weight: weight,
 				dogtag: dogtag,
-				story: story,
-				id: dog.id
+				bio: bio,
+				dogId: dogId,
+				followers: [],
+				following: [],
+				photo: photo
+				
 			})
 		  } catch(e) {
 				console.log("in update object");

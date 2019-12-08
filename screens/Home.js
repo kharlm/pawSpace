@@ -2,6 +2,7 @@ import React from 'react';
 import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import firebase from 'firebase';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View, Button, Image, FlatList, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Alert, Dimensions } from 'react-native';
 import { getPosts, likePost, unlikePost, getAdopt } from '../actions/post'
@@ -205,6 +206,7 @@ class Home extends React.Component {
 
 
   render() {
+    
     if(this.props.userprofile.dogs){
       console.log("in method")
     //  getDog(this.props.userprofile.dogs[0],'DOGLOGIN')
@@ -212,8 +214,11 @@ class Home extends React.Component {
 
     if (this.props.post === null || this.state.loading===false) return null
     return (
-      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#dedede"}}>
-        <View style={{ flex: 1, backgroundColor: "#dedede", paddingTop: 20 }}>
+      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#ffff"}}>
+        <TouchableOpacity style={styles.buttonSmall} onPress={() => firebase.auth().signOut()}>
+    <Text style={styles.bold}>Logout</Text>
+  </TouchableOpacity>
+        <View style={{ flex: 1, backgroundColor: "#ffff", paddingTop: 20 }}>
           <Text
             style={{
               fontSize: 24,
@@ -231,17 +236,17 @@ class Home extends React.Component {
             >
               <Adopt
 
-                imageUri={this.state.dataSource.animals[2].photos[0].medium}
+                imageUri={this.state.dataSource.animals[1].photos[0].medium}
                 name={this.state.dataSource.animals[0].name}
                 breed={this.state.dataSource.animals[0].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[2].photos[0].medium}
+                imageUri={this.state.dataSource.animals[3].photos[0].medium}
                 name={this.state.dataSource.animals[1].name}
                 breed={this.state.dataSource.animals[1].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[2].photos[0].medium}
+                imageUri={this.state.dataSource.animals[1].photos[0].medium}
                 name={this.state.dataSource.animals[2].name}
                 breed={this.state.dataSource.animals[2].breeds.primary}
               />

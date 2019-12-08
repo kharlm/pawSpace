@@ -1,8 +1,7 @@
 import firebase from 'firebase';
+import db from '../config/firebase';
 import { orderBy, groupBy, values } from 'lodash'
 import { allowNotifications, sendNotification } from './'
-import db from '../config/firebase';
-import {getDog} from '../actions/dog'
 
 export const updateEmail = (email) => {
 	return {type: 'UPDATE_EMAIL', payload: email}
@@ -16,27 +15,22 @@ export const updateUsername = (username) => {
 	return {type: 'UPDATE_USERNAME', payload: username}
 }
 
+export const updateBio = (bio) => {
+	return {type: 'UPDATE_BIO', payload: bio}
+}
+
 export const updatePhoto = (photo) => {
 	return {type: 'UPDATE_PHOTO', payload: photo}
 }
 
-export const signupError = () => {
-	return {type:'SIGNUP_ERROR'}
-}
 export const login = () => {
 	return async (dispatch, getState) => {
 		try {
 			const { email, password } = getState().user
 			const response = await firebase.auth().signInWithEmailAndPassword(email, password)
 			dispatch(getUser(response.user.uid))
-			const userQuery = await db.collection('users').doc(response.user.uid).get()
-			let user = userQuery.data()
-			//dispatch(getDog(user.dogs[0]))
-			
-
 			dispatch(allowNotifications())
 		} catch (e) {
-			console.log("in login");
 			alert(e)
 		}
 	}
@@ -45,7 +39,7 @@ export const login = () => {
 export const facebookLogin = () => {
 	return async (dispatch) => {
 		try {
-			const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('536462030493600')
+			const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('136245687322203')
 			if(type === 'success') {
 				// Build Firebase credential with the Facebook access token.
 				const credential = await firebase.auth.FacebookAuthProvider.credential(token);
@@ -57,6 +51,7 @@ export const facebookLogin = () => {
 						uid: response.uid,
 						email: response.email,
 						username: response.displayName,
+						bio: '',
 						photo: response.photoURL,
 						token: null,
 						followers: [],
@@ -76,40 +71,23 @@ export const facebookLogin = () => {
 
 export const getUser = (uid, type) => {
 	return async (dispatch, getState) => {
-		
 		try {
-			console.log("GET USER 1")
 			const userQuery = await db.collection('users').doc(uid).get()
 			let user = userQuery.data()
-			//let res = JSON.stringify(user);
-
-			///console.log('USER QUERY'+res);
 
       let posts = []
       const postsQuery = await db.collection('posts').where('uid', '==', uid).get()
       postsQuery.forEach(function(response) {
         posts.push(response.data())
       })
-      user.posts = orderBy(posts, 'date','asc')
+      user.posts = orderBy(posts, 'date','desc')
 
 			if(type === 'LOGIN'){
-				let res = JSON.stringify(user.dogs[0])
-				console.log("fix"+res)
-				
 				dispatch({type: 'LOGIN', payload: user })
-				dispatch(getDog(user.dogs[0],'DOGLOGIN'))
-				
-			
 			} else {
-				console.log("in get profile")
-				//console.log(user)
-				
 				dispatch({type: 'GET_PROFILE', payload: user })
-				console.log(user.dogs[0])
-				dispatch(getDog(user.dogs[0],'GET_DOGPROFILE'))
 			}
 		} catch (e) {
-			console.log("in get user");
 			alert(e)
 		}
 	}
@@ -117,13 +95,14 @@ export const getUser = (uid, type) => {
 
 export const updateUser = () => {
   return async ( dispatch, getState )  => {
-    const { uid, photo } = getState().user
+    const { uid, username, bio, photo } = getState().user
     try {
       db.collection('users').doc(uid).update({
+        username: username,
+        bio: bio,
         photo: photo
       })
     } catch(e) {
-			console.log("in update user");
       alert(e)
     }
   }
@@ -132,25 +111,23 @@ export const updateUser = () => {
 export const signup = () => {
 	return async (dispatch, getState) => {
 		try {
-			const { email, password, username} = getState().user
-			
+			const { email, password, username, bio } = getState().user
 			const response = await firebase.auth().createUserWithEmailAndPassword(email, password)
-			console.log("Setting signupError to false")
-			dispatch({type:'NOSIGNUP_ERROR'})
-			global.signupError = false
 			if(response.user.uid) {
-				
 				const user = {
 					uid: response.user.uid,
 					email: email,
-					dogs:[]
+					username: username,
+					bio: bio,
+					photo: '',
+					token: null
 				}
 				db.collection('users').doc(response.user.uid).set(user)
 				dispatch({type: 'LOGIN', payload: user})
 			}
 		} catch (e) {
-			console.log("in sign up error")
-			dispatch({type:'SIGNUP_ERROR'})
+			global.bar=true
+			console.log("Global bar"+global.bar)
 			alert(e)
 		}
 	}

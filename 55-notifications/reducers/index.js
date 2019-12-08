@@ -4,12 +4,16 @@ const user = (state = {}, action) => {
   switch (action.type) {
     case 'LOGIN':
       return action.payload
+    case 'ERROR':
+          return action.payload
     case 'UPDATE_EMAIL':
       return { ...state, email: action.payload }
     case 'UPDATE_PASSWORD':
       return { ...state, password: action.payload }
     case 'UPDATE_USERNAME':
       return { ...state, username: action.payload }
+    case 'UPDATE_BIO':
+      return { ...state, bio: action.payload }
     case 'UPDATE_PHOTO':
       return { ...state, photo: action.payload }
     case 'GET_TOKEN': 
@@ -19,49 +23,6 @@ const user = (state = {}, action) => {
   }
 }
 
-
-
-
-const signupError = ( state = false, action) => {
-  console.log("calling sign up")
-  switch(action.type) {
-    case 'SIGNUP_ERROR':
-      return state = true
-    case 'NOSIGNUP_ERROR':
-        return state = false
-    default:
-      return state;
-  }
-}
-
-const dog = (state = {}, action) => {
-  switch (action.type) {
-    case 'DOGLOGIN':
-      return action.payload
-    case 'UPDATE_DOGNAME':
-      return { ...state, dogname: action.payload } 
-    case 'UPDATE_BREED':
-      return { ...state, breed: action.payload } 
-    case 'UPDATE_AGE':
-      return { ...state, age: action.payload } 
-    case 'UPDATE_GENDER':
-      return { ...state, gender: action.payload } 
-    case 'UPDATE_WEIGHT':
-      return { ...state, weight: action.payload } 
-    case 'UPDATE_DOGTAG':
-      return { ...state, dogtag: action.payload } 
-    case 'UPDATE_BIO':
-      return { ...state, bio: action.payload } 
-    case 'UPDATE_PHOTO':
-      return { ...state, photo: action.payload }
-    default:
-      return state
-  }
-}
-
-
-
-
 const profile = (state = {}, action) => {
   switch (action.type) {
     case 'GET_PROFILE':
@@ -70,16 +31,6 @@ const profile = (state = {}, action) => {
       return state
   }
 }
-
-const dogprofile = (state = {}, action) => {
-  switch (action.type) {
-    case 'GET_DOGPROFILE':
-      return action.payload
-    default:
-      return state
-  }
-}
-
 
 const messages = (state = {}, action) => {
   switch (action.type) {
@@ -119,14 +70,11 @@ const modal = (state = null, action) => {
 }
 
 const rootReducer = combineReducers({
-  dog,
 	user,
   post,
   modal,
   profile,
-  messages,
-  dogprofile,
-  signupError
+  messages
 })
 
 export default rootReducer

@@ -55,7 +55,7 @@ class Profile extends React.Component {
        
 
   render() {
-
+    
   
     let dog = {}
    const { state, navigate } = this.props.navigation
@@ -97,14 +97,14 @@ class Profile extends React.Component {
         </ImageBackground>
       </View >
       <View style={styles1.headercontainer}>
-        <Text style={styles1.paragraph1}>Story</Text>
-        <Text style={styles1.body}>{dog.story}</Text>
+        <Text style={styles1.paragraph1}>Bio</Text>
+        <Text style={styles1.body}>{dog.bio}</Text>
       </View>
 
       <View style={styles1.midinfo}>
                 <View style ={[styles1.infoview, styles1.leftbar]}>
                     <Text style={styles1.infoone}>Weight</Text>
-                    <Text style={styles1.infotwo}>{user.username}</Text>
+                    <Text style={styles1.infotwo}>{dog.gender}</Text>
                 </View>   
                 
                 <View style={styles1.infoview}>

@@ -3,11 +3,9 @@ import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { ImagePicker, Permissions } from 'expo';
-import firebase from 'firebase'
 import { Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
-import { updatePhoto, updateEmail, updatePassword, updateUsername,signup, updateUser,signupError } from '../actions/user'
+import { updatePhoto, updateEmail, updatePassword, updateUsername, updateBio, signup, updateUser } from '../actions/user'
 import { uploadPhoto } from '../actions'
-import { dogsignup} from '../actions/dog'
 
 class Signup extends React.Component {
 
@@ -15,20 +13,8 @@ class Signup extends React.Component {
     const { routeName } = this.props.navigation.state
     if(routeName === 'Signup'){
       this.props.signup()
-      global.foo="dogsignup";
-      //let res = JSON.stringify(this.props.signupError)
-      //console.log("Signup error state "+res)
-      
-     // firebase.auth().onAuthStateChanged((user) => {
-        //if(user){
-          //if(this.props.user != null){
-        this.props.navigation.navigate('DogSignUp')
-          //}
-       // }
-      //})
-
-      }
-     else {
+      this.props.navigation.navigate('Home')
+    } else {
       this.props.updateUser()
       this.props.navigation.goBack()
     }
@@ -49,6 +35,10 @@ class Signup extends React.Component {
     const { routeName } = this.props.navigation.state
     return (
       <View style={[styles.container, styles.center]}>
+        <TouchableOpacity style={styles.center} onPress={this.openLibrary} >
+          <Image style={styles.roundImage} source={{uri: this.props.user.photo}}/>
+          <Text>Upload Photo</Text>
+        </TouchableOpacity>
         <TextInput
           style={styles.border}
           editable={routeName === 'Signup' ? true : false}
@@ -70,8 +60,14 @@ class Signup extends React.Component {
         	onChangeText={input => this.props.updateUsername(input)}
         	placeholder='Username'
         />
+        <TextInput
+        	style={styles.border}
+        	value={this.props.user.bio}
+        	onChangeText={input => this.props.updateBio(input)}
+        	placeholder='Bio'
+        />
       	<TouchableOpacity style={styles.button} onPress={this.onPress}>
-      		<Text>Add a Dog</Text>
+      		<Text>Done</Text>
       	</TouchableOpacity>
       </View>
     );
@@ -79,13 +75,12 @@ class Signup extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updatePhoto, uploadPhoto, updateUser, updateEmail, updatePassword, updateUsername,signup,signupError }, dispatch)
+  return bindActionCreators({ updatePhoto, uploadPhoto, updateUser, updateEmail, updatePassword, updateUsername, updateBio, signup }, dispatch)
 }
 
 const mapStateToProps = (state) => {
   return {
-    user: state.user,
-    signupError: state.signupError
+    user: state.user
   }
 }
 

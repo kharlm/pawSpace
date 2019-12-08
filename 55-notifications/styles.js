@@ -4,11 +4,7 @@ const  { width } = Dimensions.get('window');
 export default styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffff'
-  },
-  coverPhoto: {
-    flex: 1,
-    resizeMode:'contain'
+    backgroundColor: '#fff'
   },
   center: {
     alignItems: 'center',
@@ -59,16 +55,6 @@ export default styles = StyleSheet.create({
     borderRadius: 5,
     width: 200
   },
-  pickerBorder: {
-    width: '85%',
-    margin: 10,
-    paddingLeft: 157,
-    paddingTop: 15,
-    fontSize: 16,
-    borderColor: '#d3d3d3',
-    borderBottomWidth: 1,
-    textAlign: 'center'
-  },
   border: {
     width: '85%',
     margin: 10,
@@ -87,7 +73,6 @@ export default styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     margin: 10,
-    marginLeft: 30,
     backgroundColor: '#adadad'
   },
   squareLarge: {
@@ -123,16 +108,4 @@ export default styles = StyleSheet.create({
     borderRadius: 5,
     width: 125
   },
-  homeImage: {
-    flex: 1,
-    height: 450,
-    width: "87%",
-    resizeMode: "cover",
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#dddddd",
-    borderRadius: 25,
-    marginLeft: 27
-    
-  }
 });
