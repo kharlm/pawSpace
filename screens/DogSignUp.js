@@ -16,61 +16,56 @@ class DogSignup extends React.Component {
           dogName:'',
           dogAge:'',
           dogBio:'',
-          dogBreed:'Breed',
-          dogGender:'Gender',
+          dogBreed:'Gender',
+          dogGender:'Breed',
           dogWeight:'',
           dogTag:''
     }
   }
 
-
-  submitAndClear = () => {
-    console.log("in submit and clear")
-   
-  }
-
   onPress = () => {
 
-    const { routeName } = this.props.navigation.state
+   // const { routeName } = this.props.navigation.state
     console.log("outisde if")
-    if(routeName === 'DogSignUp'){
+    //if(routeName === 'DogSignUp'){
       
-      console.log("in if"+this.state.dogName)
-      if(this.state.dogName ==null){
+      
+      if(this.state.dogName ==''){
+        console.log("Enter a dog name")
         Alert.alert(
           'Please Enter a dog Name',
         );
   
       }
-      else if(this.state.dogAge ==null){
+      else if(this.state.dogAge ==''){
         Alert.alert(
           'Please Enter a dog Age',
         );
       }
-      else if(this.state.dogBreed =='Breed'){
+      else if(this.state.dogBreed ==''){
         Alert.alert(
           'Please Enter a dog Breed',
         );
       }
-     else if(this.state.dogGender =='Gender'){
+     else if(this.state.dogGender ==''){
         Alert.alert(
           'Please Enter a dog Gender',
       );
   
       }
-     else if(this.state.dogWeight ==null){
+     else if(this.state.dogWeight ==''){
         Alert.alert(
           'Please Enter a dog Weight',
       );
   
       }
-      else if(this.state.dogBio ==null){
+      else if(this.state.dogBio ==''){
         Alert.alert(
           'Please Enter a dog Bio',
       );
   
       }
-      else if(this.state.dogTag ==null){
+      else if(this.state.dogTag ==''){
         Alert.alert(
           'Please Enter a dog Tag ',
       );
@@ -86,6 +81,7 @@ class DogSignup extends React.Component {
          this.props.updateBio(this.state.dogBio)
          this.props.updateGender(this.state.dogGender)
          this.props.updateWeight(this.state.dogWeight)
+         this.props.updateBreed(this.state.dogBreed)
          this.props.updateDogtag(this.state.dogTag)
 
         this.props.dogsignup()
@@ -97,12 +93,13 @@ class DogSignup extends React.Component {
       
       
       
-    }
-    else {
+    //}
+    /*else {
       //this.props.updateUser()
         this.props.updateDog()
         this.props.navigation.goBack()
       }
+      */
       
       
   }
@@ -110,13 +107,13 @@ class DogSignup extends React.Component {
   addDog = () => {
 
     
-    if(this.state.dogName ==null){
+    if(this.state.dogName ==''){
       Alert.alert(
         'Please Enter a dog Name',
       );
 
     }
-    else if(this.state.dogAge ==null){
+    else if(this.state.dogAge ==''){
       Alert.alert(
         'Please Enter a dog Age',
       );
@@ -132,19 +129,19 @@ class DogSignup extends React.Component {
     );
 
     }
-   else if(this.state.dogWeight ==null){
+   else if(this.state.dogWeight ==''){
       Alert.alert(
         'Please Enter a dog Weight',
     );
 
     }
-    else if(this.state.dogBio ==null){
+    else if(this.state.dogBio ==''){
       Alert.alert(
         'Please Enter a dog Bio',
     );
 
     }
-    else if(this.state.dogTag ==null){
+    else if(this.state.dogTag ==''){
       Alert.alert(
         'Please Enter a dog ',
     );
@@ -159,6 +156,7 @@ class DogSignup extends React.Component {
          this.props.updateAge(this.state.dogAge)
          this.props.updateBio(this.state.dogBio)
          this.props.updateGender(this.state.dogGender)
+         this.props.updateBreed(this.state.dogBreed)
          this.props.updateWeight(this.state.dogWeight)
          this.props.updateDogtag(this.state.dogTag)
        
@@ -264,7 +262,7 @@ class DogSignup extends React.Component {
         	onChangeText={dogTag => this.setState({dogTag})}
         	placeholder='Dog Tag'
         />
-      	<TouchableOpacity style={styles.button} onPress={this.onPress()}>
+      	<TouchableOpacity style={styles.button} onPress={()=> this.onPress()}>
       		<Text>Done</Text>
       	</TouchableOpacity>
 

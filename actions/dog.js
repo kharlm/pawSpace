@@ -110,10 +110,7 @@ export const dogsignup = () => {
 	
 
 	export const getDog = (dogId, type) => {
-		console.log("type"+type)
-		console.log("Dog in dog profile")
 		return async (dispatch, getState) => {
-			console.log("Dog in dog profile1")
 			try {
 				
 				const dogQuery = await db.collection('dogs').doc(dogId).get()

@@ -23,7 +23,6 @@ const user = (state = {}, action) => {
 
 
 const signupError = ( state = false, action) => {
-  console.log("calling sign up")
   switch(action.type) {
     case 'SIGNUP_ERROR':
       return state = true

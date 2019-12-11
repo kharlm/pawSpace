@@ -14,46 +14,32 @@ class Login extends React.Component {
     super(props);
     this.state = {
       userData: {},
-      loading: true
-
+      loading: true,
+      moreThanOneDog: false
     }
   }
 
   componentDidMount = () => {
     firebase.auth().onAuthStateChanged((user) => {
       if(user){
-        
-       // this.props.getUser(user.uid, 'GET_PROFILE')
-      
-          //let res =JSON.stringify(user)
-        
-          //console.log("firebase user"+res)
       
         if(this.props.user && global.foo!="dogsignup"){
-          this.getUserData(user.uid)
-          
-          
-          user = this.props.getUser(user.uid, 'LOGIN')
-         
-        //let res = JSON.stringify("");
+          this.dogLengthMoreThanOne(user.uid)
+          this.getUserData(user.uid) 
+          if(this.state.moreThanOneDog!=false)  {
+            user = this.props.getUser(user.uid, 'LOGIN')     
+            this.props.navigation.navigate('Home')
+          }
 
-      
-       // console.log("USER:"+res)
-         
-          this.props.navigation.navigate('Home')
+          else{
+            this.props.navigation.navigate('DogPicker')
+          }
         }
       }
     })
-     //let res = JSON.stringify("");
-    
-      
-       // console.log("USER:"+res)
-    
-   
   }
 
    getUserData = async (id) => {
-     
     let dog1;
      try{
       console.log("in get dog data")
@@ -67,27 +53,47 @@ class Login extends React.Component {
           userData: user1,
           loading: false
         })
-        
-
      }
      catch(e){
        alert(e)
      }
 
      let res1 = JSON.stringify(this.state.loading);
-      
-
-
   }
+
+  dogLengthMoreThanOne = async (id) => {
+    try{
+       const userQuery = await db.collection ('users').doc(id).get()
+        user = userQuery.data()
+        
+        console.log("Number of dogs"
+        +user.dogs.length)
+
+        if(user.dogs.length>1){
+          this.setState({
+            moreThanOneDog: true
+          })
+        }
+
+        else{
+          this.setState({
+            moreThanOneDog: false
+          })
+        }
+      
+     }
+     catch(e){
+       alert(e)
+     }
+
+     let res1 = JSON.stringify(this.state.loading);
+  }
+
+
 
   render() {
     let res1 = JSON.stringify(this.state.loading);
-
-    
     if(this.state.loading===true){
-     // console.log("Dog"+this.state.userData)
-   
-
   }
     return (
       <View style={[styles.container, styles.center]}>

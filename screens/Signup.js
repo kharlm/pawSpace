@@ -70,7 +70,7 @@ class Signup extends React.Component {
         	onChangeText={input => this.props.updateUsername(input)}
         	placeholder='Username'
         />
-      	<TouchableOpacity style={styles.button} onPress={this.onPress}>
+      	<TouchableOpacity style={styles.button} onPress={()=>this.onPress()}>
       		<Text>Add a Dog</Text>
       	</TouchableOpacity>
       </View>

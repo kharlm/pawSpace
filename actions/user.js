@@ -23,6 +23,7 @@ export const updatePhoto = (photo) => {
 export const signupError = () => {
 	return {type:'SIGNUP_ERROR'}
 }
+
 export const login = () => {
 	return async (dispatch, getState) => {
 		try {
@@ -93,23 +94,14 @@ export const getUser = (uid, type) => {
       user.posts = orderBy(posts, 'date','asc')
 
 			if(type === 'LOGIN'){
-				let res = JSON.stringify(user.dogs[0])
-				console.log("fix"+res)
-				
 				dispatch({type: 'LOGIN', payload: user })
 				dispatch(getDog(user.dogs[0],'DOGLOGIN'))
-				
-			
-			} else {
-				console.log("in get profile")
-				//console.log(user)
-				
+			} 
+			else {
 				dispatch({type: 'GET_PROFILE', payload: user })
-				console.log(user.dogs[0])
 				dispatch(getDog(user.dogs[0],'GET_DOGPROFILE'))
 			}
 		} catch (e) {
-			console.log("in get user");
 			alert(e)
 		}
 	}

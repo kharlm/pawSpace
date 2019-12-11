@@ -208,7 +208,6 @@ class Home extends React.Component {
   render() {
     
     if(this.props.userprofile.dogs){
-      console.log("in method")
     //  getDog(this.props.userprofile.dogs[0],'DOGLOGIN')
     }
 
