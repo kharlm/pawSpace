@@ -213,7 +213,7 @@ class Home extends React.Component {
 
     if (this.props.post === null || this.state.loading===false) return null
     return (
-      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#ffff"}}>
+      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#dedede"}}>
         <TouchableOpacity style={styles.buttonSmall} onPress={() => firebase.auth().signOut()}>
     <Text style={styles.bold}>Logout</Text>
   </TouchableOpacity>
@@ -339,17 +339,14 @@ class Home extends React.Component {
                     </View>
                     <Ionicons style={{ margin: 5, marginRight: 35 }} name='ios-flag' size={25} />
                   </View>
-                  <TouchableOpacity onPress={() => this.likePost(item)} >
-                    <Image style={styles.homeImage} source={{ uri: item.postPhoto }} />
+                  <View style={styles.homeBorder}>
+                  <TouchableOpacity  onPress={() => this.likePost(item)} >
+                    <Image style={styles.postPhoto} source={{ uri: item.postPhoto }} />
+                    <Text style={{textAlign:'center',marginTop:15,fontSize:20,fontWeight:'bold'}}>{item.postDescription}</Text>
                   </TouchableOpacity>
-                  <View style={styles.row}>
-                    <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#db565b' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} />
-                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
-                      <Ionicons style={{ marginLeft: 130, marginTop: 5 }} name='ios-chatbubbles' size={25} />
-                    </TouchableOpacity>
-                    <Ionicons style={{ marginLeft: 130, marginTop: 5 }} name='ios-send' size={25} />
                   </View>
-                  <Text style={{ marginLeft: 50, marginTop: 5, marginBottom: 10 }}>{item.postDescription}</Text>
+                  <View style={styles.row}>
+                  </View>
                 </View>
               )
             }}

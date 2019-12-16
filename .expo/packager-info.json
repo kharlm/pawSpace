@@ -3,7 +3,7 @@
   "expoServerPort": null,
   "packagerPort": null,
   "packagerPid": null,
-  "expoServerNgrokUrl": null,
-  "packagerNgrokUrl": null,
-  "ngrokPid": null
+  "expoServerNgrokUrl": "https://a8-6hj.anonymous.pawspace.exp.direct",
+  "packagerNgrokUrl": "https://packager.a8-6hj.anonymous.pawspace.exp.direct",
+  "ngrokPid": 5130
 }

@@ -26,14 +26,14 @@ class Login extends React.Component {
         if(this.props.user && global.foo!="dogsignup"){
           this.dogLengthMoreThanOne(user.uid)
           this.getUserData(user.uid) 
-          if(this.state.moreThanOneDog!=false)  {
+          //if(this.state.moreThanOneDog!=false)  {
             user = this.props.getUser(user.uid, 'LOGIN')     
             this.props.navigation.navigate('Home')
-          }
+          //}
 
-          else{
-            this.props.navigation.navigate('DogPicker')
-          }
+          //else{
+            //this.props.navigation.navigate('DogPicker')
+          //}
         }
       }
     })

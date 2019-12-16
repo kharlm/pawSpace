@@ -16,7 +16,7 @@ class Adopt extends Component {
         <View style={{ flex: 2 }}>
           <Image
             source={{uri:this.props.imageUri}}
-            style={{ flex: 1, width: null, height: null, resizeMode: "cover" }}
+            style={{ flex: 1,width: null, height: null, resizeMode:"cover"}}
           />
         </View>
         <View style={{ flex: 1, paddingLeft: 10, paddingTop: 10 }}>

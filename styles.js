@@ -2,9 +2,42 @@ import { StyleSheet, Dimensions } from 'react-native';
 const  { width } = Dimensions.get('window');
 
 export default styles = StyleSheet.create({
+  body: {
+    backgroundColor: '#dedede'
+  },
+  gallery:{
+    display: 'flex',
+    width: 900,
+    margin: 'auto',
+    justifyContent: 'space-between',
+    //flexWrap: wrap
+  },
+  figure:{
+    width: 200,
+    marginTop: 8,
+    marginBottom: 8,
+    marginRight: 0,
+    marginLeft: 0,
+    borderWidth: 100 ,
+    borderStyle: 'solid',
+    borderColor: '#777',
+    padding: 8,
+   // box-sizing: border-box;
+    backgroundColor: '#fff'
+  },
+  figureImg: {
+    width: '100%',
+  },
+   figcaption :{
+    textAlign: 'center',
+    paddingTop: 8 ,
+    paddingBottom: 8,
+    paddingRight: 4,
+    paddingLeft: 4
+  },
   container: {
     flex: 1,
-    backgroundColor: '#ffff'
+    backgroundColor: '#dedede'
   },
   coverPhoto: {
     flex: 1,
@@ -47,7 +80,6 @@ export default styles = StyleSheet.create({
     borderColor: '#d3d3d3',
     borderWidth: 1,
     borderRadius: 50,
-    fontSize: 16,
   },
   facebookButton: {
     backgroundColor: '#3b5998',
@@ -69,6 +101,22 @@ export default styles = StyleSheet.create({
     borderBottomWidth: 1,
     textAlign: 'center'
   },
+  homeBorder: {
+    textAlign: 'center',
+    color: '#000',
+    borderStyle: 'solid', 
+    borderColor: '#A9A9A9',
+    borderWidth: 1.5,
+    paddingTop: 12,
+    paddingBottom: 30,
+    paddingRight: 12,
+    paddingLeft: 12,
+    marginTop: 0,
+    marginBottom: 10,
+    marginRight: 5 ,
+    marginLeft: 5,
+    backgroundColor: "#fff"
+  },
   border: {
     width: '85%',
     margin: 10,
@@ -79,8 +127,8 @@ export default styles = StyleSheet.create({
     textAlign: 'center'
   },
   postPhoto: {
-    height: 250,
-    width: width,
+    height: 350,
+    width: null,
   },
   roundImage: {
     width: 40, 
