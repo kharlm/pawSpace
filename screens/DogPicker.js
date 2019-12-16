@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { connect } from 'react-redux'
 import firebase from 'firebase'
 import { bindActionCreators } from 'redux'
@@ -15,7 +15,9 @@ class DogPicker extends React.Component {
         super(props);
 
         this.state = {
-            numberOfDogs: 0
+            numberOfDogs: 0,
+            dogs:[],
+            userDogs: this.props.user.dogs
         }
     }
     componentDidMount = () => {
@@ -25,40 +27,74 @@ class DogPicker extends React.Component {
                 this.props.getUser(user.uid, 'LOGIN')
                 this.props.getUser(user.uid, 'GET_PROFILE')
 
+                this.getUserData(user.uid)
             }
         })
     }
+   
+    getUserData = async (id) => {
+        let dog1;
+         try{
+          console.log("in get dog data")
+           const userQuery = await db.collection ('users').doc(id).get()
+            user1 = userQuery.data()
+           
+            user1.dogs.map((data)=>{
+                this.getDogData(data)
+
+            })
+            
+          
+           
+            
+         }
+         catch(e){
+           alert(e)
+         }
+    
+         
+      }
+
+      getUserDog = (id) => {
+        console.log("Dog Id"+id)
+        this.props.getDog(id,'DOGLOGIN')
+        this.props.navigation.navigate('Home')
+    
+      }
     getDogData = async (id) => {
          try{
            const dogQuery = await db.collection ('dogs').doc(id).get()
             dog = dogQuery.data()
             let res = JSON.stringify(dog.dogId);
             console.log("dogoo"+dog.dogId)
-            
-            //this.props.getDog(user1.dogs[0], 'GET_DOGPROFILE')
-           
             this.setState({
-              //userData: user1,
-              //loading: false
-            })
+                dogs: [...this.state.dogs, dog]
+               })
+           
+            
          }
          catch(e){
            alert(e)
          }
       }
     render() {
+        
 
         if (this.props.user.dogs == null) return null
-        const dogPicker = this.props.user.dogs.map((data) => {
-            //console.log(data)
-            //this.getDogData(data)
-           //this.props.getDog(data,'DOG_DOGPROFILE')
+        
+
+       
+        const dogPicker = this.props.user.dogs.map((data,i) => {
+            key={i}
+            if(this.state.dogs[i]){
             return (
                 <View>
-                <Text>{this.props.dogprofile.dogId}</Text>
-               <DogPickerComponent />
+                <TouchableOpacity onPress={() => this.getUserDog(this.state.dogs[i].dogId)}>
+               <DogPickerComponent name={this.state.dogs[i].dogname}/>
+               </TouchableOpacity>
                </View>
             )
+            }
         })
         return (
             <ScrollView>

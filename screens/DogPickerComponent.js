@@ -17,11 +17,11 @@ class DogPickerComponent extends Component {
         <View style={{ flex: 2 }}>
           <Image
             source={{uri:this.props.imageUri}}
-            style={{ flex: 1, width: null, height: null, resizeMode: "cover" }}
+            style={{ flex: 1, width: null, height: null, resizeMode: "cover",backgroundColor: '#d3d3d3' }}
           />
         </View>
-        <View style={{ flex: 1, paddingLeft: 10, paddingTop: 10 }}>
-          <Text style={{fontWeight: 'bold'}}>{this.props.name}</Text>
+        <View style={{ flex: 1,paddingTop: 10 }}>
+          <Text style={{fontWeight: 'bold', textAlign:'center'}}>{this.props.name}</Text>
           <Text style={{fontSize: 12}}>{this.props.breed}</Text>
         </View>
       </View>

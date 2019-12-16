@@ -16,16 +16,13 @@ class Signup extends React.Component {
     if(routeName === 'Signup'){
       this.props.signup()
       global.foo="dogsignup";
-      //let res = JSON.stringify(this.props.signupError)
-      //console.log("Signup error state "+res)
-      
-     // firebase.auth().onAuthStateChanged((user) => {
-        //if(user){
-          //if(this.props.user != null){
+      firebase.auth().onAuthStateChanged((user) => {
+        if(user){
+        if(this.props.user != null){
         this.props.navigation.navigate('DogSignUp')
-          //}
-       // }
-      //})
+          }
+        }
+      })
 
       }
      else {

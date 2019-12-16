@@ -30,11 +30,6 @@ const StackNavigator = createStackNavigator(
       screen: DogPickerScreen,
       navigationOptions: ({ navigation }) => ({
         title: 'DogPicker',
-        headerLeft: (
-          <TouchableOpacity onPress={() => navigation.goBack()} >
-            <Ionicons style={styles.icon} name={'ios-arrow-back'} size={30}/>
-          </TouchableOpacity>
-        )
       })
     },
     DogSignUp: { 

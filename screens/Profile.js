@@ -98,7 +98,7 @@ class Profile extends React.Component {
       </View >
       <View style={styles1.headercontainer}>
         <Text style={styles1.paragraph1}>Bio</Text>
-        <Text style={styles1.body}>{dog.bio}</Text>
+        <Text style={styles1.body}>{dog.dogId}</Text>
       </View>
 
       <View style={styles1.midinfo}>

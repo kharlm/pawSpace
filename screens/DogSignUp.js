@@ -6,10 +6,12 @@ import { ImagePicker, Permissions } from 'expo';
 import { Text, View, TextInput, TouchableOpacity, Image, Alert, ScrollView} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog, dogsignup } from '../actions/dog'
-import { updatePhoto, updateEmail, updatePassword, updateUsername,signup, updateUser } from '../actions/user'
+import { updatePhoto, updateEmail, updatePassword, updateUsername,signup, updateUser, getUser} from '../actions/user'
 
 
 class DogSignup extends React.Component {
+
+  
   constructor(props) {
     super(props);
     this.state = { dogNumber: 1 ,
@@ -19,7 +21,8 @@ class DogSignup extends React.Component {
           dogBreed:'Gender',
           dogGender:'Breed',
           dogWeight:'',
-          dogTag:''
+          dogTag:'',
+          moreThanOneDog: false
     }
   }
 
@@ -85,7 +88,18 @@ class DogSignup extends React.Component {
          this.props.updateDogtag(this.state.dogTag)
 
         this.props.dogsignup()
-        this.props.navigation.navigate('Home')
+        let res = JSON.stringify(this.props.user)
+        console.log("user yo"+res)
+        this.dogLengthMoreThanOne(this.props.user.uid)
+        if(this.state.moreThanOneDog!=false)  {
+          
+          this.props.getUser(this.props.user.uid, 'LOGIN')     
+          this.props.navigation.navigate('Home')
+        }
+
+        else{
+          this.props.navigation.navigate('DogPicker')
+        }
   
       }
       
@@ -187,10 +201,38 @@ class DogSignup extends React.Component {
       }
     }
   }
+
+  dogLengthMoreThanOne = async (id) => {
+    try{
+       const userQuery = await db.collection ('users').doc(id).get()
+        user = userQuery.data()
+        
+
+        if(user.dogs.length>1){
+          this.setState({
+            moreThanOneDog: true
+          })
+        }
+
+        else{
+          this.setState({
+            moreThanOneDog: false
+          })
+        }
+      
+     }
+     catch(e){
+       alert(e)
+     }
+
+     let res1 = JSON.stringify(this.state.loading);
+  }
   
 
   render() {
     const { routeName } = this.props.navigation.state
+
+    
     
     return (
       <ScrollView>
@@ -282,12 +324,13 @@ let breeds = [
   { label: 'Afghan Hound',value: 'Afghan Hound'},
 ]
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog,dogsignup,signup,updateUser}, dispatch)
+  return bindActionCreators({ updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog,dogsignup,signup,updateUser,getUser}, dispatch)
 }
 
 const mapStateToProps = (state) => {
   return {
-    dog: state.dog
+    dog: state.dog,
+    user: state.user
   }
 }
 
