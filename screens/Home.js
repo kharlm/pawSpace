@@ -240,7 +240,7 @@ class Home extends React.Component {
                 breed={this.state.dataSource.animals[0].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[3].photos[0].medium}
+                imageUri={this.state.dataSource.animals[2].photos[0].medium}
                 name={this.state.dataSource.animals[1].name}
                 breed={this.state.dataSource.animals[1].breeds.primary}
               />
@@ -250,7 +250,7 @@ class Home extends React.Component {
                 breed={this.state.dataSource.animals[2].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[3].photos[0].medium}
+                imageUri={this.state.dataSource.animals[2].photos[0].medium}
                 name={this.state.dataSource.animals[3].name}
                 breed={this.state.dataSource.animals[3].breeds.primary}
               />

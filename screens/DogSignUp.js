@@ -7,7 +7,7 @@ import { Text, View, TextInput, TouchableOpacity, Image, Alert, ScrollView} from
 import RNPickerSelect from 'react-native-picker-select';
 import { updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog, dogsignup } from '../actions/dog'
 import { updatePhoto, updateEmail, updatePassword, updateUsername,signup, updateUser, getUser} from '../actions/user'
-
+import db from '../config/firebase'
 
 class DogSignup extends React.Component {
 
@@ -22,17 +22,14 @@ class DogSignup extends React.Component {
           dogGender:'Breed',
           dogWeight:'',
           dogTag:'',
-          moreThanOneDog: false
+          moreThanOneDog: false,
+          dogTagExists: false,
+          login: false
     }
   }
 
   onPress = () => {
-
-   // const { routeName } = this.props.navigation.state
-    console.log("outisde if")
-    //if(routeName === 'DogSignUp'){
-      
-      
+    
       if(this.state.dogName ==''){
         console.log("Enter a dog name")
         Alert.alert(
@@ -72,10 +69,16 @@ class DogSignup extends React.Component {
         Alert.alert(
           'Please Enter a dog Tag ',
       );
+
       }
+
+     /* else if(this.state.dogTag!='' && this.state.dogTagExists == false) {
+        this.checkIfUserExists(this.state.dogTag);
+      }
+      */
   
       else{
-  
+
         this.setState({
           dogNumber: this.state.dogNumber+1,
         })
@@ -91,14 +94,19 @@ class DogSignup extends React.Component {
         let res = JSON.stringify(this.props.user)
         console.log("user yo"+res)
         this.dogLengthMoreThanOne(this.props.user.uid)
-        if(this.state.moreThanOneDog!=false)  {
+        if(this.state.moreThanOneDog===false)  {
           
-          this.props.getUser(this.props.user.uid, 'LOGIN')     
-          this.props.navigation.navigate('Home')
+          this.props.getUser(this.props.user.uid, 'LOGIN')   
+          this.setState({
+            login: true
+          })
+          
         }
 
         else{
-          this.props.navigation.navigate('DogPicker')
+          this.setState({
+            login: false
+          })
         }
   
       }
@@ -117,6 +125,23 @@ class DogSignup extends React.Component {
       
       
   }
+
+  // Tests to see if /users/<userId> has any data. 
+ checkIfUserExists(dogtag) {
+  db.collection ('dogs').child(dogtag).once('value', function(snapshot) {
+    var exists = (snapshot.val() !== null);
+    userExistsCallback(uid, exists);
+  });
+}
+
+ userExistsCallback(dogtag, exists) {
+  if (exists) {
+    alert('user ' + dogtag + ' exists!');
+  } else {
+    alert('user ' + dogtag + ' does not exist!');
+  }
+}
+
 
   addDog = () => {
 
@@ -231,6 +256,18 @@ class DogSignup extends React.Component {
 
   render() {
     const { routeName } = this.props.navigation.state
+
+    console.log("more than one dog"+this.state.moreThanOneDog)
+    console.log("login"+this.state.login)
+
+    if(this.state.moreThanOneDog===true){
+      this.props.navigation.navigate('DogPicker')
+    }
+
+    if(this.state.moreThanOneDog===false && this.state.login===true){
+      
+      this.props.navigation.navigate('Home')
+    }
 
     
     

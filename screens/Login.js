@@ -15,7 +15,8 @@ class Login extends React.Component {
     this.state = {
       userData: {},
       loading: true,
-      moreThanOneDog: false
+      moreThanOneDog: false,
+      login: false
     }
   }
 
@@ -26,16 +27,14 @@ class Login extends React.Component {
         if(this.props.user && global.foo!="dogsignup"){
           this.dogLengthMoreThanOne(user.uid)
           this.getUserData(user.uid) 
-          if(this.state.moreThanOneDog!=false)  {
-            user = this.props.getUser(user.uid, 'LOGIN')     
-            this.props.navigation.navigate('Home')
-          }
+            user = this.props.getUser(user.uid, 'LOGIN')  
 
-          else{
-            this.props.navigation.navigate('DogPicker')
-          }
+            this.setState({
+              login: true
+            })
         }
       }
+      
     })
   }
 
@@ -66,16 +65,17 @@ class Login extends React.Component {
        const userQuery = await db.collection ('users').doc(id).get()
         user = userQuery.data()
         
-        console.log("Number of dogs"
-        +user.dogs.length)
+     
 
         if(user.dogs.length>1){
+          
           this.setState({
             moreThanOneDog: true
           })
         }
 
         else{
+          console.log("setting state to less than one dog")
           this.setState({
             moreThanOneDog: false
           })
@@ -93,8 +93,21 @@ class Login extends React.Component {
 
   render() {
     let res1 = JSON.stringify(this.state.loading);
-    if(this.state.loading===true){
+  
+   /* if(this.state.loading===true){
   }
+  */
+
+    if(this.state.moreThanOneDog===true){
+      this.props.navigation.navigate('DogPicker')
+    }
+
+    if(this.state.moreThanOneDog===false && this.state.login===true){
+      
+      this.props.navigation.navigate('Home')
+    }
+
+  
     return (
       <View style={[styles.container, styles.center]}>
         <Image style={{width: 300, height: 100}} source={require('../assets/logo.jpg')} />

@@ -16,14 +16,14 @@ class Signup extends React.Component {
     if(routeName === 'Signup'){
       this.props.signup()
       global.foo="dogsignup";
-      firebase.auth().onAuthStateChanged((user) => {
+     /* firebase.auth().onAuthStateChanged((user) => {
         if(user){
         if(this.props.user != null){
         this.props.navigation.navigate('DogSignUp')
           }
         }
-      })
-
+      })*/
+      this.props.navigation.navigate('DogSignUp')
       }
      else {
       this.props.updateUser()

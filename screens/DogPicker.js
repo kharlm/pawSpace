@@ -106,6 +106,9 @@ class DogPicker extends React.Component {
                     justifyContent: "space-between",
 
                 }}>
+                      <TouchableOpacity style={styles.buttonSmall} onPress={() => firebase.auth().signOut()}>
+    <Text style={styles.bold}>Logout</Text>
+  </TouchableOpacity>
                     {dogPicker}
 
                 </View>
