@@ -23,7 +23,7 @@ export const HomeNavigator = createAppContainer(createStackNavigator(
       screen: HomeScreen,
       navigationOptions: ({ navigation }) => ({
         headerTitle: <Image style={{width: 120, height: 35}} source={require('../assets/logo.jpg')} />,
-        headerLeft: (
+        /*headerLeft: (
           <TouchableOpacity onPress={() => navigation.navigate('Camera')} >
             <Ionicons style={{marginLeft: 10}} name={'ios-camera'} size={30}/>
           </TouchableOpacity>
@@ -33,6 +33,7 @@ export const HomeNavigator = createAppContainer(createStackNavigator(
             <Ionicons style={{marginRight: 10}} name={'ios-send'} size={30}/>
           </TouchableOpacity>
         ),
+        */
       })
     },
     Comment: {

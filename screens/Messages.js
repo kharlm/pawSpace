@@ -14,8 +14,8 @@ class Messages extends React.Component {
   }
 
   goToChat = (members) => {
-    const uid = members.filter(id => id !== this.props.user.uid)
-    this.props.navigation.navigate('Chat', uid[0])
+    const dogId = members.filter(id => id !== this.props.dog.dogId)
+    this.props.navigation.navigate('Chat', dogId[0])
   }
 
   render() {
@@ -48,6 +48,7 @@ const mapStateToProps = (state) => {
   return {
     user: state.user,
     messages: state.messages,
+    dog: state.dogId
   };
 }
 

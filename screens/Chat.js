@@ -30,7 +30,7 @@ class Chat extends React.Component {
         <FlatList
           inverted
           keyExtractor={(item) => JSON.stringify(item.date)}
-          data={this.props.messages.filter(message => message.members.indexOf(params) >= 0 && message.members.indexOf(this.props.user.uid) >= 0)}
+          data={this.props.messages.filter(message => message.members.indexOf(params) >= 0 && message.members.indexOf(this.props.dog.dogId) >= 0)}
           renderItem={({ item }) => (
           <TouchableOpacity onPress={() => this.goToChat(item)} style={[styles.row, styles.space]}>
             { item.uid !== uid ? <Image style={styles.roundImage} source={{uri: item.photo}}/> : null}
@@ -61,7 +61,8 @@ const mapDispatchToProps = (dispatch) => {
 const mapStateToProps = (state) => {
   return {
     user: state.user,
-    messages: state.messages
+    messages: state.messages,
+    dog: state.dog
   }
 }
 

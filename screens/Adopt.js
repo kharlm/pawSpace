@@ -10,13 +10,16 @@ class Adopt extends Component {
           width: 130,
           marginLeft: 20,
           borderWidth: 0.5,
-          borderColor: "#dddddd"
+          borderColor: "#000000",
+          
         }}
       >
-        <View style={{ flex: 2 }}>
+        <View style={{ flex: 2 ,borderTopRightRadius: 10,
+          borderTopLeftRadius: 10}}>
           <Image
-            source={{uri:this.props.imageUri}}
-            style={{ flex: 1, width: null, height: null, resizeMode: "cover" }}
+            source={{uri: this.props.imageUri}}
+            style={{ flex: 1, width: 130, height: 130, resizeMode: "cover",borderTopRightRadius: 10,
+            borderTopLeftRadius: 10, overflow: 'hidden'}}
           />
         </View>
         <View style={{ flex: 1, paddingLeft: 10, paddingTop: 10 }}>

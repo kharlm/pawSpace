@@ -87,7 +87,7 @@ class Profile extends React.Component {
         style={styles1.container1}
       >
         <ImageBackground
-          source={require('../images/profile4.jpg')}
+          source={{uri: dog.photo}}
           style={styles1.image}
         >
           <Text
@@ -121,7 +121,7 @@ class Profile extends React.Component {
                 
                 <View style={styles1.infoview}>
                 <Text style={styles1.infoone}>DogTag</Text>
-                <Text style={styles1.infotwo}>{dog.dogtag}</Text>
+                <Text style={styles1.infotwo}>{dog.dogTag}</Text>
                 </View>
 
             </View>

@@ -2,11 +2,14 @@ import React from 'react';
 import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { ImagePicker, Permissions } from 'expo';
+import * as ImagePicker from 'expo-image-picker'
+import * as Permissions from 'expo-permissions'
 import { Text, View, TextInput, TouchableOpacity, Image, Alert, ScrollView} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog, dogsignup } from '../actions/dog'
-import { updatePhoto, updateEmail, updatePassword, updateUsername,signup, updateUser, getUser} from '../actions/user'
+import {updateEmail, updatePassword, updateUsername,signup, updateUser, getUser} from '../actions/user'
+import { uploadPhoto } from '../actions'
+import {updatePhoto} from '../actions/dog'
 import db from '../config/firebase'
 
 class DogSignup extends React.Component {
@@ -18,20 +21,57 @@ class DogSignup extends React.Component {
           dogName:'',
           dogAge:'',
           dogBio:'',
-          dogBreed:'Gender',
-          dogGender:'Breed',
+          dogBreed:'Breed',
+          dogGender:'Gender',
           dogWeight:'',
           dogTag:'',
           moreThanOneDog: false,
           dogTagExists: false,
-          login: false
+          login: false,
+          search: '',
+		      query: ''
     }
   }
 
-  onPress = () => {
-    
+  searchDogTag = async () => {
+  	let search = []
+    const query = await db.collection('dogs').where('dogTag', '==', this.state.dogTag).get()
+    query.forEach((response) => {
+      search.push(response.data())
+    })
+
+    if(search[0]){
+    this.setState({query: search[0].dogTag},this.addDog)
+    }
+    else{
+      this.setState({query:""},this.addDog)
+    }
+    let res= JSON.stringify(this.state.query)
+    console.log("query: "+res)
+	}
+  
+  searchDogTag1 = async () => {
+  	let search = []
+    const query = await db.collection('dogs').where('dogTag', '==', this.state.dogTag).get()
+    query.forEach((response) => {
+      search.push(response.data())
+    })
+
+    if(search[0]){
+    this.setState({query: search[0].dogTag},this.addDog)
+    }
+    else{
+      this.setState({query:""},this.onPress)
+    }
+    let res= JSON.stringify(this.state.query)
+    console.log("query: "+res)
+	}
+  
+
+  onPress = () => {  
+
+    console.log("dog Tag: "+this.state.dogTag)
       if(this.state.dogName ==''){
-        console.log("Enter a dog name")
         Alert.alert(
           'Please Enter a dog Name',
         );
@@ -42,12 +82,12 @@ class DogSignup extends React.Component {
           'Please Enter a dog Age',
         );
       }
-      else if(this.state.dogBreed ==''){
+      else if(this.state.dogBreed =='Breed'){
         Alert.alert(
           'Please Enter a dog Breed',
         );
       }
-     else if(this.state.dogGender ==''){
+     else if(this.state.dogGender =='Gender'){
         Alert.alert(
           'Please Enter a dog Gender',
       );
@@ -72,11 +112,21 @@ class DogSignup extends React.Component {
 
       }
 
-     /* else if(this.state.dogTag!='' && this.state.dogTagExists == false) {
-        this.checkIfUserExists(this.state.dogTag);
+      else if(this.state.dogTag == this.state.query){
+        Alert.alert(
+          'This dogTag is already in use please enter a different one ',
+      );
+
       }
-      */
-  
+
+      else if(typeof this.props.dog.photo === 'undefined'){
+        console.log("in undefined")
+        Alert.alert(
+          'Please Upload a profile photo for your dog ',
+      );
+
+      }
+
       else{
 
         this.setState({
@@ -88,71 +138,32 @@ class DogSignup extends React.Component {
          this.props.updateGender(this.state.dogGender)
          this.props.updateWeight(this.state.dogWeight)
          this.props.updateBreed(this.state.dogBreed)
-         this.props.updateDogtag(this.state.dogTag)
+         this.props.updateDogtag(this.state.dogTag.toLowerCase())
 
         this.props.dogsignup()
         let res = JSON.stringify(this.props.user)
-        console.log("user yo"+res)
         this.dogLengthMoreThanOne(this.props.user.uid)
         if(this.state.moreThanOneDog===false)  {
           
           this.props.getUser(this.props.user.uid, 'LOGIN')   
-          this.setState({
-            login: true
-          })
-          
-        }
-
-        else{
-          this.setState({
-            login: false
-          })
         }
   
       }
-      
-      
-      
-      
-      
-    //}
-    /*else {
-      //this.props.updateUser()
-        this.props.updateDog()
-        this.props.navigation.goBack()
-      }
-      */
-      
-      
+        
   }
-
-  // Tests to see if /users/<userId> has any data. 
- checkIfUserExists(dogtag) {
-  db.collection ('dogs').child(dogtag).once('value', function(snapshot) {
-    var exists = (snapshot.val() !== null);
-    userExistsCallback(uid, exists);
-  });
-}
-
- userExistsCallback(dogtag, exists) {
-  if (exists) {
-    alert('user ' + dogtag + ' exists!');
-  } else {
-    alert('user ' + dogtag + ' does not exist!');
-  }
-}
-
 
   addDog = () => {
 
-    
+    console.log("query in add dog"+this.state.query)
+    console.log("dog tag in add dog"+this.state.dogTag)
+
     if(this.state.dogName ==''){
       Alert.alert(
         'Please Enter a dog Name',
       );
 
     }
-    else if(this.state.dogAge ==''){
+   /* else if(this.state.dogAge ==''){
       Alert.alert(
         'Please Enter a dog Age',
       );
@@ -180,14 +191,28 @@ class DogSignup extends React.Component {
     );
 
     }
+    */
     else if(this.state.dogTag ==''){
       Alert.alert(
-        'Please Enter a dog ',
+        'Please Enter a dogTag ',
     );
     }
 
-    else if(this.state.dogName!=null && this.state.dogWeight!=null && this.state.dogAge!=null && this.state.dogGender!=null && this.state.dogTag!=null && this.state.dogBio!=null){
-      console.log("WHhy am i in else")
+    else if(this.state.dogTag === this.state.query){
+      Alert.alert(
+        'This dogTag is already in use please enter a different one ',
+    );
+
+    }
+
+    else if(typeof this.props.dog.photo === 'undefined'){
+      Alert.alert(
+        'Please Upload a profile photo for your dog ',
+    );
+
+    }
+
+    else if(this.state.dogName!=null && this.state.dogWeight!=null && this.state.dogAge!=null && this.state.dogGender!='Gender' && this.state.dogBreed!='Breed' && this.state.dogTag!=null && this.state.dogBio!=null){
       this.setState({
         dogNumber: this.state.dogNumber+1,
       })
@@ -197,7 +222,7 @@ class DogSignup extends React.Component {
          this.props.updateGender(this.state.dogGender)
          this.props.updateBreed(this.state.dogBreed)
          this.props.updateWeight(this.state.dogWeight)
-         this.props.updateDogtag(this.state.dogTag)
+         this.props.updateDogtag(this.state.dogTag.toLowerCase())
        
         this.props.dogsignup()
       
@@ -219,7 +244,7 @@ class DogSignup extends React.Component {
   openLibrary = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
     if (status === 'granted') {
-      const image = await ImagePicker.launchImageLibraryAsync()
+      const image = await ImagePicker.launchImageLibraryAsync({allowsEditing: true})
       if(!image.cancelled ){
         const url = await this.props.uploadPhoto(image)
         this.props.updatePhoto(url)
@@ -235,13 +260,15 @@ class DogSignup extends React.Component {
 
         if(user.dogs.length>1){
           this.setState({
-            moreThanOneDog: true
+            moreThanOneDog: true,
+            login: true
           })
         }
 
         else{
           this.setState({
-            moreThanOneDog: false
+            moreThanOneDog: false,
+            login: true
           })
         }
       
@@ -257,17 +284,19 @@ class DogSignup extends React.Component {
   render() {
     const { routeName } = this.props.navigation.state
 
-    console.log("more than one dog"+this.state.moreThanOneDog)
-    console.log("login"+this.state.login)
-
     if(this.state.moreThanOneDog===true){
+      return(
       this.props.navigation.navigate('DogPicker')
+      )
     }
 
     if(this.state.moreThanOneDog===false && this.state.login===true){
-      
+      return(
       this.props.navigation.navigate('Home')
+      )
     }
+
+    else{
 
     
     
@@ -275,7 +304,7 @@ class DogSignup extends React.Component {
       <ScrollView>
       <View style={[styles.container, styles.center]}>
         <TouchableOpacity style={styles.center} onPress={this.openLibrary} >
-          <Image style={styles.roundImage} source={{}}/>
+          <Image style={styles.roundImage} source={{uri: this.props.dog.photo}}/>
           <Text>Upload Photo</Text>     
         </TouchableOpacity>
         <Text style={{paddingTop: 10,fontSize: 20}}>Add Info for Dog # {this.state.dogNumber}</Text>
@@ -299,7 +328,7 @@ class DogSignup extends React.Component {
         <View style={[styles.center, styles.pickerBorder]}>
          <RNPickerSelect
              placeholder={{
-              label: this.state.dogBreed,
+              label: 'Breed',
               color: 'red',
             }}
             onValueChange={(dogBreed) => this.setState({dogBreed})}
@@ -310,7 +339,7 @@ class DogSignup extends React.Component {
         <View style={[styles.center, styles.pickerBorder]}>
          <RNPickerSelect
              placeholder={{
-              label: this.state.dogGender,
+              label: 'Gender',
               color: 'red',
             }}
             onValueChange={(dogGender) => this.setState({dogGender})}
@@ -337,16 +366,17 @@ class DogSignup extends React.Component {
         />
         <TextInput
           style={styles.border}
-        	value={this.state.dogTag}
+        	value={this.state.dogTag.toLowerCase()}
         	onChangeText={dogTag => this.setState({dogTag})}
-        	placeholder='Dog Tag'
+          placeholder='Dog Tag'
+          autoCapitalize='none'
         />
-      	<TouchableOpacity style={styles.button} onPress={()=> this.onPress()}>
+      	<TouchableOpacity style={styles.button} onPress={()=> {this.searchDogTag1(); }}>
       		<Text>Done</Text>
       	</TouchableOpacity>
 
         <Text style={{marginTop:12}}>OR</Text>
-        <TouchableOpacity style={styles.button} onPress={() => { this.addDog();}}>
+        <TouchableOpacity style={styles.button} onPress={() => { this.searchDogTag();}}>
       		<Text>Add Another Dog</Text>
       	</TouchableOpacity>
 
@@ -355,13 +385,14 @@ class DogSignup extends React.Component {
     );
   }
 }
+}
 let breeds = [
   { label: 'Affenpinscher',value: 'Affenpinscher'},
   { label: 'Affenpoo',value: 'Affenpoo'},
   { label: 'Afghan Hound',value: 'Afghan Hound'},
 ]
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog,dogsignup,signup,updateUser,getUser}, dispatch)
+  return bindActionCreators({ updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog,dogsignup,signup,updateUser,getUser,uploadPhoto,updatePhoto}, dispatch)
 }
 
 const mapStateToProps = (state) => {

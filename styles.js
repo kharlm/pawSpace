@@ -4,7 +4,7 @@ const  { width } = Dimensions.get('window');
 export default styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffff'
+    backgroundColor: '#fff'
   },
   coverPhoto: {
     flex: 1,
@@ -49,6 +49,12 @@ export default styles = StyleSheet.create({
     borderRadius: 50,
     fontSize: 16,
   },
+  backgroundImage: {
+    flex: 1,
+    width: null,
+    height: null,
+    resizeMode: 'cover'
+},
   facebookButton: {
     backgroundColor: '#3b5998',
     marginTop: 20,
@@ -103,6 +109,33 @@ export default styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: '#fff',
     marginBottom: 50
+  },
+  dogInfoLeft : {
+
+    marginTop: 20,
+    marginRight: 30,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderColor: '#d3d3d3',
+    backgroundColor:'#faebd7',
+    borderWidth: 1,
+    borderRadius: 10,
+    width: 150,
+    overflow: 'hidden'
+
+  },
+  dogInfoRight : {
+
+    marginTop: 20,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderColor: '#d3d3d3',
+    backgroundColor:'#faebd7',
+    borderWidth: 1,
+    borderRadius: 10,
+    width: 200,
+    overflow: 'hidden'
+
   },
   button: {
     marginTop: 20,

@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import firebase from 'firebase';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View, Button, Image, FlatList, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Alert, Dimensions } from 'react-native';
+import { Text, View, Button, Image, FlatList, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Alert, Dimensions,ImageBackground } from 'react-native';
 import { getPosts, likePost, unlikePost, getAdopt } from '../actions/post'
 import { getUser } from '../actions/user'
 import * as Permissions from 'expo-permissions'
@@ -12,10 +12,12 @@ import * as Location from 'expo-location'
 const PET_API = 'http://api.petfinder.com/pet.getRandom?key=' + 'm0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs' + '&animal=cat&location=' + '34758' + '&output=basic&format=json'
 import Adopt from "./Adopt";
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
-const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+San Antonio&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
+const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+'
+const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
 import moment from 'moment'
 import DogParks from './DogParks';
 import { getDog } from '../actions/dog';
+
 const { width } = Dimensions.get('window');
 
 
@@ -43,8 +45,7 @@ class Home extends React.Component {
 
     this.getMyLocation()
     this.props.getPosts()
-    this.getAdoptToken()
-    this.getDogParks()
+   // this.getDogParks()
     
     
 
@@ -70,11 +71,9 @@ class Home extends React.Component {
   }
 
 
-  getAdoptResponse = async (a) => {
-    console.log(this.state.locationLoading)
-   
+  getAdoptResponse = async (a) => { 
       console.log("ZipCode "+this.state.zipCode)
-      fetch('https://api.petfinder.com/v2/animals?type=dog&location='+'32653'+'&limit=5', {
+      fetch('https://api.petfinder.com/v2/animals?type=dog&location='+this.state.zipCode+'&limit=5', {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -88,6 +87,7 @@ class Home extends React.Component {
             loading: true
           })
           let res = JSON.stringify(this.state.dataSource.animals)
+          //console.log(res)
           return responseJson;
 
         })
@@ -110,8 +110,9 @@ class Home extends React.Component {
   }
 
   getDogParks = async () => {
+    console.log("city"+this.state.city)
 
-    const response = await fetch(GOOGLE_PLACEAPI)
+    const response = await fetch(GOOGLE_PLACEAPI+this.state.zipCode+'&key='+key)
     const data = await response.json()
     this.setState({
       DogParks: data.results,
@@ -122,6 +123,15 @@ class Home extends React.Component {
     
 
   }
+  
+  signOutUser = async () => {
+    try {
+        await firebase.auth().signOut();
+        this.props.navigation.navigate('Login')
+    } catch (e) {
+        console.log(e);
+    }
+}
 
   getDogParkPhoto = async () => {
 
@@ -163,36 +173,56 @@ class Home extends React.Component {
     const response1 = await fetch(GOOGLE_PLACEAPI)
     const data = await response.json()
     const data1 = await response1.json()
+   
+    let ind;
+    let ind1
+    for(var i=0;i<data.results.length;++i){
+      
+      
+      if(data.results[i].types[0]=="postal_code"){
+        
+          ind = data.results[i].address_components[0].long_name;  
+      }
+
+      if(data.results[i].types[0]=="locality"){
+
+          ind1 = data.results[i].address_components[0].long_name; 
+      }
+     
+    }
+    let res = JSON.stringify(data.results[0].address_components[6].types[0])
     
     
+   
+
     this.setState({
         myLocation: JSON.stringify(location),
-        zipCode: data.results[0].address_components[7].long_name,
+        zipCode: ind,
         locationLoading: true,
-        city: data.results[0].address_components[3].long_name
+        city: ind1
         
-    });
+    },() => {
+      this.getAdoptToken();
+      this.getDogParks();
+  });
   
    
 };
 
 
   likePost = (post) => {
-    const { uid } = this.props.user
-    if (post.likes.includes(uid)) {
+    const { dogId } = this.props.dog
+    if (post.likes.includes(dogId)) {
       this.props.unlikePost(post)
     } else {
       this.props.likePost(post)
     }
   }
-  goToUser = (post) => {
+  goToDog = (post) => {
 
    
-    console.log("in go to user"+post.uid)
-    this.props.getUser(post.uid)
-    
-    
-
+    console.log("in go to user "+post.dogId)
+    this.props.getDog(post.dogId)
     this.props.navigation.navigate('Profile')
 
   }
@@ -206,18 +236,19 @@ class Home extends React.Component {
 
 
   render() {
-    
     if(this.props.userprofile.dogs){
     //  getDog(this.props.userprofile.dogs[0],'DOGLOGIN')
     }
-
-    if (this.props.post === null || this.state.loading===false) return null
+    console.log("Location loading: "+this.state.locationLoading)
+    if (this.props.post === null || this.state.loading===false || this.state.locationLoading===false) return null 
     return (
-      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#ffff"}}>
-        <TouchableOpacity style={styles.buttonSmall} onPress={() => firebase.auth().signOut()}>
+      <View style={{flex: 1}}>
+      <ImageBackground source={{uri: dog.photo}} style={styles.backgroundImage}>
+      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#fff"}}>
+        <TouchableOpacity style={styles.buttonSmall} onPress={() => this.signOutUser()}>
     <Text style={styles.bold}>Logout</Text>
   </TouchableOpacity>
-        <View style={{ flex: 1, backgroundColor: "#ffff", paddingTop: 20 }}>
+        <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: 20 }}>
           <Text
             style={{
               fontSize: 24,
@@ -234,23 +265,22 @@ class Home extends React.Component {
               data={this.state.dataSource}
             >
               <Adopt
-
-                imageUri={this.state.dataSource.animals[1].photos[0].medium}
+                imageUri= {this.state.dataSource.animals[0].photos[0] ? this.state.dataSource.animals[0].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
                 name={this.state.dataSource.animals[0].name}
                 breed={this.state.dataSource.animals[0].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[2].photos[0].medium}
+                imageUri={this.state.dataSource.animals[1].photos[0] ? this.state.dataSource.animals[1].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
                 name={this.state.dataSource.animals[1].name}
                 breed={this.state.dataSource.animals[1].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[1].photos[0].medium}
+                imageUri={this.state.dataSource.animals[2].photos[0] ? this.state.dataSource.animals[2].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
                 name={this.state.dataSource.animals[2].name}
                 breed={this.state.dataSource.animals[2].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[2].photos[0].medium}
+                imageUri={this.state.dataSource.animals[3].photos[0] ? this.state.dataSource.animals[3].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
                 name={this.state.dataSource.animals[3].name}
                 breed={this.state.dataSource.animals[3].breeds.primary}
               />
@@ -280,28 +310,28 @@ class Home extends React.Component {
               >
 
           <DogParks
-            imageUri={this.state.DogParkPhotos[2].url}
+            imageUri={this.state.DogParkPhotos[0] ? this.state.DogParkPhotos[0].url: 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
             width={width}
-            name={this.state.DogParks[0].name}
-            type={this.state.DogParks[0].formatted_address}
+            name={this.state.DogParks[0] ? this.state.DogParks[0].name : "No dog Park Available"}
+            type={this.state.DogParks[0] ? this.state.DogParks[0].formatted_address :"No dog Park Available"}
           />
           <DogParks
-            imageUri={this.state.DogParkPhotos[1].url}
+            imageUri={this.state.DogParkPhotos[1] ? this.state.DogParkPhotos[1].url: 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
             width={width}
-            name={this.state.DogParks[1].name}
-            type={this.state.DogParks[1].formatted_address}
+            name={this.state.DogParks[1] ? this.state.DogParks[1].name :"No dog Park Available"}
+            type={this.state.DogParks[1] ? this.state.DogParks[1].formatted_address :"No dog Park Available"}
           />
           <DogParks
-            imageUri={this.state.DogParkPhotos[2].url}
+            imageUri={this.state.DogParkPhotos[2] ? this.state.DogParkPhotos[2].url: 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
             width={width}
-            name={this.state.DogParks[2].name}
-            type={this.state.DogParks[2].formatted_address}
+            name={this.state.DogParks[2] ? this.state.DogParks[2].name : "No dog Park Available"}
+            type={this.state.DogParks[2] ? this.state.DogParks[2].formatted_address: "No dog Park Available"}
           />
           <DogParks
-          imageUri={this.state.DogParkPhotos[3].url}
+          imageUri={this.state.DogParkPhotos[3] ? this.state.DogParkPhotos[3].url: 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
             width={width}
-            name={this.state.DogParks[3].name}
-            type={this.state.DogParks[3].formatted_address}
+            name={this.state.DogParks[3] ? this.state.DogParks[3].name : "No dog Park Available"}
+            type={this.state.DogParks[3] ? this.state.DogParks[3].formatted_address: "No dog Park Available"}
           />
           </View>
 
@@ -321,16 +351,16 @@ class Home extends React.Component {
             data={this.props.post.feed}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
-              const liked = item.likes.includes(this.props.user.uid)
+              const liked = item.likes.includes(this.props.dog.dogId)
               return (
                 <View>
                   <View style={[styles.row, styles.space]}>
                     <View style={[styles.row, styles.center]}>
-                      <TouchableOpacity onPress={() => this.goToUser(item)} >
-                        <Image style={styles.roundImage} source={{ uri: this.props.post.feed }} />
+                      <TouchableOpacity onPress={() => this.goToDog(item)} >
+                        <Image style={styles.roundImage} source={{ uri: item.photo}} />
                       </TouchableOpacity>
                       <View>
-                        <Text style={styles.bold}>{item.username}</Text>
+                        <Text style={styles.bold}>{item.dogTag}</Text>
                         <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
                         <TouchableOpacity onPress={() => this.navigateMap(item)} >
                           <Text>{item.postLocation ? item.postLocation.name : null}</Text>
@@ -343,9 +373,12 @@ class Home extends React.Component {
                     <Image style={styles.homeImage} source={{ uri: item.postPhoto }} />
                   </TouchableOpacity>
                   <View style={styles.row}>
+                  <TouchableOpacity onPress={() => this.likePost(item)} >
                     <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#db565b' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} />
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
                       <Ionicons style={{ marginLeft: 130, marginTop: 5 }} name='ios-chatbubbles' size={25} />
+                      <Text style={[styles.gray, styles.small]}>View Comments</Text>
                     </TouchableOpacity>
                     <Ionicons style={{ marginLeft: 130, marginTop: 5 }} name='ios-send' size={25} />
                   </View>
@@ -355,8 +388,11 @@ class Home extends React.Component {
             }}
           />
         </View>
-
       </ScrollView>
+      </ImageBackground>
+      </View>
+  
+  
 
 
     )
@@ -431,16 +467,16 @@ class Home extends React.Component {
 */
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ getPosts, likePost, unlikePost, getUser, getAdopt }, dispatch)
+  return bindActionCreators({ getPosts, likePost, unlikePost, getUser, getAdopt,getDog }, dispatch)
 }
 
 const mapStateToProps = (state) => {
   return {
     post: state.post,
     user: state.user,
-    userprofile: state.profile
+    userprofile: state.profile,
+    dog: state.dog
   }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home)
-

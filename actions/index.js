@@ -1,13 +1,15 @@
 import uuid from 'uuid';
 import firebase from 'firebase'
 import db from '../config/firebase'
-import { Permissions,Notifications } from 'expo';
+import {Notifications } from 'expo';
+import * as Permissions from 'expo-permissions'
 import * as ImageManipulator from 'expo-image-manipulator'
 const PUSH_ENDPOINT = 'https://exp.host/--/api/v2/push/send'
 
 export const uploadPhoto = (image) => {
   return async (dispatch) => {
     try {
+      console.log("in upload photo")
       const resize = await ImageManipulator.manipulateAsync(image.uri, [], { format: 'jpeg', compress: 0.1 })
       const blob = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()
@@ -20,20 +22,30 @@ export const uploadPhoto = (image) => {
       const downloadURL = await uploadTask.ref.getDownloadURL()
       return downloadURL
     } catch(e) {
+      console.log("in upload photo error")
       console.error(e)
     }
   }
 }
 
-export const allowNotifications = () => {
+export const allowNotifications = (uid) => {
+  console.log("in allow notifications ")
   return async ( dispatch, getState ) => {
-    const { uid } = getState().user
+    console.log("in allow notifications ")
+    //const { uid } = getState().user
     try {
-      const permission = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-      if (permission.status === 'granted') {
+      const permission1 = await Permissions.askAsync(Permissions.NOTIFICATIONS)
+      const permission = 'granted'
+      if (permission === 'granted') {
+        console.log("permission granted")
         const token = await Notifications.getExpoPushTokenAsync()
         dispatch({ type: 'GET_TOKEN', payload: token })
-        db.collection('users').doc(uid).update({ token: token })      
+        let res = JSON.stringify(token)
+        console.log("token "+token)
+        console.log("uid: "+uid)
+       
+        db.collection('users').doc(uid).update({ token: token })
+        console.log("uid"+ uid)      
       }
     } catch(e) {
       console.error(e)
@@ -41,11 +53,16 @@ export const allowNotifications = () => {
   }
 }
 
-export const sendNotification = (uid, text) => {
+export const sendNotification = (dogId, text) => {
   return async (dispatch, getState) => {
     const { username } = getState().user
+    const { dogTag,uid } = getState().dog
     try {
+     
+      const dog = await db.collection('dogs').doc(dogId).get()
+    
       const user = await db.collection('users').doc(uid).get()
+     
       if(user.data().token){
         fetch(PUSH_ENDPOINT, {
           method: 'POST',
@@ -55,7 +72,7 @@ export const sendNotification = (uid, text) => {
           },
           body: JSON.stringify({
             to: user.data().token,
-            title: username,
+            title: dogTag,
             body: text,
           })
         })

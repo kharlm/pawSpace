@@ -17,7 +17,7 @@ class Activity extends React.Component {
 
   getActivity = async () => {
   	let activity = []
-    const query = await db.collection('activity').where('uid', '==', this.props.user.uid).get()
+    const query = await db.collection('activity').where('dogId', '==', this.props.dog.dogId).get()
     query.forEach((response) => {
       activity.push(response.data())
     })
@@ -55,7 +55,9 @@ class Activity extends React.Component {
   }
 
   render() {
-  	if (this.state.activity.length <= 0 ) return <ActivityIndicator style={styles.container}/>
+
+    //CHECK THIS LATER
+  	//if (this.state.activity.length <= 0 ) return <ActivityIndicator style={styles.container}/>
     return (
     	<View style={styles.container}>
 				<FlatList
@@ -71,7 +73,8 @@ class Activity extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    user: state.user
+    user: state.user,
+    dog: state.dog
   }
 }
 

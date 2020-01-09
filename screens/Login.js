@@ -29,9 +29,6 @@ class Login extends React.Component {
           this.getUserData(user.uid) 
             user = this.props.getUser(user.uid, 'LOGIN')  
 
-            this.setState({
-              login: true
-            })
         }
       }
       
@@ -41,7 +38,6 @@ class Login extends React.Component {
    getUserData = async (id) => {
     let dog1;
      try{
-      console.log("in get dog data")
        const userQuery = await db.collection ('users').doc(id).get()
         user1 = userQuery.data()
         let res = JSON.stringify(user1.dogs[0]);
@@ -70,14 +66,15 @@ class Login extends React.Component {
         if(user.dogs.length>1){
           
           this.setState({
-            moreThanOneDog: true
+            moreThanOneDog: true,
+            login: true
           })
         }
 
         else{
-          console.log("setting state to less than one dog")
           this.setState({
-            moreThanOneDog: false
+            moreThanOneDog: false,
+            login: true
           })
         }
       
@@ -99,15 +96,19 @@ class Login extends React.Component {
   */
 
     if(this.state.moreThanOneDog===true){
+
+      return(
       this.props.navigation.navigate('DogPicker')
+      )
     }
 
     if(this.state.moreThanOneDog===false && this.state.login===true){
-      
+      return(
       this.props.navigation.navigate('Home')
+      )
     }
 
-  
+   else{
     return (
       <View style={[styles.container, styles.center]}>
         <Image style={{width: 300, height: 100}} source={require('../assets/logo.jpg')} />
@@ -137,6 +138,7 @@ class Login extends React.Component {
       </View>
     );
   }
+}
 }
 
 const mapDispatchToProps = (dispatch) => {

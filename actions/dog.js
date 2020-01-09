@@ -26,14 +26,17 @@ export const updateWeight = (weight) => {
     
 }
 
-export const updateDogtag = (dogtag) => {
-    return {type: 'UPDATE_DOGTAG', payload: dogtag}
+export const updateDogtag = (dogTag) => {
+    return {type: 'UPDATE_DOGTAG', payload: dogTag}
     
 }
 
 export const updateBio = (bio) => {
     return {type: 'UPDATE_BIO', payload: bio}
     
+}
+export const updatePhoto = (photo) => {
+	return {type: 'UPDATE_PHOTO', payload: photo}
 }
 
 
@@ -43,7 +46,6 @@ export const dogsignup = () => {
 		const { uid} = getState().user
 			
 		try {
-			console.log("Inside try of dog sign up")
 			const id = uuid.v4()	
 			db.collection('users').doc(uid).update({
 				dogs: firebase.firestore.FieldValue.arrayUnion(id)
@@ -57,7 +59,7 @@ export const dogsignup = () => {
 			const response = await firebase.auth().createUserWithEmailAndPassword(email, password)
 			*/
 		
-			const {dogname,breed,age,gender,weight,dogtag,bio,photo } = getState().dog
+			const {dogname,breed,age,gender,weight,dogTag,bio,photo} = getState().dog
 		
 			if(id){
 				const dog = {
@@ -66,12 +68,13 @@ export const dogsignup = () => {
 					age: age,
 					gender: gender,
 					weight: weight,
-					dogtag: dogtag,
+					dogTag: dogTag,
 					bio: bio,
 					dogId: id,
 					followers: [],
 					following: [],
-					photo: ''
+					photo: photo,
+					uid: uid
 				
 			}
 				
@@ -83,7 +86,6 @@ export const dogsignup = () => {
 
 			
 		} catch (e) {
-			console.log("in dog object");
 			alert(e)
 		}
 		
@@ -94,15 +96,13 @@ export const dogsignup = () => {
 		
 		return async (dispatch, getState) => {
 			try {
-				console.log("function working")
 				const { dogId} = getState().dog
-				console.log("dog id"+dogId)
 				const dogQuery = await db.collection('dogs').doc(dogId).get()
 				let dog = dogQuery.data()
 	
 				dispatch(getDog(dog.dogId))
 			} catch (e) {
-				console.log("in Dog login");
+
 				alert(e)
 			}
 		}
@@ -132,7 +132,6 @@ export const dogsignup = () => {
 		 // user.posts = orderBy(posts, 'date','desc')
 	
 				if(type === 'DOGLOGIN'){
-					console.log("in dog login")
 					
 					dispatch({type: 'DOGLOGIN', payload: dog })
 				} else {
@@ -142,14 +141,13 @@ export const dogsignup = () => {
 				}
 				
 			} catch (e) {
-				console.log("in get DOG");
 				alert(e)
 			}
 		}
 	}
 	export const updateDog = () => {
 		return async ( dispatch, getState )  => {
-		  const {dogname,breed,age,gender,weight,dogtag,bio,dogId } = getState().dog
+		  const {dogname,breed,age,gender,weight,dogTag,bio,dogId,photo } = getState().dog
 		  try {
 				const {dog} = getState()
 			db.collection('dogs').doc(dog.dogId).update({
@@ -158,7 +156,7 @@ export const dogsignup = () => {
 				age: age,
 				gender: gender,
 				weight: weight,
-				dogtag: dogtag,
+				dogTag: dogTag,
 				bio: bio,
 				dogId: dogId,
 				followers: [],
@@ -167,7 +165,7 @@ export const dogsignup = () => {
 				
 			})
 		  } catch(e) {
-				console.log("in update object");
+				
 			alert(e)
 		  }
 		}

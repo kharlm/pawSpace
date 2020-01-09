@@ -37,7 +37,7 @@ class Post extends React.Component {
   openLibrary = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
     if (status === 'granted') {
-      const image = await ImagePicker.launchImageLibraryAsync()
+      const image = await ImagePicker.launchImageLibraryAsync({allowsEditing: true})
       if(!image.cancelled){
         const url = await this.props.uploadPhoto(image)
         this.props.updatePhoto(url)

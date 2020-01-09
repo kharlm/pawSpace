@@ -38,7 +38,7 @@ class Explore extends React.Component {
           data={this.props.post.feed}
           keyExtractor={(item) => item.id}
           renderItem={({item}) => {
-            const liked = item.likes.includes(this.props.user.uid)
+            const liked = item.likes.includes(this.props.dog.dogId)
             return (
               <View>
                 <View style={[styles.row, styles.space]}>
@@ -82,7 +82,8 @@ const mapStateToProps = (state) => {
   return {
     navigation: state.navigation,
     post: state.post, 
-    user: state.user 
+    user: state.user,
+    dog: state.dog
   }
 }
 

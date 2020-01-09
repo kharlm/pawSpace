@@ -48,7 +48,7 @@ const dog = (state = {}, action) => {
     case 'UPDATE_WEIGHT':
       return { ...state, weight: action.payload } 
     case 'UPDATE_DOGTAG':
-      return { ...state, dogtag: action.payload } 
+      return { ...state, dogTag: action.payload } 
     case 'UPDATE_BIO':
       return { ...state, bio: action.payload } 
     case 'UPDATE_PHOTO':

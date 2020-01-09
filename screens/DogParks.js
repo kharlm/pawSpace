@@ -14,7 +14,7 @@ class DogParks extends Component {
       >
         <View style={{ flex: 1 }}>
           <Image
-            style={{ flex: 1, width: null, height: null, resizeMode: "cover" }}
+            style={{ flex: 1, width: null, height: null, resizeMode: "cover" , backgroundColor: '#adadad'}}
             source={{uri:this.props.imageUri}}
           />
         </View>

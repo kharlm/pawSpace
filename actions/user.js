@@ -29,15 +29,15 @@ export const login = () => {
 		try {
 			const { email, password } = getState().user
 			const response = await firebase.auth().signInWithEmailAndPassword(email, password)
+			console.log("user id: "+response.user.uid)
 			dispatch(getUser(response.user.uid))
-			const userQuery = await db.collection('users').doc(response.user.uid).get()
-			let user = userQuery.data()
+			//const userQuery = await db.collection('users').doc(response.user.uid).get()
+			//let user = userQuery.data()
 			//dispatch(getDog(user.dogs[0]))
 			
-
-			dispatch(allowNotifications())
+			console.log("in log before dispatch allow notifications")
+			dispatch(allowNotifications(response.user.uid))
 		} catch (e) {
-			console.log("in login");
 			alert(e)
 		}
 	}
@@ -79,7 +79,6 @@ export const getUser = (uid, type) => {
 	return async (dispatch, getState) => {
 		
 		try {
-			console.log("GET USER 1")
 			const userQuery = await db.collection('users').doc(uid).get()
 			let user = userQuery.data()
 			//let res = JSON.stringify(user);
@@ -95,11 +94,11 @@ export const getUser = (uid, type) => {
 
 			if(type === 'LOGIN'){
 				dispatch({type: 'LOGIN', payload: user })
-				dispatch(getDog(user.dogs[0],'DOGLOGIN'))
+				//dispatch(getDog(user.dogs[0],'DOGLOGIN'))
 			} 
 			else {
 				dispatch({type: 'GET_PROFILE', payload: user })
-				dispatch(getDog(user.dogs[0],'GET_DOGPROFILE'))
+				//dispatch(getDog(user.dogs[0],'GET_DOGPROFILE'))
 			}
 		} catch (e) {
 			alert(e)
@@ -135,7 +134,8 @@ export const signup = () => {
 				const user = {
 					uid: response.user.uid,
 					email: email,
-					dogs:[]
+					dogs:[],
+					token: null
 				}
 				db.collection('users').doc(response.user.uid).set(user)
 				dispatch({type: 'LOGIN', payload: user})
@@ -148,45 +148,45 @@ export const signup = () => {
 	}
 }
 
-export const followUser = (user) => {
+export const followUser = (dog) => {
   return async ( dispatch, getState ) => {
-    const { uid, photo, username } = getState().user
+    const { dogId, photo, dogTag} = getState().dog
     try {
-			db.collection('users').doc(user.uid).update({
-				followers: firebase.firestore.FieldValue.arrayUnion(uid)
+			db.collection('dogs').doc(dog.dogId).update({
+				followers: firebase.firestore.FieldValue.arrayUnion(dogId)
 			})
-			db.collection('users').doc(uid).update({
-				following: firebase.firestore.FieldValue.arrayUnion(user.uid)
+			db.collection('dogs').doc(dogId).update({
+				following: firebase.firestore.FieldValue.arrayUnion(dog.dogId)
 			})
       db.collection('activity').doc().set({
-        followerId: uid,
+        followerId: dogId,
         followerPhoto: photo,
-        followerName: username,
-        uid: user.uid,
-        photo: user.photo,
-        username: user.username,
+        followerName: dogTag,
+        dogId: dog.dogId,
+        photo: dog.photo,
+        dogTag: dog.dogTag,
         date: new Date().getTime(),
         type: 'FOLLOWER',
       })
-      dispatch(sendNotification(user.uid, 'Started Following You'))
-			dispatch(getUser(user.uid))
+      dispatch(sendNotification(dog.dogId, 'Started Following You'))
+	 dispatch(getDog(dog.dogId))
     } catch(e) {
       console.error(e)
     }
   }
 }
 
-export const unfollowUser = (user) => {
+export const unfollowUser = (dog) => {
   return async ( dispatch, getState ) => {
-    const { uid, photo, username } = getState().user
+    const { dogId, photo, dogTag } = getState().dog
     try {
-			db.collection('users').doc(user.uid).update({
-				followers: firebase.firestore.FieldValue.arrayRemove(uid)
+			db.collection('dogs').doc(dog.dogId).update({
+				followers: firebase.firestore.FieldValue.arrayRemove(dogId)
 			})
-			db.collection('users').doc(uid).update({
-				following: firebase.firestore.FieldValue.arrayRemove(user.uid)
+			db.collection('dogs').doc(dogId).update({
+				following: firebase.firestore.FieldValue.arrayRemove(dog.dogId)
 			})
-			dispatch(getUser(user.uid))
+			dispatch(getDog(dog.dogId))
     } catch(e) {
       console.error(e)
     }

@@ -21,16 +21,16 @@ export const updateLocation = (input) => {
 export const uploadPost = () => {
 	return async (dispatch, getState) => {
 		try {
-			const { post, user } = getState()
+			const { post, dog } = getState()
 			const id = uuid.v4()
 			const upload = {
 				id: id,
 				postPhoto: post.photo,
 				postDescription: post.description || ' ',
 				postLocation: post.location || ' ',
-				uid: user.uid,
-				photo: user.photo || ' ',
-				username: user.username,
+				dogId: dog.dogId,
+				photo: dog.photo || ' ',
+				dogTag: dog.dogTag,
 				likes: [],
         comments: []
 			}
@@ -82,7 +82,7 @@ export const getlocationPosts = () => {
 
 export const likePost = (post) => {
   return (dispatch, getState) => {
-    const { uid, username, photo } = getState().user
+    const { dogId, dogTag, photo } = getState().dog
     try {
       // const home = cloneDeep(getState().post.feed)
       // let newFeed = home.map(item => {
@@ -91,20 +91,20 @@ export const likePost = (post) => {
       //   } return item
       // })
       db.collection('posts').doc(post.id).update({
-        likes: firebase.firestore.FieldValue.arrayUnion(uid)
+        likes: firebase.firestore.FieldValue.arrayUnion(dogId)
       })
       db.collection('activity').doc().set({
         postId: post.id,
         postPhoto: post.postPhoto,
-        likerId: uid,
+        likerId: dogId,
         likerPhoto: photo,
-        likerName: username,
-        uid: post.uid,
+        likerName: dogTag,
+        dogId: post.dogId,
         date: new Date().getTime(),
         type: 'LIKE',
       })
-      dispatch(sendNotification(post.uid, 'Liked Your Photo'))
-      // dispatch({type: 'GET_POSTS', payload: newFeed})
+      dispatch(sendNotification(post.dogId, 'Liked Your Photo'))
+     // dispatch({type: 'GET_POSTS', payload: newFeed})
       dispatch(getPosts())
     } catch(e) {
       console.error(e)
@@ -114,12 +114,12 @@ export const likePost = (post) => {
 
 export const unlikePost = (post) => {
   return async (dispatch, getState) => {
-    const { uid } = getState().user
+    const { dogId } = getState().dog
     try {
       db.collection('posts').doc(post.id).update({
-        likes: firebase.firestore.FieldValue.arrayRemove(uid)
+        likes: firebase.firestore.FieldValue.arrayRemove(dogId)
       })
-      const query = await db.collection('activity').where('postId', '==', post.id).where('likerId', '==', uid).get()
+      const query = await db.collection('activity').where('postId', '==', post.id).where('likerId', '==', dogId).get()
       query.forEach((response) => {
         response.ref.delete()
       })
@@ -138,14 +138,14 @@ export const getComments = (post) => {
 
 export const addComment = (text, post) => {
   return (dispatch, getState) => {
-    const { uid, photo, username } = getState().user
+    const { dogId, photo, dogTag } = getState().dog
     let comments = cloneDeep(getState().post.comments.reverse())
     try {
       const comment = {
         comment: text,
-        commenterId: uid,
+        commenterId: dogId,
         commenterPhoto: photo || '',
-        commenterName: username,
+        commenterName: dogTag,
         date: new Date().getTime(),
       }
       db.collection('posts').doc(post.id).update({
@@ -153,12 +153,12 @@ export const addComment = (text, post) => {
       })
       comment.postId = post.id
       comment.postPhoto = post.postPhoto
-      comment.uid = post.uid
+      comment.dogId = post.dogId
       comment.type = 'COMMENT'
       comments.push(comment)
       dispatch({ type: 'GET_COMMENTS', payload: comments.reverse() })
 
-      dispatch(sendNotification(post.uid, text))
+      //dispatch(sendNotification(post.dogId, text))
       db.collection('activity').doc().set(comment)
     } catch(e) {
       console.error(e)

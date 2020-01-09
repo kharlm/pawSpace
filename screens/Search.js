@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { View, Text, SafeAreaView, TextInput, FlatList, Image, TouchableOpacity } from 'react-native';
 import db from '../config/firebase';
-import { getUser } from '../actions/user'
+import { getDog } from '../actions/dog'
 
 class Search extends React.Component {
 	state = {
@@ -14,15 +14,15 @@ class Search extends React.Component {
 
 	searchUser = async () => {
   	let search = []
-    const query = await db.collection('users').where('username', '>=', this.state.search).get()
+    const query = await db.collection('dogs').where('dogTag', '>=', this.state.search).get()
     query.forEach((response) => {
       search.push(response.data())
     })
 		this.setState({query: search})
 	}
 
-	goToUser = (user) => {
-		this.props.getUser(user.uid)
+	goToDog = (dog) => {
+		this.props.getDog(dog.dogId)
 		this.props.navigation.navigate('Profile')
 	}
 
@@ -38,12 +38,12 @@ class Search extends React.Component {
           onSubmitEditing={this.searchUser}/>
 				<FlatList
 				  data={this.state.query}
-				  keyExtractor={(item) => JSON.stringify(item.uid)}
+				  keyExtractor={(item) => JSON.stringify(item.dogId)}
 				  renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => this.goToUser(item)} style={[styles.row, styles.space]}>
+          <TouchableOpacity onPress={() => this.goToDog(item)} style={[styles.row, styles.space]}>
             <Image style={styles.roundImage} source={{uri: item.photo}}/>
             <View style={[styles.container, styles.left]}>
-              <Text style={styles.bold}>{item.username}</Text>
+              <Text style={styles.bold}>{item.dogTag}</Text>
             </View>
           </TouchableOpacity>
 				)} />
@@ -53,12 +53,13 @@ class Search extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ getUser }, dispatch)
+  return bindActionCreators({ getDog }, dispatch)
 }
 
 const mapStateToProps = (state) => {
   return {
-    user: state.user
+    user: state.user,
+    dog: state.dog
   }
 }
 

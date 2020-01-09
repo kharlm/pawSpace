@@ -35,7 +35,6 @@ class DogPicker extends React.Component {
     getUserData = async (id) => {
         let dog1;
          try{
-          console.log("in get dog data")
            const userQuery = await db.collection ('users').doc(id).get()
             user1 = userQuery.data()
            
@@ -90,7 +89,7 @@ class DogPicker extends React.Component {
             return (
                 <View>
                 <TouchableOpacity onPress={() => this.getUserDog(this.state.dogs[i].dogId)}>
-               <DogPickerComponent name={this.state.dogs[i].dogname}/>
+               <DogPickerComponent name={this.state.dogs[i].dogname}  imageUri={this.state.dogs[i].photo} />
                </TouchableOpacity>
                </View>
             )
@@ -106,9 +105,6 @@ class DogPicker extends React.Component {
                     justifyContent: "space-between",
 
                 }}>
-                      <TouchableOpacity style={styles.buttonSmall} onPress={() => firebase.auth().signOut()}>
-    <Text style={styles.bold}>Logout</Text>
-  </TouchableOpacity>
                     {dogPicker}
 
                 </View>

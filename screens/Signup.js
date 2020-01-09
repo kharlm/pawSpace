@@ -61,12 +61,6 @@ class Signup extends React.Component {
           placeholder='Password'
           secureTextEntry={true}
         />
-        <TextInput
-        	style={styles.border}
-        	value={this.props.user.username}
-        	onChangeText={input => this.props.updateUsername(input)}
-        	placeholder='Username'
-        />
       	<TouchableOpacity style={styles.button} onPress={()=>this.onPress()}>
       		<Text>Add a Dog</Text>
       	</TouchableOpacity>
