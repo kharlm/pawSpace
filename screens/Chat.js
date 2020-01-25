@@ -23,7 +23,7 @@ class Chat extends React.Component {
 
   render() {
     const { params } = this.props.navigation.state
-    const { uid } = this.props.user
+    const { dogId } = this.props.dog
     if (!this.props.messages) return <ActivityIndicator style={styles.container}/>
     return (
       <KeyboardAvoidingView enabled behavior='padding' style={styles.container}>
@@ -33,13 +33,13 @@ class Chat extends React.Component {
           data={this.props.messages.filter(message => message.members.indexOf(params) >= 0 && message.members.indexOf(this.props.dog.dogId) >= 0)}
           renderItem={({ item }) => (
           <TouchableOpacity onPress={() => this.goToChat(item)} style={[styles.row, styles.space]}>
-            { item.uid !== uid ? <Image style={styles.roundImage} source={{uri: item.photo}}/> : null}
-            <View style={[styles.container, item.uid === uid ? styles.right : styles.left]}>
+            { item.dogId !== dogId ? <Image style={styles.roundImage} source={{uri: item.photo}}/> : null}
+            <View style={[styles.container, item.dogId === dogId ? styles.right : styles.left]}>
               <Text style={styles.bold}>{item.username}</Text>
               <Text style={styles.gray}>{item.message}</Text>
               <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
             </View>
-            { item.uid === uid ? <Image style={styles.roundImage} source={{uri: item.photo}}/> : null}
+            { item.dogId === dogId ? <Image style={styles.roundImage} source={{uri: item.photo}}/> : null}
           </TouchableOpacity>
         )}/> 
         <TextInput

@@ -27,7 +27,8 @@ class Login extends React.Component {
         if(this.props.user && global.foo!="dogsignup"){
           this.dogLengthMoreThanOne(user.uid)
           this.getUserData(user.uid) 
-            user = this.props.getUser(user.uid, 'LOGIN')  
+            user = this.props.getUser(user.uid, 'LOGIN') 
+            
 
         }
       }
@@ -41,6 +42,7 @@ class Login extends React.Component {
        const userQuery = await db.collection ('users').doc(id).get()
         user1 = userQuery.data()
         let res = JSON.stringify(user1.dogs[0]);
+
         
         this.props.getDog(user1.dogs[0], 'GET_DOGPROFILE')
        
@@ -104,6 +106,7 @@ class Login extends React.Component {
 
     if(this.state.moreThanOneDog===false && this.state.login===true){
       return(
+      this.props.getDog(user.dogs[0],'DOGLOGIN'),
       this.props.navigation.navigate('Home')
       )
     }
@@ -128,9 +131,6 @@ class Login extends React.Component {
       	<TouchableOpacity style={styles.button} onPress={() => this.props.login()}>
       		<Text>Login</Text>
       	</TouchableOpacity>
-        <TouchableOpacity style={styles.facebookButton} onPress={() => this.props.facebookLogin()}>
-          <Text style={styles.white}>Facebook Login</Text>
-        </TouchableOpacity>
       	<Text style={{margin: 20}}>OR</Text>
       	<TouchableOpacity style={styles.button} onPress={() => this.props.navigation.navigate('Signup')}>
       		<Text>Signup</Text>

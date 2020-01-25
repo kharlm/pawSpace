@@ -8,6 +8,7 @@ import { Text, View, TextInput, TouchableOpacity, Image, Alert, ScrollView} from
 import RNPickerSelect from 'react-native-picker-select';
 import { updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog, dogsignup } from '../actions/dog'
 import {updateEmail, updatePassword, updateUsername,signup, updateUser, getUser} from '../actions/user'
+import { getPosts} from '../actions/post'
 import { uploadPhoto } from '../actions'
 import {updatePhoto} from '../actions/dog'
 import db from '../config/firebase'
@@ -17,6 +18,24 @@ class DogSignup extends React.Component {
   
   constructor(props) {
     super(props);
+    const { routeName } = this.props.navigation.state
+
+    if(routeName==='Edit'){
+      console.log("inside edit routename")
+     
+      this.state = { dogNumber: 1 ,
+        dogName: this.props.dog.dogname,
+        dogAge:this.props.dog.age,
+        dogBio:this.props.dog.bio,
+        dogBreed:this.props.dog.breed,
+        dogGender:this.props.dog.gender,
+        dogWeight:this.props.dog.weight,
+        dogTag:this.props.dog.dogTag,
+       
+  }
+    }
+    else{
+    console.log("routname: "+routeName)
     this.state = { dogNumber: 1 ,
           dogName:'',
           dogAge:'',
@@ -32,6 +51,7 @@ class DogSignup extends React.Component {
 		      query: ''
     }
   }
+}
 
   searchDogTag = async () => {
   	let search = []
@@ -58,7 +78,7 @@ class DogSignup extends React.Component {
     })
 
     if(search[0]){
-    this.setState({query: search[0].dogTag},this.addDog)
+    this.setState({query: search[0].dogTag},this.onPress)
     }
     else{
       this.setState({query:""},this.onPress)
@@ -69,6 +89,8 @@ class DogSignup extends React.Component {
   
 
   onPress = () => {  
+
+    const { routeName } = this.props.navigation.state
 
     console.log("dog Tag: "+this.state.dogTag)
       if(this.state.dogName ==''){
@@ -112,7 +134,8 @@ class DogSignup extends React.Component {
 
       }
 
-      else if(this.state.dogTag == this.state.query){
+      else if(this.state.dogTag == this.state.query && routeName==='DogSignUp'){
+        console.log("roouto: "+routeName)
         Alert.alert(
           'This dogTag is already in use please enter a different one ',
       );
@@ -127,7 +150,7 @@ class DogSignup extends React.Component {
 
       }
 
-      else{
+      else if(routeName==='DogSignUp'){
 
         this.setState({
           dogNumber: this.state.dogNumber+1,
@@ -149,6 +172,17 @@ class DogSignup extends React.Component {
         }
   
       }
+     else {
+       this.props.updateDogname(this.state.dogName)
+      this.props.updateAge(this.state.dogAge)
+      this.props.updateBio(this.state.dogBio)
+      this.props.updateGender(this.state.dogGender)
+      this.props.updateWeight(this.state.dogWeight)
+      this.props.updateBreed(this.state.dogBreed)
+      this.props.updateDog()
+      this.props.getPosts()
+      this.props.navigation.goBack()
+    }
         
   }
 
@@ -163,7 +197,7 @@ class DogSignup extends React.Component {
       );
 
     }
-   /* else if(this.state.dogAge ==''){
+    else if(this.state.dogAge ==''){
       Alert.alert(
         'Please Enter a dog Age',
       );
@@ -191,7 +225,6 @@ class DogSignup extends React.Component {
     );
 
     }
-    */
     else if(this.state.dogTag ==''){
       Alert.alert(
         'Please Enter a dogTag ',
@@ -199,6 +232,7 @@ class DogSignup extends React.Component {
     }
 
     else if(this.state.dogTag === this.state.query){
+      console.log("in wrong dogtag")
       Alert.alert(
         'This dogTag is already in use please enter a different one ',
     );
@@ -325,6 +359,7 @@ class DogSignup extends React.Component {
           keyboardType='numeric'
           
         />
+
         <View style={[styles.center, styles.pickerBorder]}>
          <RNPickerSelect
              placeholder={{
@@ -350,6 +385,9 @@ class DogSignup extends React.Component {
             ]}
         />
         </View>
+   
+
+       
         
          <TextInput
           style={styles.border}
@@ -367,7 +405,8 @@ class DogSignup extends React.Component {
         <TextInput
           style={styles.border}
         	value={this.state.dogTag.toLowerCase()}
-        	onChangeText={dogTag => this.setState({dogTag})}
+          onChangeText={dogTag => this.setState({dogTag})}
+          editable={routeName === 'DogSignUp' ? true : false}
           placeholder='Dog Tag'
           autoCapitalize='none'
         />
@@ -375,10 +414,19 @@ class DogSignup extends React.Component {
       		<Text>Done</Text>
       	</TouchableOpacity>
 
+        {
+          routeName === 'DogSignUp' ?
+
+          
+          <View>
+
         <Text style={{marginTop:12}}>OR</Text>
         <TouchableOpacity style={styles.button} onPress={() => { this.searchDogTag();}}>
       		<Text>Add Another Dog</Text>
-      	</TouchableOpacity>
+      	</TouchableOpacity> 
+        </View>:
+         <View></View>
+        }
 
       </View>
       </ScrollView>
@@ -387,12 +435,100 @@ class DogSignup extends React.Component {
 }
 }
 let breeds = [
+  
   { label: 'Affenpinscher',value: 'Affenpinscher'},
   { label: 'Affenpoo',value: 'Affenpoo'},
   { label: 'Afghan Hound',value: 'Afghan Hound'},
+  { label: 'Airedale Terrier',value: 'Airedale Terrier'},
+  { label: 'Airedoodle',value: 'Airedoodle'},
+  { label: 'Akbash Dog',value: 'Akbash Dog'},
+  { label: 'Aki-Poo',value: 'Aki-Poo'},
+  { label: 'Akita',value: 'Akita'},
+  { label: 'Akita Mix',value: 'Akita Mix'},
+  { label: 'Alapaha Blue Blood Bulldog',value: 'Alapaha Blue Blood Bulldog'},
+  {label: 'Alaskan Klee Kai', value:'Alaskan Klee Kai'},
+  {label: 'Alaskan Klee Kai', value:'Alaskan Klee Kai'},
+  {label: 'Alaskan Malamute', value:'Alaskan Malamute'},
+  {label: 'Alaskan Malamute Mix', value:'Alaskan Malamute Mix'},
+  {label: 'American Bulldog', value:'American Bulldog'},
+  {label: 'American Bulldog Hybrid', value:'American Bulldog Hybrid'},
+  {label: 'American Bully', value:'American Bully'},
+  {label: 'American Bully Hybrid', value:'American Bully Hybrid'},
+  {label: 'American Eskimo', value:'American Eskimo'},
+  {label: 'American Foxhound', value:'American Foxhound'},
+  {label: 'American Leopard Hound', value:'American Leopard Hound'},
+  {label: 'American Pit Bull Terrier', value:'American Pit Bull Terrier'},
+  {label: 'American Staffordshire Terrier', value:'American Staffordshire Terrier'},
+  {label: 'American Water Spaniel', value:'American Water Spaniel'},
+  {label: 'Anatolian Shepherd', value:'Anatolian Shepherd'},
+  {label: 'Anatolian Shepherd Hybrid', value:'Anatolian Shepherd Hybrid'},
+  {label: 'Aussiedoodle', value:'Aussiedoodle'},
+  {label: 'Australian Cattle Dog', value:'Australian Cattle Dog'},
+  {label: 'Australian Cattle Dog Hybrid', value:'Australian Cattle Dog Hybrid'},
+  {label: 'Australian Shepherd', value:'Australian Shepherd'},
+  {label: 'Australian Shepherd Mix', value:'Australian Shepherd Mix'},
+  {label: 'Australian Terrier', value:'Australian Terrier'},
+  {label: 'Basenji', value:'Basenji'},
+  {label: 'Basset Hound', value:'Basset Hound'},
+  {label: 'Basset Mix', value:'Basset Mix'},
+  {label: 'Beabull', value:'Beabull'},
+  {label: 'Beagle', value:'Beagle'},
+  {label: 'Beagle Mix', value:'Beagle Mix'},
+  {label: 'Beaglier', value:'Beaglier'},
+  {label: 'Bearded Collie', value:'Bearded Collie'},
+  {label: 'Beauceron', value:'Beauceron'},
+  {label: 'Bedlington Terrier', value:'Bedlington Terrier'},
+  {label: 'Belgian Malinois', value:'Belgian Malinois'},
+  {label: 'Belgian Malinois Hybrid', value:'Belgian Malinois Hybrid'},
+  {label: 'Belgian Sheepdog', value:'Belgian Sheepdog'},
+  {label: 'Bengal Kitten', value:'Bengal Kitten'},
+  {label: 'Bernedoodle', value:'Bernedoodle'},
+  {label: 'Bernese Mountain Dog', value:'Bernese Mountain Dog'},
+  {label: 'Bernese Mountain Dog Mini', value:'Bernese Mountain Dog Mini'},
+  {label: 'Bernese Mountain Dog Mix', value:'Bernese Mountain Dog Mix'},
+  {label: 'Bichon Frise', value:'Bichon Frise'},
+  {label: 'Bichon Mix', value:'Bichon Mix'},
+  {label: 'Bichpoo', value:'Bichpoo'},
+  {label: 'Biewer Terrier', value:'Biewer Terrier'},
+  {label: 'Black and Tan Coonhound', value:'Black and Tan Coonhound'},
+  {label: 'Black and Tan Coonhound Hybrid', value:'Black and Tan Coonhound Hybrid'},
+  {label: 'Black Russian Terrier', value:'Black Russian Terrier'},
+  {label: 'Bloodhound', value:'Bloodhound'},
+  {label: 'Bloodhound Poodle Hybrid', value:'Bloodhound Poodle Hybrid'},
+  {label: 'Blue Heeler', value:'Blue Heeler'},
+  {label: 'Blue Heeler Mix', value:'Blue Heeler Mix'},
+  {label: 'Border Collie', value:'Border Collie'},
+  {label: 'Border Collie Mix', value:'Border Collie Mix'},
+  {label: 'Border Terrier', value:'Border Terrier'},
+  {label: 'Borzoi', value:'Borzoi'},
+  {label: 'Boston Terrier', value:'Boston Terrier'},
+  {label: 'Boston Terrier Mix', value:'Boston Terrier Mix'},
+  {label: 'Bouvier des Flandres', value:'Bouvier des Flandres'},
+  {label: 'Boxer', value:'Boxer'},
+  {label: 'Boxer Mix', value:'Boxer Mix'},
+  {label: 'Boxer/Bulldog', value:'Boxer/Bulldog'},
+  {label: 'Briard', value:'Briard'},
+  {label: 'Briquet Griffon Vendéen', value:'Briquet Griffon Vendéen'},
+  {label: 'Brittany Mix', value:'Brittany Mix'},
+  {label: 'Brittany Spaniel', value:'Brittany Spaniel'},
+  {label: 'Brittnepoo', value:'Brittnepoo'},
+  {label: 'Broodle Griffon', value:'Broodle Griffon'},
+  {label: 'Brussels Griffon', value:'Brussels Griffon'},
+  {label: 'Brussels Griffon Mix', value:'Brussels Griffon Mix'},
+  {label: 'Bugg', value:'Bugg'},
+  {label: 'Bull Mastiff Hybrid', value:'Bull Mastiff Hybrid'},
+  {label: 'Bull Terrier', value:'Bull Terrier'},
+  {label: 'Bullmastiff', value:'Bullmastiff'},
+  {label: 'Bully Bassets', value:'Bully Bassets'},
+ 
+  
+  
+
+  {label: 'Labrador Retriever', value:'Labrador Retriever'},
+  {label:'Golden Retriever', value:'Golden Retriever'}
 ]
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog,dogsignup,signup,updateUser,getUser,uploadPhoto,updatePhoto}, dispatch)
+  return bindActionCreators({ updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog,dogsignup,signup,updateUser,getUser,uploadPhoto,updatePhoto,getPosts}, dispatch)
 }
 
 const mapStateToProps = (state) => {

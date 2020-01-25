@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import firebase from 'firebase';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View, Button, Image, FlatList, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Alert, Dimensions,ImageBackground } from 'react-native';
+import { Text, View, Button, Image, FlatList, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Alert, Dimensions,ImageBackground,RefreshControl, } from 'react-native';
 import { getPosts, likePost, unlikePost, getAdopt } from '../actions/post'
 import { getUser } from '../actions/user'
 import * as Permissions from 'expo-permissions'
@@ -17,8 +17,16 @@ const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
 import moment from 'moment'
 import DogParks from './DogParks';
 import { getDog } from '../actions/dog';
-
+import { Google } from 'expo';
+//import { WebView } from "react-native";
+import { WebView } from 'react-native-webview';
+//import  WebView  from "react-native-webview";
+//import {ModalizeWebView} from 'react-native-modalize-webview'
 const { width } = Dimensions.get('window');
+import Constants from 'expo-constants';
+import {NavigationEvents} from 'react-navigation';
+
+
 
 
 
@@ -30,14 +38,32 @@ class Home extends React.Component {
     this.state = {
       loading: false,
       dataSource: [],
+      cleanDataSource: [],
       myLocation: null,
       zipCode: "",
       locationLoading: false,
       city:"",
       DogParks:{},
       loadingPark: false,
-      DogParkPhotos:[]
+      DogParkPhotos:[],
+      showWebView: false,
+      currentUri: '',
+      refreshing: false,
+    }
+  }
 
+  _onRefresh = () => {
+    this.setState({refreshing: true});
+    this.props.getPosts().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.isFocused !== this.props.isFocused) {
+      // Use the `this.props.isFocused` boolean
+      // Call any action
+      console.log("Focused")
     }
   }
 
@@ -45,8 +71,16 @@ class Home extends React.Component {
 
     this.getMyLocation()
     this.props.getPosts()
+    console.log("inside component did mount")
    // this.getDogParks()
-    
+
+   
+
+  
+
+
+
+  
     
 
   }
@@ -71,9 +105,26 @@ class Home extends React.Component {
   }
 
 
+  getCleanAdoptResponse = () => {
+
+    for(let i=0;i<this.state.dataSource.animals.length;i++){
+        if(this.state.dataSource.animals[i].photos[0]!=null){
+
+          this.setState({ cleanDataSource: [...this.state.cleanDataSource,this.state.dataSource.animals[i] ] }) 
+
+        }
+
+    }
+    this.setState({
+      loading: true
+    })
+
+    let res = JSON.stringify(this.state.cleanDataSource)
+  }
+
   getAdoptResponse = async (a) => { 
       console.log("ZipCode "+this.state.zipCode)
-      fetch('https://api.petfinder.com/v2/animals?type=dog&location='+this.state.zipCode+'&limit=5', {
+      fetch('https://api.petfinder.com/v2/animals?type=dog&location='+this.state.zipCode+'&limit=20', {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -84,10 +135,13 @@ class Home extends React.Component {
         .then((responseJson) => {
           this.setState({
             dataSource: responseJson,
-            loading: true
+           // loading: true
           })
-          let res = JSON.stringify(this.state.dataSource.animals)
-          //console.log(res)
+
+          this.getCleanAdoptResponse()
+
+          let res = JSON.stringify(this.state.dataSource.animals[0].url)
+          console.log(res)
           return responseJson;
 
         })
@@ -115,9 +169,7 @@ class Home extends React.Component {
     const response = await fetch(GOOGLE_PLACEAPI+this.state.zipCode+'&key='+key)
     const data = await response.json()
     this.setState({
-      DogParks: data.results,
-      loadingPark: true
-
+      DogParks: data.results
     });
    this.getDogParkPhoto()
     
@@ -135,23 +187,28 @@ class Home extends React.Component {
 
   getDogParkPhoto = async () => {
 
-    
+    console.log("in get Dog park photo")
 
     const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[0].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     const response1 = await fetch(url1)
-    const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[1].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
-    const response2 = await fetch(url2)
+   //const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[1].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   // const response2 = await fetch(url2)
     const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[2].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     const response3 = await fetch(url3)
     const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[3].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     const response4 = await fetch(url4)
 
     this.setState({
-      DogParkPhotos: [response1,response2,response3,response4]
+      
+      DogParkPhotos: [response1,response3,response4],
+      loadingPark: true
+      
     
     })
 
-   
+    
+
+   console.log("photo url: "+response1)
    
    
    
@@ -233,22 +290,40 @@ class Home extends React.Component {
     })
   }
 
+  openWebView = (url )=> {
+
+  }
 
 
-  render() {
+
+  render() {   
     if(this.props.userprofile.dogs){
     //  getDog(this.props.userprofile.dogs[0],'DOGLOGIN')
     }
-    console.log("Location loading: "+this.state.locationLoading)
-    if (this.props.post === null || this.state.loading===false || this.state.locationLoading===false) return null 
+    if (this.props.post === null || this.state.loading===false || this.state.locationLoading===false ||this.state.loadingPark===false) return null 
+     
+    if(this.state.showWebView){
+      console.log('inside webview')
+      return (
+        
+        <View style={{ flex: 1 }}>
+        <WebView source={{ uri: "https://twitter.com" }} />
+        
+      </View>
+      )
+    }
+     
     return (
-      <View style={{flex: 1}}>
-      <ImageBackground source={{uri: dog.photo}} style={styles.backgroundImage}>
-      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#fff"}}>
-        <TouchableOpacity style={styles.buttonSmall} onPress={() => this.signOutUser()}>
-    <Text style={styles.bold}>Logout</Text>
-  </TouchableOpacity>
-        <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: 20 }}>
+
+      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#F8F8FF"}}
+      refreshControl={
+        <RefreshControl
+          refreshing={this.state.refreshing}
+          onRefresh={this._onRefresh}
+        />
+      }
+      >
+        <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
           <Text
             style={{
               fontSize: 24,
@@ -258,36 +333,38 @@ class Home extends React.Component {
           >
             Dogs in {this.state.city} up for adoption
         </Text>
-          <View style={{ height: 130, marginTop: 20 }}>
+          <View style={{ height: 165, marginTop: 15 }}>
             <ScrollView
               horizontal={true}
               showsHorizontalScrollIndicator={false}
               data={this.state.dataSource}
             >
+              <TouchableOpacity onPress={() => this.setState({showWebView: true})}>
               <Adopt
-                imageUri= {this.state.dataSource.animals[0].photos[0] ? this.state.dataSource.animals[0].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
-                name={this.state.dataSource.animals[0].name}
-                breed={this.state.dataSource.animals[0].breeds.primary}
+                imageUri= {this.state.cleanDataSource[0].photos[0] ? this.state.cleanDataSource[0].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+                name={this.state.cleanDataSource[0].name}
+                breed={this.state.cleanDataSource[0].breeds.primary}
+              />
+              </TouchableOpacity >
+              <Adopt
+                imageUri={this.state.cleanDataSource[1].photos[0] ? this.state.cleanDataSource[1].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+                name={this.state.cleanDataSource[1].name}
+                breed={this.state.cleanDataSource[1].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[1].photos[0] ? this.state.dataSource.animals[1].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
-                name={this.state.dataSource.animals[1].name}
-                breed={this.state.dataSource.animals[1].breeds.primary}
+                imageUri={this.state.cleanDataSource[2].photos[0] ? this.state.cleanDataSource[2].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+                name={this.state.cleanDataSource[2].name}
+                breed={this.state.cleanDataSource[2].breeds.primary}
               />
               <Adopt
-                imageUri={this.state.dataSource.animals[2].photos[0] ? this.state.dataSource.animals[2].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
-                name={this.state.dataSource.animals[2].name}
-                breed={this.state.dataSource.animals[2].breeds.primary}
-              />
-              <Adopt
-                imageUri={this.state.dataSource.animals[3].photos[0] ? this.state.dataSource.animals[3].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
-                name={this.state.dataSource.animals[3].name}
-                breed={this.state.dataSource.animals[3].breeds.primary}
+                imageUri={this.state.cleanDataSource[3].photos[0] ? this.state.cleanDataSource[3].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+                name={this.state.cleanDataSource[3].name}
+                breed={this.state.cleanDataSource[3].breeds.primary}
               />
             </ScrollView>
           </View>
 
-          <View style={{ marginTop: 30 }}>
+          <View style={{ marginTop: 10 }}>
             <Text
               style={{
                 fontSize: 24,
@@ -301,7 +378,7 @@ class Home extends React.Component {
 
           <View
                 style={{
-                  padding: 20,
+                  padding: 10,
                   marginTop: 5,
                   flexDirection: "row",
                   flexWrap: "wrap",
@@ -351,13 +428,14 @@ class Home extends React.Component {
             data={this.props.post.feed}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
-              const liked = item.likes.includes(this.props.dog.dogId)
+              let liked = item.likes.includes(this.props.dog.dogId)
+              console.log("like:"+liked)
               return (
                 <View>
                   <View style={[styles.row, styles.space]}>
                     <View style={[styles.row, styles.center]}>
                       <TouchableOpacity onPress={() => this.goToDog(item)} >
-                        <Image style={styles.roundImage} source={{ uri: item.photo}} />
+                        <Image style={styles.roundImage} source={{ uri: item.dog.photo}} />
                       </TouchableOpacity>
                       <View>
                         <Text style={styles.bold}>{item.dogTag}</Text>
@@ -374,31 +452,36 @@ class Home extends React.Component {
                   </TouchableOpacity>
                   <View style={styles.row}>
                   <TouchableOpacity onPress={() => this.likePost(item)} >
-                    <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#db565b' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} />
-                    </TouchableOpacity>
+                    <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#0000ff' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} 
+                    />
+                    <Text style={{ fontWeight: 'bold' ,marginTop: 0,marginLeft: 51}}>{item.likes.length} Licks</Text>
+                  
+                  </TouchableOpacity>
                     <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
-                      <Ionicons style={{ marginLeft: 130, marginTop: 5 }} name='ios-chatbubbles' size={25} />
-                      <Text style={[styles.gray, styles.small]}>View Comments</Text>
+                      <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-chatbubbles' size={25} />
                     </TouchableOpacity>
-                    <Ionicons style={{ marginLeft: 130, marginTop: 5 }} name='ios-send' size={25} />
+                    
+                    <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-send' size={25} />
                   </View>
+                  
                   <Text style={{ marginLeft: 50, marginTop: 5, marginBottom: 10 }}>{item.postDescription}</Text>
+                  <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
+                  <Text style={{color:'#adadad', fontSize:10, marginBottom: 5,marginLeft: 50}}>View Comments</Text>
+                    </TouchableOpacity>
+                    
+                
+                  
                 </View>
               )
             }}
           />
         </View>
       </ScrollView>
-      </ImageBackground>
-      </View>
-  
-  
-
-
     )
 
   }
 }
+
 /*
   componentDidMount() {
     this.props.getPosts()
@@ -480,3 +563,4 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home)
+

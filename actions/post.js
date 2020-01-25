@@ -4,9 +4,11 @@ import uuid from 'uuid'
 import cloneDeep from 'lodash/cloneDeep'
 import orderBy from 'lodash/orderBy'
 import { sendNotification } from './'
+import {getDog} from '../actions/dog'
+import { connect } from 'react-redux'
 
 
-export const updateDescription = (input) => {
+export const upfDescription = (input) => {
 	return {type: 'UPDATE_DESCRIPTION', payload: input}
 }
 
@@ -20,21 +22,32 @@ export const updateLocation = (input) => {
 
 export const uploadPost = () => {
 	return async (dispatch, getState) => {
+    const { post,dog} = getState()
 		try {
-			const { post, dog } = getState()
-			const id = uuid.v4()
+
+      
+      const id = uuid.v4()
+      let res = JSON.stringify(dog.dogId)
+    
+      console.log("dog: "+res)
+      const dogQuery = await db.collection('dogs').doc(dog.dogId).get()
+      let dog1 = dogQuery.data()
+ 
 			const upload = {
 				id: id,
 				postPhoto: post.photo,
 				postDescription: post.description || ' ',
 				postLocation: post.location || ' ',
-				dogId: dog.dogId,
-				photo: dog.photo || ' ',
-				dogTag: dog.dogTag,
+				dogId: dog1.dogId,
+				photo: dog1.photo || ' ',
+        dogTag: dog1.dogTag,
+        dog: dog1,
 				likes: [],
-        comments: []
+        comments: [],
+        date: new Date().getTime(),
 			}
-			db.collection('posts').doc(id).set(upload)
+      db.collection('posts').doc(id).set(upload)
+      
 		} catch (e) {
 			console.error(e)
 		}
@@ -50,9 +63,47 @@ export const getPosts = () => {
 			posts.forEach((post)=>{
 				array.push(post.data())
 			})
-			dispatch({type: 'GET_POSTS', payload: array})
+			dispatch({type: 'GET_POSTS',  payload: orderBy(array, 'date','desc')})
 		} catch (e) {
-      console.log("in get posts");
+			alert(e)
+    }
+    
+  }
+
+}
+
+export const getPost = (id) => {
+  return async (dispatch, getState) => {
+		try {
+      console.log("post id: "+id)
+			const posts = await db.collection('posts').where('id', '==', id).get()
+			
+			let array = []
+			posts.forEach((post)=>{
+				array.push(post.data())
+      })
+      
+     
+			dispatch({type: 'GET_POST', payload: array})
+		} catch (e) {
+			alert(e)
+    }
+    
+  }
+
+}
+
+export const getBreedPosts = (breed) => {
+  return async (dispatch, getState) => {
+		try {
+			const posts = await db.collection('posts').where('dog.breed', '==', breed).get()
+			
+			let array = []
+			posts.forEach((post)=>{
+				array.push(post.data())
+			})
+			dispatch({type: 'GET_DOGPOSTS', payload: array})
+		} catch (e) {
 			alert(e)
     }
     
@@ -66,7 +117,6 @@ export const getlocationPosts = () => {
 		try {
       let posts = []
       const postsQuery = await db.collection('posts').where('postLocation.country', '==', 'Japan').get()
-      console.log(postsQuery);
       postsQuery.forEach(function(response) {
         posts.push(response.data())
 			})
@@ -103,7 +153,7 @@ export const likePost = (post) => {
         date: new Date().getTime(),
         type: 'LIKE',
       })
-      dispatch(sendNotification(post.dogId, 'Liked Your Photo'))
+      dispatch(sendNotification(post.dogId, 'Licked Your Photo'))
      // dispatch({type: 'GET_POSTS', payload: newFeed})
       dispatch(getPosts())
     } catch(e) {
@@ -165,3 +215,18 @@ export const addComment = (text, post) => {
     }
   }
 }
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators({ followUser, unfollowUser,getDog,getUser }, dispatch)
+}
+
+const mapStateToProps = (state) => {
+  return {
+    post: state.post,
+    user: state.user,
+    userprofile: state.profile,
+    dog: state.dog
+  }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)

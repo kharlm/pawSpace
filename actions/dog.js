@@ -123,15 +123,17 @@ export const dogsignup = () => {
       
 				//console.log("DOG TRY"+res)
 	
-		/*  let posts = []
-		  const postsQuery = await db.collection('posts').where('id', '==', id).get()
+		 let posts = []
+		  const postsQuery = await db.collection('posts').where('dogId', '==', dogId).get()
 		  postsQuery.forEach(function(response) {
 			posts.push(response.data())
 		  })
-		  */
-		 // user.posts = orderBy(posts, 'date','desc')
+		  
+		 dog.posts = orderBy(posts, 'date','desc')
+		
 	
 				if(type === 'DOGLOGIN'){
+					
 					
 					dispatch({type: 'DOGLOGIN', payload: dog })
 				} else {
@@ -149,8 +151,8 @@ export const dogsignup = () => {
 		return async ( dispatch, getState )  => {
 		  const {dogname,breed,age,gender,weight,dogTag,bio,dogId,photo } = getState().dog
 		  try {
-				const {dog} = getState()
-			db.collection('dogs').doc(dog.dogId).update({
+				//const {dog} = getState()
+			db.collection('dogs').doc(dogId).update({
 				name: dogname,
 				breed: breed,
 				age: age,
@@ -165,7 +167,7 @@ export const dogsignup = () => {
 				
 			})
 		  } catch(e) {
-				
+				console.log("inside update dog error")
 			alert(e)
 		  }
 		}

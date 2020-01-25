@@ -10,10 +10,13 @@ import CameraScreen from '../screens/Camera'
 import MapScreen from '../screens/Map'
 import GlobeScreen from '../screens/Globe'
 import ExploreScreen from '../screens/Explore'
+import BreedScreen from '../screens/BreedPosts'
 import EditScreen from '../screens/Signup'
+import DogEditScreen from '../screens/DogSignUp'
 import CommentScreen from '../screens/Comment'
 import ChatScreen from '../screens/Chat'
 import MessagesScreen from '../screens/Messages'
+import PostViewScreen from '../screens/PostView'
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 import { TouchableOpacity, Image } from 'react-native'
 
@@ -138,6 +141,17 @@ export const SearchNavigator = createAppContainer(createStackNavigator(
         )
       })
     },
+    Breeds: { 
+      screen: BreedScreen,
+      navigationOptions: ({ navigation }) => ({
+        title: 'Breeds',
+        headerLeft: (
+          <TouchableOpacity onPress={() => navigation.goBack()} >
+            <Ionicons style={styles.icon} name={'ios-arrow-back'} size={30}/>
+          </TouchableOpacity>
+        )
+      })
+    }
   }
 ));
 
@@ -188,9 +202,20 @@ export const ProfileNavigator = createAppContainer(createStackNavigator(
       }
     },
     Edit: {
-      screen: EditScreen,
+      screen: DogEditScreen,
       navigationOptions: ({ navigation }) => ({
         title: 'Edit Profile',
+        headerLeft: (
+          <TouchableOpacity onPress={() => navigation.goBack()} >
+            <Ionicons style={styles.icon} name={'ios-arrow-back'} size={30}/>
+          </TouchableOpacity>
+        )
+      })
+    },
+    PostView: {
+      screen: PostViewScreen,
+      navigationOptions: ({ navigation }) => ({
+        title: 'Post',
         headerLeft: (
           <TouchableOpacity onPress={() => navigation.goBack()} >
             <Ionicons style={styles.icon} name={'ios-arrow-back'} size={30}/>

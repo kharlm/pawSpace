@@ -10,6 +10,9 @@ import { NavigationEvents } from 'react-navigation';
 import { updateDescription, updateLocation, uploadPost, updatePhoto } from '../actions/post'
 import { FlatList, Modal, SafeAreaView, Text, View, TextInput, Image, TouchableOpacity } from 'react-native';
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
+//import Toast from 'react-native-simple-toast';
+import Toast from 'react-native-root-toast';
+
 
 import { uploadPhoto } from '../actions'
 
@@ -24,14 +27,43 @@ class Post extends React.Component {
   }
 
   post = () => {
+    post = ''
     this.props.uploadPost()
+   
+    // Add a Toast on screen.
+let toast = Toast.show('Photo uploaded please drag down the top of the screen to reload and see image', {
+  duration: Toast.durations.LONG,
+  position: Toast.positions.CENTER,
+  shadow: true,
+  animation: true,
+  hideOnPress: true,
+  delay: 0,
+  onShow: () => {
+      // calls on toast\`s appear animation start
+  },
+  onShown: () => {
+      // calls on toast\`s appear animation end.
+  },
+  onHide: () => {
+      // calls on toast\`s hide animation start.
+  },
+  onHidden: () => {
+      // calls on toast\`s hide animation end.
+  }
+});
+
+// You can manually hide the Toast, or it will automatically disappear after a `duration` ms timeout.
+setTimeout(function () {
+  Toast.hide(toast);
+}, 5000);
+
     this.props.navigation.navigate('Home')
   }
 
   onWillFocus = () => {
-    if(!this.props.post.photo){
+    
       this.openLibrary()
-    }
+    
   }
 
   openLibrary = async () => {
@@ -79,6 +111,8 @@ class Post extends React.Component {
   }
 
   render() {
+
+   
     return (
       <View style={[styles.container, styles.center]}>
         <NavigationEvents onWillFocus={this.onWillFocus}/>
@@ -123,7 +157,8 @@ const mapDispatchToProps = (dispatch) => {
 const mapStateToProps = (state) => {
   return {
     post: state.post,
-    user: state.user
+    user: state.user,
+    dog: state.dog
   }
 }
 

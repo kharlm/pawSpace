@@ -32,9 +32,7 @@ export const login = () => {
 			console.log("user id: "+response.user.uid)
 			dispatch(getUser(response.user.uid))
 			//const userQuery = await db.collection('users').doc(response.user.uid).get()
-			//let user = userQuery.data()
-			//dispatch(getDog(user.dogs[0]))
-			
+			//let user = userQuery.data()	
 			console.log("in log before dispatch allow notifications")
 			dispatch(allowNotifications(response.user.uid))
 		} catch (e) {

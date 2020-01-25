@@ -4,7 +4,8 @@ const  { width } = Dimensions.get('window');
 export default styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+   
   },
   coverPhoto: {
     flex: 1,
@@ -12,7 +13,7 @@ export default styles = StyleSheet.create({
   },
   center: {
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   space: {
     alignItems: 'center',
@@ -113,14 +114,14 @@ export default styles = StyleSheet.create({
   dogInfoLeft : {
 
     marginTop: 20,
-    marginRight: 30,
     paddingVertical: 10,
+    marginRight: 30,
     alignItems: 'center',
     borderColor: '#d3d3d3',
-    backgroundColor:'#faebd7',
+    backgroundColor:'#f0ffff',
     borderWidth: 1,
     borderRadius: 10,
-    width: 150,
+    width: 200,
     overflow: 'hidden'
 
   },
@@ -130,10 +131,25 @@ export default styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
     borderColor: '#d3d3d3',
-    backgroundColor:'#faebd7',
+    backgroundColor:'#f0ffff',
     borderWidth: 1,
     borderRadius: 10,
     width: 200,
+    overflow: 'hidden'
+
+  },
+
+  dogInfoRightBig : {
+
+    marginTop: 20,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderColor: '#d3d3d3',
+    backgroundColor:'#fffff0',
+    borderWidth: 1,
+    borderRadius: 25,
+    width: 200,
+    height: 200,
     overflow: 'hidden'
 
   },
@@ -155,6 +171,20 @@ export default styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     width: 125
+  },
+
+  dogLeftInfoPic:{
+
+    flex: 1,
+    height: 250,
+    width: "87%",
+    resizeMode: "cover",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#dddddd",
+    borderRadius: 25,
+    marginLeft: 1
+
   },
   homeImage: {
     flex: 1,

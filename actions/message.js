@@ -3,14 +3,14 @@ import { orderBy } from 'lodash'
 
 export const addMessage = (id, text) => {
   return (dispatch, getState) => {
-    const { uid, photo, username } = getState().user
+    const { dogId, photo, dogTag } = getState().dog
     try {
       const message = {
-        members: [id, uid].sort(),
+        members: [id, dogId].sort(),
         message: text,
         photo: photo,
-        username: username,
-        uid: uid,
+        dogTag: dogTag,
+        dogId: dogId,
         date: new Date().getTime(),
       }
       db.collection('messages').doc().set(message)
@@ -23,10 +23,10 @@ export const addMessage = (id, text) => {
 
 export const getMessages = () => {
   return async (dispatch, getState) => {
-    const { uid } = getState().user
+    const { dogId } = getState().dog
     let messages = []
     try {
-      const query = await db.collection('messages').where('members', 'array-contains', uid).get()
+      const query = await db.collection('messages').where('members', 'array-contains', dogId).get()
       query.forEach((response) => {
         let message = response.data()
         messages.push(message)

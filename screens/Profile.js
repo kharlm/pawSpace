@@ -7,55 +7,86 @@ import { Text, View, Image, TouchableOpacity, FlatList, ActivityIndicator, Style
 import { followUser, unfollowUser, getUser } from '../actions/user'
 import Masonry from "react-native-masonry";
 const  { width,height } = Dimensions.get('window');
+import { NavigationEvents } from 'react-navigation';
 import {getDog} from '../actions/dog'
+import {getPost} from '../actions/post'
 import { GeofencingRegionState } from 'expo-location';
+import { Tile } from 'react-native-elements';
+import DogInfo from './DogInfo';
+let post = [];
 
-
+let pic =false;
 class Profile extends React.Component {
  
+  
     
   constructor(props) {
     console.log("in constructor")
     super(props);
     this.state = {
       userData: {},
-      loading: true
+      loading: true,
+      postPics: false
 
     }
   }
+
+
  
   componentDidMount = () => {
-   
-    //this.props.getDog(user.dogs[0], 'DOGLOGIN')
-    
-    
-  
-    
-    console.log("In mount")
-    //this.props.getUser(user.uid)
-    //let res = JSON.stringify(this.props.profile);
-
-  //dog= this.props.getDog(user.dogs[0], 'DOGLOGIN')
-   //let res1 = JSON.stringify(dog);
-  
-    //console.log(res1)
-
-    
-    
+   //this.createPostList()  
   }
-  follow = (user) => {
-    if(user.followers.indexOf(this.props.user.uid) >= 0){
-      this.props.unfollowUser(user)
+  onWillFocus = (dog) => {
+
+    console.log("in will focus")
+    
+    this.createPostList(dog) 
+  
+}
+
+  follow = (dog) => {
+    if(dog.followers.indexOf(this.props.dog.dogId) >= 0){
+      this.props.unfollowUser(dog)
     } else {
-      this.props.followUser(user)
+      this.props.followUser(dog)
     }
   }
+  signOutUser = async () => {
+    try {
+        await firebase.auth().signOut();
+        this.props.navigation.navigate('Login')
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+createPostList = (dog) => {
+  console.log("in create post list")
+  
+
+post = dog.posts.map(posts => ({
+  uri: posts.postPhoto,onPress: () => { this.props.getPost(posts.id) 
+    this.props.navigation.navigate('PostView')}
+}))
+
+//this.forceUpdate()
+/*for (let i = 0; i < this.props.dog.posts.length; i++) {
+    post.push({
+        uri : this.props.dog.posts[i].postPhoto
+    });
+}*/
+
+
+
+}
+
 
  
        
 
   render() {
-    
+    const breed = this.props.navigation.getParam('breed','no text');
+  
   
     let dog = {}
    const { state, navigate } = this.props.navigation
@@ -69,136 +100,94 @@ class Profile extends React.Component {
       console.log("in else profile")
       user = this.props.user
       dog = this.props.dog
+
+      
     }
     
    
-    
      
    //let res = JSON.stringify(user.uid);
    //console.log("hello"+res);
-    if (!user.posts) return <ActivityIndicator />
+    //if (!user.posts) return <ActivityIndicator />
     //this.props.getUser(user.uid)
     //this.props.getDog(user.dogs[0], 'DOGLOGIN')
     //this.props.getUser(user.uid)/// YOU MIGHT WANT TO REMOVE TOO MANY CALLS TO THE DB!!
     return (
+      
   
       <ScrollView Vertical ={true} pagingEnabled={true}>
+        <NavigationEvents onWillFocus={this.onWillFocus(dog)}/>
       <View
         style={styles1.container1}
       >
         <ImageBackground
           source={{uri: dog.photo}}
           style={styles1.image}
+          //imageStyle={{ borderRadius: 50 }}
         >
           <Text
             style={styles1.paragraph}
-          >      {dog.name}
+          >      {dog.dogname}
         {"\n"}{dog.breed}</Text>
         </ImageBackground>
       </View >
       <View style={styles1.headercontainer}>
         <Text style={styles1.paragraph1}>Bio</Text>
-        <Text style={styles1.body}>{dog.dogId}</Text>
+        <Text style={styles1.body}>{dog.bio}</Text>
       </View>
+      <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between"
+                }}
+              >
+                <DogInfo
+            width={width}
+            height={height}
+            info ='Weight'
+            infoImage ='https://images.unsplash.com/photo-1551476319-b90310126939?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60'
+            infoData={dog.weight}
+          />
+            <DogInfo
+            width={width}
+            height={height}
+            info ='Age'
+            infoImage='https://images.unsplash.com/photo-1578729370305-131f65fbd716?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60'
+            infoData={dog.age}
 
-      <View style={styles1.midinfo}>
-                <View style ={[styles1.infoview, styles1.leftbar]}>
-                    <Text style={styles1.infoone}>Weight</Text>
-                    <Text style={styles1.infotwo}>{dog.gender}</Text>
-                </View>   
-                
-                <View style={styles1.infoview}>
-                <Text style={styles1.infoone}>Age</Text>
-                <Text style={styles1.infotwo}>{dog.age}</Text>
-                </View>
 
-            </View>
-            <View style={styles1.midinfo}>
-                <View style ={[styles1.infoview, styles1.leftbar]}>
-                    <Text style={styles1.infoone}>Gender</Text>
-                    <Text style={styles1.infotwo}>{dog.gender}</Text>
-                </View>   
-                
-                <View style={styles1.infoview}>
-                <Text style={styles1.infoone}>DogTag</Text>
-                <Text style={styles1.infotwo}>{dog.dogTag}</Text>
-                </View>
-
-            </View>
-      
-
-      <View style={styles1.mid}>
-                <View style ={[styles1.outerview, styles1.leftbar]}>
-                    <Text style={styles1.textone}>75+</Text>
-                    <Text style={styles1.texttwo}>Images</Text>
-                </View>   
-                
-                <View style={styles1.outerview}>
-                <Text style={styles1.textone}>100k</Text>
-                <Text style={styles1.texttwo}>Subscribers</Text>
-                </View>
-                
-
-            </View>
-          <View>
-          </View>
-          <View>
-          <Masonry
-  sorted // optional - Default: false
-  columns={1} // optional - Default: 2
-  bricks={[
-    { uri: '' },
-    { uri: '' },
-    { uri: '' }
-  ]}
-/>
-      </View>
-        
-
-      <TouchableOpacity style={styles.buttonSmall} onPress={() => firebase.auth().signOut()}>
-              <Text style={styles.bold}>Logout</Text>
-            </TouchableOpacity>
-      </ScrollView>
-    );
-
-     /* return(
-        <View>
-           <View style={[styles.row, styles.space]}>
-                  <View style={[styles.row, styles.center]}></View>
-             <Image style ={styles1.container} source = {require('../assets/splash.png')}/>
-             <Text>HI IM BUNNY</Text>
-             </View>
-          </View>
-      );
-      */
-
-      
-   /*  
-    return (
-      <View style={styles.container}>
-        <View style={[styles.row, styles.space, {paddingHorizontal: 20}]}>
-          <View style={styles.center}>
-            <Image style={styles.roundImage} source={{uri: user.photo}}/>
-            <Text>Ruby</Text>
-            <Text style={styles.bold}>Breed: pitbull</Text>
-            <Text style={styles.bold}>Dog Tag: Ruby12</Text>
-
-          </View>
-          <View style={styles.center}>
-            <Text style={styles.bold}>{user.posts.length}</Text>
+          />
+            <DogInfo
+            width={width}
+            height={height}
+            info ='Gender'
+            infoImage='https://images.pexels.com/photos/33287/dog-viszla-close.jpg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260'
+            infoData={dog.gender}
+          />
+            <DogInfo
+            width={width}
+            height={height}
+            info ='DogTag'
+            infoImage='https://images.unsplash.com/photo-1534719521254-e98a61a0a037?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60'
+            infoData={dog.dogTag}
+          />
+              </View>
+              <View style={{flexDirection: 'row', flex:1, justifyContent: "space-between", paddingTop: 10,paddingRight:10,paddingLeft:10}}>
+              <View style={styles.center}>
+            <Text style={styles.bold}>{dog.posts.length}</Text>
             <Text>posts</Text>
           </View>
           <View style={styles.center}>
-            <Text style={styles.bold}>"Hi"</Text>
+            <Text style={styles.bold}>{dog.followers.length}</Text>
             <Text>followers</Text>
           </View>
           <View style={styles.center}>
-            <Text style={styles.bold}>"Hi"</Text>
+            <Text style={styles.bold}>{dog.following.length}</Text>
             <Text>following</Text>
           </View>
-        </View>
-        <View style={styles.center}>
-        {
+          </View>
+          {
           state.routeName === 'MyProfile' ?
           <View style={styles.row}>
             <TouchableOpacity style={styles.buttonSmall} onPress={() => this.props.navigation.navigate('Edit')}>
@@ -209,27 +198,43 @@ class Profile extends React.Component {
             </TouchableOpacity>
           </View> : 
           <View style={styles.row}>
-            <TouchableOpacity style={styles.buttonSmall} onPress={() => this.follow(user)}>
-              <Text style={styles.bold}>{user.followers.indexOf(this.props.user.uid) >= 0 ? 'UnFollow User' : 'Follow User'}</Text>
+            <TouchableOpacity style={styles.buttonSmall} onPress={() => this.follow(dog)}>
+              <Text style={styles.bold}>{dog.followers.indexOf(this.props.dog.dogId) >= 0 ? 'UnFollow Dog' : 'Follow Dog'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonSmall} onPress={() => this.props.navigation.navigate('Chat', user.uid )}>
+            <TouchableOpacity style={styles.buttonSmall}>
               <Text style={styles.bold}>Message</Text>
-            </TouchableOpacity>
+              </TouchableOpacity>
           </View>
         }
-        </View>
-        <FlatList
-          style={{paddingTop: 25}}
-          horizontal={false}
-          numColumns={3}
-          data={user.posts}
-          keyExtractor={(item) => JSON.stringify(item.date)}
-          renderItem={({ item }) => <Image style={styles.squareLarge} source={{uri: item.postPhoto}}/> }/>
+              <View style={{ marginTop: 17,marginBottom:17 }}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "500",
+                paddingHorizontal: (width/3) + 10
+              }}
+            >
+              Photos
+          </Text>
+          </View>
+      
+          <View>
+          
+          <Masonry
+  sorted // optional - Default: false
+  columns={3} // optional - Default: 2
+  bricks={post}
+/>
       </View>
-    );
-    */
-    
+        
+
+      <TouchableOpacity style={styles.buttonSmall} onPress={() => this.signOutUser()}>
+              <Text style={styles.bold}>Logout</Text>
+            </TouchableOpacity>
+      </ScrollView>
+    );    
   }
+  
 }
 
 const styles1 = StyleSheet.create({
@@ -242,22 +247,58 @@ const styles1 = StyleSheet.create({
     borderColor: '#F44336',
     
   },
+  container2: {
+        flex: 1,
+        justifyContent:'center',
+        alignItems: 'center'
+      },
+      imageStyle: {
+        width: 200,
+        height: 200
+      },
+    
+      viewTextStyle: {
+        position: 'absolute',
+        justifyContent: 'center',
+        alignItems: 'center'
+      },
+      textStyle: {
+        fontSize: 23,
+        fontWeight:'bold',
+        color: 'white'
+      },
   headercontainer: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 100,
-      backgroundColor: '#f5f5dc',
+      padding: 70,
+      backgroundColor: '#faebd7',
       margin: 5,
+      borderRadius: 5,
+      borderWidth: 0.5,
+      borderColor: "#dddddd",
   },
   container1: {
     flex: 1,
     alignItems: 'stretch',
     justifyContent: 'center',
+  }, backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover', // or 'stretch'
+    borderRadius: 20
+  },
+  profileImage:{
+    width: 120, 
+    height: 120,
+    borderRadius: 20,
+    margin: 10,
+    marginLeft: 30,
+    backgroundColor: '#adadad'
+
   },
   image: {
     flexGrow:1,
-    height:null,
+    height:height*.80,
     width:null,
     alignItems: 'center',
     justifyContent:'center',
@@ -267,12 +308,23 @@ const styles1 = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    marginTop: 500,
+    marginTop: height*.65,
+    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 40, 
+  },
+
+  paragraph2: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: 800,
     fontWeight: 'bold',
     color: '#fff',
     fontSize: 40, 
   },
   paragraph1: {
+    paddingTop: 15,
     position: 'absolute',
     top: 0,
     fontWeight: 'bold',
@@ -282,7 +334,7 @@ const styles1 = StyleSheet.create({
   body: {
     fontWeight: 'bold',
     color: '#000',
-    fontSize: 15,
+    fontSize: 30,
   },
   separator: {
     padding: 10,
@@ -341,12 +393,23 @@ const styles1 = StyleSheet.create({
   borderRightWidth: 2,
   borderRightColor: '#fff',
 
+  },
+  name: {
+    fontWeight: 'bold',
+    alignItems:'center',
+  },
+  
+  container: {
+    marginLeft :15,
+    borderWidth: 0.5,
+    borderColor: "#dddddd",
+    borderRadius: 4
   }
 });
 
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ followUser, unfollowUser,getDog,getUser }, dispatch)
+  return bindActionCreators({ followUser, unfollowUser,getDog,getUser,getPost }, dispatch)
 }
 
 const mapStateToProps = (state) => {
@@ -360,3 +423,4 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile)
+
