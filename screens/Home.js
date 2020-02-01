@@ -50,6 +50,9 @@ class Home extends React.Component {
       currentUri: '',
       refreshing: false,
     }
+
+  
+    
   }
 
   _onRefresh = () => {
@@ -68,21 +71,11 @@ class Home extends React.Component {
   }
 
   componentDidMount() {
-
+    //this.createBreed()
     this.getMyLocation()
     this.props.getPosts()
     console.log("inside component did mount")
    // this.getDogParks()
-
-   
-
-  
-
-
-
-  
-    
-
   }
   getAdoptToken = async () => {
     fetch('https://api.petfinder.com/v2/oauth2/token', {
@@ -339,13 +332,11 @@ class Home extends React.Component {
               showsHorizontalScrollIndicator={false}
               data={this.state.dataSource}
             >
-              <TouchableOpacity onPress={() => this.setState({showWebView: true})}>
               <Adopt
                 imageUri= {this.state.cleanDataSource[0].photos[0] ? this.state.cleanDataSource[0].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
                 name={this.state.cleanDataSource[0].name}
                 breed={this.state.cleanDataSource[0].breeds.primary}
               />
-              </TouchableOpacity >
               <Adopt
                 imageUri={this.state.cleanDataSource[1].photos[0] ? this.state.cleanDataSource[1].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
                 name={this.state.cleanDataSource[1].name}
@@ -429,7 +420,6 @@ class Home extends React.Component {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
               let liked = item.likes.includes(this.props.dog.dogId)
-              console.log("like:"+liked)
               return (
                 <View>
                   <View style={[styles.row, styles.space]}>

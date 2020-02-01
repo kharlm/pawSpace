@@ -43,7 +43,7 @@ const TabNavigator = createBottomTabNavigator(
       }
     },
 
-   Explore: { 
+  /* Explore: { 
       screen: ExploreNavigator,
       navigationOptions: {
         tabBarLabel: ' ',
@@ -52,6 +52,7 @@ const TabNavigator = createBottomTabNavigator(
         ) 
       }
     },
+    */
     MyProfile: { 
       screen: ProfileNavigator,
       navigationOptions: {

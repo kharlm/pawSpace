@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View, Button, Image, FlatList, TouchableOpacity } from 'react-native';
-import { getlocationPosts, likePost, unlikePost } from '../actions/post'
+import { getlocationPosts, likePost, unlikePost, getPosts,getPost } from '../actions/post'
 import moment from 'moment'
 
 class PostView extends React.Component {
@@ -17,7 +17,7 @@ class PostView extends React.Component {
       }
 
   componentDidMount() {
-    this.props.getlocationPosts()
+    this.props.getPosts()
 
 
   }
@@ -28,8 +28,10 @@ class PostView extends React.Component {
     const { dogId } = this.props.dog
     if (post.likes.includes(dogId)) {
       this.props.unlikePost(post)
+      this.props.getPost(post.id)
     } else {
       this.props.likePost(post)
+      this.props.getPost(post.id)
     }
   }
   
@@ -44,10 +46,8 @@ class PostView extends React.Component {
           data={this.props.post.postFeed}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => {
-            this.setState({like: item.likes.includes(this.props.dog.dogId)})
-            console.log("loke: "+this.state.like)
-            return (
-                
+            let liked = item.likes.includes(this.props.dog.dogId)
+            return (   
               <View>
                 <View style={[styles.row, styles.space]}>
                   <View style={[styles.row, styles.center]}>
@@ -69,7 +69,7 @@ class PostView extends React.Component {
                 </TouchableOpacity>
                 <View style={styles.row}>
                 <TouchableOpacity onPress={() => this.likePost(item)} >
-                  <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={'#000'} name={'ios-heart-empty'} size={25} 
+                <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#0000ff' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} 
                   />
                   <Text style={{ fontWeight: 'bold' ,marginTop: 0,marginLeft: 51}}>{item.likes.length} Licks</Text>
                 
@@ -85,8 +85,6 @@ class PostView extends React.Component {
                 <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
                 <Text style={{color:'#adadad', fontSize:10, marginBottom: 5,marginLeft: 50}}>View Comments</Text>
                   </TouchableOpacity>
-                  
-              
                 
               </View>
             )
@@ -98,7 +96,7 @@ class PostView extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ getlocationPosts, likePost, unlikePost }, dispatch)
+  return bindActionCreators({ getlocationPosts, likePost, unlikePost,getPosts,getPost }, dispatch)
 }
 
 const mapStateToProps = (state) => {

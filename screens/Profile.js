@@ -9,7 +9,7 @@ import Masonry from "react-native-masonry";
 const  { width,height } = Dimensions.get('window');
 import { NavigationEvents } from 'react-navigation';
 import {getDog} from '../actions/dog'
-import {getPost} from '../actions/post'
+import {getPost,getPosts} from '../actions/post'
 import { GeofencingRegionState } from 'expo-location';
 import { Tile } from 'react-native-elements';
 import DogInfo from './DogInfo';
@@ -21,11 +21,11 @@ class Profile extends React.Component {
   
     
   constructor(props) {
-    console.log("in constructor")
+    
     super(props);
     this.state = {
       userData: {},
-      loading: true,
+      loading: false,
       postPics: false
 
     }
@@ -34,15 +34,10 @@ class Profile extends React.Component {
 
  
   componentDidMount = () => {
-   //this.createPostList()  
+   this.props.getPosts()
+   this.props.getDog
   }
-  onWillFocus = (dog) => {
-
-    console.log("in will focus")
-    
-    this.createPostList(dog) 
   
-}
 
   follow = (dog) => {
     if(dog.followers.indexOf(this.props.dog.dogId) >= 0){
@@ -60,14 +55,8 @@ class Profile extends React.Component {
     }
 }
 
-createPostList = (dog) => {
-  console.log("in create post list")
-  
 
-post = dog.posts.map(posts => ({
-  uri: posts.postPhoto,onPress: () => { this.props.getPost(posts.id) 
-    this.props.navigation.navigate('PostView')}
-}))
+
 
 //this.forceUpdate()
 /*for (let i = 0; i < this.props.dog.posts.length; i++) {
@@ -77,12 +66,14 @@ post = dog.posts.map(posts => ({
 }*/
 
 
+viewPost = (item) => {
+  this.props.getPost(item.id)
+  this.props.navigation.navigate('PostView') 
 
 }
 
 
  
-       
 
   render() {
     const breed = this.props.navigation.getParam('breed','no text');
@@ -91,13 +82,13 @@ post = dog.posts.map(posts => ({
     let dog = {}
    const { state, navigate } = this.props.navigation
     if(state.routeName === 'Profile'){
-      console.log("in prop profile")
+      
       user = this.props.profile
       let res = JSON.stringify(user)
       
       dog = this.props.dogprofile
     } else {
-      console.log("in else profile")
+      
       user = this.props.user
       dog = this.props.dog
 
@@ -112,11 +103,13 @@ post = dog.posts.map(posts => ({
     //this.props.getUser(user.uid)
     //this.props.getDog(user.dogs[0], 'DOGLOGIN')
     //this.props.getUser(user.uid)/// YOU MIGHT WANT TO REMOVE TOO MANY CALLS TO THE DB!!
+    let res = JSON.stringify(post)
+    console.log("posts: "+res)
+   
     return (
       
   
       <ScrollView Vertical ={true} pagingEnabled={true}>
-        <NavigationEvents onWillFocus={this.onWillFocus(dog)}/>
       <View
         style={styles1.container1}
       >
@@ -193,7 +186,7 @@ post = dog.posts.map(posts => ({
             <TouchableOpacity style={styles.buttonSmall} onPress={() => this.props.navigation.navigate('Edit')}>
               <Text style={styles.bold}>Edit Profile</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonSmall} onPress={() => firebase.auth().signOut()}>
+            <TouchableOpacity style={styles.buttonSmall} onPress={() => this.signOutUser()}>
               <Text style={styles.bold}>Logout</Text>
             </TouchableOpacity>
           </View> : 
@@ -218,19 +211,28 @@ post = dog.posts.map(posts => ({
           </Text>
           </View>
       
-          <View>
+          <View style={{backgroundColor:'#dedede'}}>
           
-          <Masonry
-  sorted // optional - Default: false
-  columns={3} // optional - Default: 2
-  bricks={post}
-/>
-      </View>
-        
-
-      <TouchableOpacity style={styles.buttonSmall} onPress={() => this.signOutUser()}>
-              <Text style={styles.bold}>Logout</Text>
+          <FlatList
+          style={{paddingTop: 25}}
+          horizontal={false}
+          numColumns={3}
+          data={dog.posts}
+          keyExtractor={(item) => JSON.stringify(item.date)}
+          
+          renderItem={({ item }) => 
+          <TouchableOpacity onPress={() => this.viewPost(item)}>
+          <View style={styles.homeBorder}>
+            
+            <Image style={styles.squareLarge} source={{uri: item.postPhoto}}/> 
+            <Text style={{ marginTop: 2, marginLeft:5,height: 22,width:width*.26,fontFamily: 'MarkerFelt-Thin',fontWeight: 'bold'}}>{item.postDescription}</Text>
+            
+            </View>
             </TouchableOpacity>
+            
+            }/>
+            
+      </View>
       </ScrollView>
     );    
   }
@@ -306,7 +308,7 @@ const styles1 = StyleSheet.create({
   },
   paragraph: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
     marginTop: height*.65,
     fontWeight: 'bold',
@@ -324,6 +326,7 @@ const styles1 = StyleSheet.create({
     fontSize: 40, 
   },
   paragraph1: {
+    paddingHorizontal: 100,
     paddingTop: 15,
     position: 'absolute',
     top: 0,
@@ -409,7 +412,7 @@ const styles1 = StyleSheet.create({
 
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ followUser, unfollowUser,getDog,getUser,getPost }, dispatch)
+  return bindActionCreators({ followUser, unfollowUser,getDog,getUser,getPost,getPosts }, dispatch)
 }
 
 const mapStateToProps = (state) => {

@@ -34,13 +34,16 @@ class BreedPosts extends React.Component {
         const { dogId } = this.props.dog
         if (post.likes.includes(dogId)) {
           this.props.unlikePost(post)
+          this.props.getBreedPosts(post.dog.breed)
         } else {
           this.props.likePost(post)
+          this.props.getBreedPosts(post.dog.breed)
         }
       }
 
       render(){
         const breed = this.props.navigation.getParam('breed','');
+        console.log("breed: "+breed)
         if(typeof this.props.post.breedFeed != 'undefined'){
         let res = JSON.stringify(this.props.post.breedFeed.length)
         console.log("feed: "+ res)
@@ -68,53 +71,59 @@ class BreedPosts extends React.Component {
               fontSize: 24,
               fontWeight: "700",
               paddingHorizontal: 10,
-              paddingLeft: 130,
+              paddingLeft: 100,
               paddingTop: 10,
               paddingBottom: 5
             }}
           >
             {breed}s
         </Text>
-            <View style={styles.container}>
-            <FlatList
-              //onRefresh={() => this.props.getBreedPosts(breed)}
-              refreshing={false}
-              data={this.props.post.breedFeed}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => {
-                const liked = item.likes.includes(this.props.dog.dogId)
-                return (
-                  <View>
-                    <View style={[styles.row, styles.space]}>
-                      <View style={[styles.row, styles.center]}>
-                        <TouchableOpacity onPress={() => this.goToDog(item)} >
-                          <Image style={styles.roundImage} source={{ uri: item.photo}} />
-                        </TouchableOpacity>
-                        <View>
-                          <Text style={styles.bold}>{item.dogTag}</Text>
-                          <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
-                          <TouchableOpacity onPress={() => this.navigateMap(item)} >
-                            <Text>{item.postLocation ? item.postLocation.name : null}</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                      <Ionicons style={{ margin: 5, marginRight: 35 }} name='ios-flag' size={25} />
-                    </View>
-                    <TouchableOpacity onPress={() => this.likePost(item)} >
-                      <Image style={styles.homeImage} source={{ uri: item.postPhoto }} />
+        <View style={styles.container}>
+        <FlatList
+          data={this.props.post.breedFeed}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => {
+            let liked = item.likes.includes(this.props.dog.dogId)
+            return (   
+              <View>
+                <View style={[styles.row, styles.space]}>
+                  <View style={[styles.row, styles.center]}>
+                    <TouchableOpacity onPress={() => this.goToDog(item)} >
+                      <Image style={styles.roundImage} source={{ uri: item.dog.photo}} />
                     </TouchableOpacity>
-                    <View style={styles.row}>
-                    <TouchableOpacity onPress={() => this.likePost(item)} >
-                      <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#db565b' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} />
+                    <View>
+                      <Text style={styles.bold}>{item.dogTag}</Text>
+                      <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
+                      <TouchableOpacity onPress={() => this.navigateMap(item)} >
+                        <Text>{item.postLocation ? item.postLocation.name : null}</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
-                        <Ionicons style={{ marginLeft: 130, marginTop: 5 }} name='ios-chatbubbles' size={25} />
-                        <Text style={[styles.gray, styles.small]}>View Comments</Text>
-                      </TouchableOpacity>
-                      <Ionicons style={{ marginLeft: 130, marginTop: 5 }} name='ios-send' size={25} />
                     </View>
-                    <Text style={{ marginLeft: 50, marginTop: 5, marginBottom: 10 }}>{item.postDescription}</Text>
                   </View>
+                  <Ionicons style={{ margin: 5, marginRight: 35 }} name='ios-flag' size={25} />
+                </View>
+                <TouchableOpacity onPress={() => this.likePost(item)} >
+                  <Image style={styles.homeImage} source={{ uri: item.postPhoto }} />
+                </TouchableOpacity>
+                <View style={styles.row}>
+                <TouchableOpacity onPress={() => this.likePost(item)} >
+                <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#0000ff' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} 
+                  />
+                  <Text style={{ fontWeight: 'bold' ,marginTop: 0,marginLeft: 51}}>{item.likes.length} Licks</Text>
+                
+                </TouchableOpacity>
+                  <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
+                    <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-chatbubbles' size={25} />
+                  </TouchableOpacity>
+                  
+                  <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-send' size={25} />
+                </View>
+                
+                <Text style={{ marginLeft: 50, marginTop: 5, marginBottom: 10 }}>{item.postDescription}</Text>
+                <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
+                <Text style={{color:'#adadad', fontSize:10, marginBottom: 5,marginLeft: 50}}>View Comments</Text>
+                  </TouchableOpacity>
+                
+              </View>
                 )
               }}
             />

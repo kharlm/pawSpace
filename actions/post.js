@@ -8,7 +8,7 @@ import {getDog} from '../actions/dog'
 import { connect } from 'react-redux'
 
 
-export const upfDescription = (input) => {
+export const updateDescription = (input) => {
 	return {type: 'UPDATE_DESCRIPTION', payload: input}
 }
 
@@ -18,6 +18,60 @@ export const updatePhoto = (input) => {
 
 export const updateLocation = (input) => {
 	return {type: 'UPDATE_LOCATION', payload: input}
+}
+
+export const updateDog = () => {
+  return async ( dispatch, getState )  => {
+    const {dogname,breed,age,gender,weight,dogTag,bio,dogId,photo } = getState().dog
+    try {
+      //const {dog} = getState()
+    db.collection('dogs').doc(dogId).update({
+      name: dogname,
+      breed: breed,
+      age: age,
+      gender: gender,
+      weight: weight,
+      dogTag: dogTag,
+      bio: bio,
+      dogId: dogId,
+      followers: [],
+      following: [],
+      photo: photo
+      
+    })
+    } catch(e) {
+      console.log("inside update dog error")
+    alert(e)
+    }
+  }
+  }
+
+export const updatePosts = () => {
+
+  return async ( dispatch, getState )  => {
+    const {id,postPhoto,postDescription,postLocation,dogId,photo,dogTag,dog,likes,comments,date} = getState().post
+    try {
+      //const {dog} = getState()
+    db.collection('posts').doc(id).update({
+        id: id,
+				postPhoto: postPhoto,
+				postDescription: postDescription,
+				postLocation: postLocation,
+				dogId: dogId,
+				photo: photo,
+        dogTag: dogTag,
+        dog: dog,
+				likes: likes,
+        comments: comments,
+        date: date,
+      
+    })
+    } catch(e) {
+      console.log("post update error")
+    alert(e)
+    }
+  }
+
 }
 
 export const uploadPost = () => {
@@ -47,6 +101,8 @@ export const uploadPost = () => {
         date: new Date().getTime(),
 			}
       db.collection('posts').doc(id).set(upload)
+      dispatch(getPosts())
+      dispatch(getDog(dog.dogId,'DOGLOGIN'))
       
 		} catch (e) {
 			console.error(e)
@@ -101,7 +157,9 @@ export const getBreedPosts = (breed) => {
 			let array = []
 			posts.forEach((post)=>{
 				array.push(post.data())
-			})
+      })
+      let res = JSON.stringify(array)
+      console.log("breed posts: "+res)
 			dispatch({type: 'GET_DOGPOSTS', payload: array})
 		} catch (e) {
 			alert(e)

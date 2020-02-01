@@ -8,6 +8,7 @@ import { Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { updatePhoto, updateEmail, updatePassword, updateUsername,signup, updateUser,signupError } from '../actions/user'
 import { uploadPhoto } from '../actions'
 import { dogsignup} from '../actions/dog'
+;
 
 class Signup extends React.Component {
 
@@ -19,11 +20,12 @@ class Signup extends React.Component {
       firebase.auth().onAuthStateChanged((user) => {
         if(user){
         if(this.props.user != null){
+         
         this.props.navigation.navigate('DogSignUp')
           }
-        }
+       }
       })
-      this.props.navigation.navigate('DogSignUp')
+      
       }
      else {
       this.props.updateUser()
@@ -41,6 +43,7 @@ class Signup extends React.Component {
       }
     }
   }
+
 
   render() {
     const { routeName } = this.props.navigation.state

@@ -25,7 +25,7 @@ class BreedSearch extends Component {
   <Text
     style={{
       fontWeight: 'bold',
-      fontSize: 30,
+      fontSize: 25,
       color: 'white',
       position: 'absolute', // child
       justifyContent: 'center', alignItems: 'center',
@@ -38,7 +38,7 @@ class BreedSearch extends Component {
   <Text
     style={{
       fontWeight: 'bold',
-      fontSize: 20,
+      fontSize: 25,
       color: 'white',
       position: 'absolute', // child
       justifyContent: 'center', alignItems: 'center',

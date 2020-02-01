@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker'
 import * as Location from 'expo-location'
 import * as Permissions from 'expo-permissions'
 import { NavigationEvents } from 'react-navigation';
-import { updateDescription, updateLocation, uploadPost, updatePhoto } from '../actions/post'
+import { updateDescription, updateLocation, uploadPost, updatePhoto,getPosts } from '../actions/post'
 import { FlatList, Modal, SafeAreaView, Text, View, TextInput, Image, TouchableOpacity } from 'react-native';
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
 //import Toast from 'react-native-simple-toast';
@@ -31,7 +31,7 @@ class Post extends React.Component {
     this.props.uploadPost()
    
     // Add a Toast on screen.
-let toast = Toast.show('Photo uploaded please drag down the top of the screen to reload and see image', {
+let toast = Toast.show('Photo uploaded', {
   duration: Toast.durations.LONG,
   position: Toast.positions.CENTER,
   shadow: true,
@@ -55,7 +55,7 @@ let toast = Toast.show('Photo uploaded please drag down the top of the screen to
 // You can manually hide the Toast, or it will automatically disappear after a `duration` ms timeout.
 setTimeout(function () {
   Toast.hide(toast);
-}, 5000);
+}, 3000);
 
     this.props.navigation.navigate('Home')
   }
@@ -151,7 +151,7 @@ setTimeout(function () {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updateDescription, uploadPost, updateLocation, uploadPhoto, updatePhoto }, dispatch)
+  return bindActionCreators({ updateDescription, uploadPost, updateLocation, uploadPhoto, updatePhoto,getPosts }, dispatch)
 }
 
 const mapStateToProps = (state) => {

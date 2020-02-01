@@ -4,7 +4,7 @@ const  { width } = Dimensions.get('window');
 export default styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F8FF',
    
   },
   coverPhoto: {
@@ -98,9 +98,9 @@ export default styles = StyleSheet.create({
     backgroundColor: '#adadad'
   },
   squareLarge: {
-    width: width*.33, 
+    width: width*.26, 
     height: 125,
-    margin: 1,
+    margin: 3,
     backgroundColor: '#d3d3d3'
   },
   cameraButton: {
@@ -185,6 +185,22 @@ export default styles = StyleSheet.create({
     borderRadius: 25,
     marginLeft: 1
 
+  },
+  homeBorder: {
+    textAlign: 'center',
+    color: '#000',
+    borderStyle: 'solid', 
+    borderColor: '#A9A9A9',
+    borderWidth: 1.5,
+    paddingTop: 4,
+    paddingBottom: 10,
+    paddingRight: 4,
+    paddingLeft: 4,
+    marginTop: 0,
+    marginBottom: 10,
+    marginRight: 5 ,
+    marginLeft: 5,
+    backgroundColor: "#fff"
   },
   homeImage: {
     flex: 1,
