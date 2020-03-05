@@ -30,19 +30,20 @@ export const uploadPhoto = (image) => {
 
 export const allowNotifications = (uid) => {
   console.log("in allow notifications ")
-  return async ( dispatch, getState ) => {
+  return async ( dispatch) => {
     console.log("in allow notifications ")
+    console.log("uid: "+uid)
     //const { uid } = getState().user
     try {
-      const permission1 = await Permissions.askAsync(Permissions.NOTIFICATIONS)
-      const permission = 'granted'
-      if (permission === 'granted') {
+      console.log("in try")
+      const permission = await Permissions.askAsync(Permissions.NOTIFICATIONS)
+      if (permission.status === 'granted') {
         console.log("permission granted")
         const token = await Notifications.getExpoPushTokenAsync()
         dispatch({ type: 'GET_TOKEN', payload: token })
         let res = JSON.stringify(token)
         console.log("token "+token)
-        console.log("uid: "+uid)
+      
        
         db.collection('users').doc(uid).update({ token: token })
         console.log("uid"+ uid)      

@@ -96,7 +96,7 @@ export const getUser = (uid, type) => {
 			} 
 			else {
 				dispatch({type: 'GET_PROFILE', payload: user })
-				//dispatch(getDog(user.dogs[0],'GET_DOGPROFILE'))
+				dispatch(getDog(user.dogs[0],'GET_DOGPROFILE'))
 			}
 		} catch (e) {
 			alert(e)

@@ -173,7 +173,8 @@ class DogSignup extends React.Component {
         this.dogLengthMoreThanOne(this.props.user.uid)
         if(this.state.moreThanOneDog===false)  {
           
-          this.props.getUser(this.props.user.uid, 'LOGIN')   
+          this.props.getUser(this.props.user.uid, 'LOGIN')  
+          this.props.getUser(this.props.user.uid, 'GET_PROFILE')   
         }
   
       }

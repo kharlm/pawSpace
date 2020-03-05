@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
-import { HomeNavigator, SearchNavigator, PostNavigator, ActivityNavigator, ProfileNavigator,ExploreNavigator } from './StackNavigator'
+import { HomeNavigator, SearchNavigator, PostNavigator, ActivityNavigator, ProfileNavigator,ExploreNavigator,MatchNavigator } from './StackNavigator'
 import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
 
 const TabNavigator = createBottomTabNavigator(
@@ -14,6 +14,15 @@ const TabNavigator = createBottomTabNavigator(
           <MaterialCommunityIcons name={focused ? 'home' : 'home-outline'} size={32} />
         ) 
       } 
+    },
+    Match: { 
+      screen: MatchNavigator,
+      navigationOptions: {
+        tabBarLabel: ' ',
+        tabBarIcon: ({focused}) => (
+          <Ionicons  name={focused ? 'ios-bonfire' : 'md-bonfire'} size={32} />
+        ) 
+      }
     },
     Search: { 
       screen: SearchNavigator,

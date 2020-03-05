@@ -3,6 +3,9 @@ import { orderBy, groupBy, values } from 'lodash'
 import { allowNotifications, sendNotification } from './'
 import db from '../config/firebase';
 import uuid from 'uuid'
+import * as Permissions from 'expo-permissions'
+import * as Location from 'expo-location'
+import Geohash from 'latlon-geohash';
 
 
 export const updateDogname = (dogname) => {
@@ -37,6 +40,33 @@ export const updateBio = (bio) => {
 }
 export const updatePhoto = (photo) => {
 	return {type: 'UPDATE_PHOTO', payload: photo}
+}
+
+export const getLocation = (dog) => {
+	console.log("in get location")
+	return async(dispatch,getState) => {
+		Permissions.askAsync(Permissions.LOCATION).then(function(result){
+		  if(result){
+		    Location.getCurrentPositionAsync({}).then(function(location){
+			  var geocode = Geohash.encode(location.coords.latitude, location.coords.longitude, 1)
+			  
+			  
+					
+				try {
+					const id = uuid.v4()	
+					db.collection('dogs').doc(dog.dogId).update({
+						geocode: geocode
+					})
+				}catch (e) {
+
+					alert(e)
+				}
+		      
+		      dispatch({ type: 'GET_LOCATION', payload: geocode });
+		    })
+		  }
+		})
+	}
 }
 
 
@@ -101,6 +131,7 @@ export const dogsignup = () => {
 				let dog = dogQuery.data()
 	
 				dispatch(getDog(dog.dogId))
+				
 			} catch (e) {
 
 				alert(e)
@@ -133,11 +164,9 @@ export const dogsignup = () => {
 		
 	
 				if(type === 'DOGLOGIN'){
-					
-					
+				
 					dispatch({type: 'DOGLOGIN', payload: dog })
 				} else {
-					
 					
 					dispatch({type: 'GET_DOGPROFILE', payload: dog })
 				}
@@ -172,3 +201,87 @@ export const dogsignup = () => {
 		  }
 		}
 	  }
+
+	  export const getDogs = (dog) => {
+		return async (dispatch, getState) => {
+			let dogs = []
+			try {
+				const snapshot = await db.collection('dogs').where('geocode', '==', dog.geocode).get()
+				const query = await db.collection('dogs').where('dogId', '==', dog.dogId).get()
+				const fullSnapshot = await db.collection('dogs').get()
+				let items = []
+				let allItems= []
+
+				let ind;
+
+				query.forEach(function(response) {
+					dogs.push(response.data())
+					})
+
+				allItems = fullSnapshot.docs.map(doc => doc.data());
+				items = snapshot.docs.map(doc => doc.data());
+				
+
+				//let res = JSON.stringify(Object.keys(dogs[0].swipes[0])[0])
+				//Object.keys(dogs[0].swipes[i])[0]===card.dogId)
+				//console.log("Array "+dogs[0].swipes.length)
+
+				//this removes any dogs the user already swiped on from the list of cards
+				let removeId=null;
+				let removeIndex= -1
+				
+					
+					if(dogs[0].swipes){
+					for(let i = 0; i<allItems.length;i++){
+						console.log("inside first for loop")
+						for(let j=0;j<dogs[0].swipes.length; j++){
+							if(allItems[i].dogId===Object.keys(dogs[0].swipes[j])[0]){
+								console.log("swipeID "+Object.keys(dogs[0].swipes[j])[0])
+								removeId = allItems[i].dogId
+								
+							}
+							//console.log("remove id"+removeId)
+							if(removeId!=null){
+								let res = JSON.stringify(allItems)
+								console.log("item: "+res)
+							removeIndex = items.map(function(item) { return item.dogId; }).indexOf("56bcfdeb-9d83-4159-929e-7b4fb43787cc");
+							console.log("remove id"+removeIndex)
+							}
+							if(removeIndex!=1){
+								//console.log("REMOVE INDEX "+removeIndex)
+							}
+							removeId = null
+							//console.log("array before: "+items.length)
+								items.splice(removeIndex, 1);
+								removeIndex=null
+								let res1 = JSON.stringify(items)
+								//console.log("array after: "+items.length+res1)
+							
+						}
+					}
+						
+					
+				 
+				console.log("remove index: "+removeIndex)
+				
+					}
+					
+
+				// Removes the users profile from a list of cards that returned
+				for(let i=0; i<items.length; i++){
+					if(items[i].dogId===dog.dogId){
+						items.splice(i,1)
+					}
+				}
+
+				
+				dispatch({ type: 'GET_CARDS', payload: items });
+	
+    		//console.log(snapshot.docs.map(
+				//doc => doc.data()))
+			} catch (e) {
+				alert(e)
+			}
+		}
+	}
+	  

@@ -172,6 +172,22 @@ export default styles = StyleSheet.create({
     borderRadius: 5,
     width: 125
   },
+  noMoreCards: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardButton: {
+    margin: 10,
+   padding: 5,
+    paddingLeft: 10,
+    backgroundColor:'#D3D3D3',
+    alignItems: 'center',
+    borderColor: '#d3d3d3',
+    borderWidth: 1,
+    borderRadius: 15,
+    width: 75
+  },
 
   dogLeftInfoPic:{
 
@@ -205,13 +221,13 @@ export default styles = StyleSheet.create({
   homeImage: {
     flex: 1,
     height: 450,
-    width: "87%",
+    width: "95%",
     resizeMode: "cover",
     borderRadius: 5,
     borderWidth: 1,
     borderColor: "#dddddd",
     borderRadius: 25,
-    marginLeft: 27
+    marginLeft: 10
     
   }
 });

@@ -12,6 +12,11 @@ import GlobeScreen from '../screens/Globe'
 import ExploreScreen from '../screens/Explore'
 import BreedScreen from '../screens/BreedPosts'
 import EditScreen from '../screens/Signup'
+import MatchScreen from '../screens/SearchScreen'
+import ItsAMatchScreen from '../screens/ItsAMatch'
+import MatchesScreen from '../screens/ChatMatch'
+import MatchesChatScreen from '../screens/MatchesChat'
+import MatchProfileScreen from '../screens/MatchProfile'
 import DogEditScreen from '../screens/DogSignUp'
 import CommentScreen from '../screens/Comment'
 import ChatScreen from '../screens/Chat'
@@ -193,6 +198,42 @@ export const ExploreNavigator = createAppContainer(createStackNavigator(
   }
 ));
 
+export const MatchNavigator = createAppContainer(createStackNavigator(
+  {
+    Match: { 
+      screen: MatchScreen,
+      navigationOptions: {
+        title: 'Matches'
+      }
+    },
+    MatchProfile: { 
+      screen: MatchProfileScreen,
+      navigationOptions: {
+        title: 'Match Profile'
+      }
+    },
+    MatchesChat: { 
+      screen: MatchesChatScreen,
+      navigationOptions: {
+        title: 'Chat'
+      }
+    },
+    MatchesScreen: { 
+      screen: MatchesScreen,
+      navigationOptions: {
+        title: 'Matches Chat'
+      }
+    },
+
+    ItsAMatch: { 
+      screen: ItsAMatchScreen,
+      navigationOptions: {
+        title: 'You Matched!'
+      }
+    },
+  }
+));
+
 export const ProfileNavigator = createAppContainer(createStackNavigator(
   {
     MyProfile: { 
@@ -217,8 +258,8 @@ export const ProfileNavigator = createAppContainer(createStackNavigator(
       navigationOptions: ({ navigation }) => ({
         title: 'Post',
         headerLeft: (
-          <TouchableOpacity onPress={() => navigation.goBack()} >
-            <Ionicons style={styles.icon} name={'ios-arrow-back'} size={30}/>
+          <TouchableOpacity onPress={() => navigation.navigate("Home")} >
+            <Ionicons style={{paddingLeft: 10}} name={'ios-arrow-back'} size={30}/>
           </TouchableOpacity>
         )
       })

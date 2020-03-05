@@ -53,6 +53,8 @@ const dog = (state = {}, action) => {
       return { ...state, bio: action.payload } 
     case 'UPDATE_PHOTO':
       return { ...state, photo: action.payload }
+    case 'GET_LOCATION':
+    return { ...state, geocode: action.payload }
     default:
       return state
   }
@@ -74,6 +76,15 @@ const dogprofile = (state = {}, action) => {
   switch (action.type) {
     case 'GET_DOGPROFILE':
       return action.payload
+    default:
+      return state
+  }
+}
+
+const cards = (state = {}, action) => {
+  switch (action.type) {
+    case 'GET_CARDS':      
+    return { ...state, cards: action.payload}
     default:
       return state
   }
@@ -129,7 +140,7 @@ const rootReducer = combineReducers({
   profile,
   messages,
   dogprofile,
-  signupError
+  signupError,cards
 })
 
 export default rootReducer

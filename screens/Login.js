@@ -5,7 +5,7 @@ import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { updateEmail, updatePassword, login, getUser, facebookLogin} from '../actions/user'
-import {getDog} from '../actions/dog'
+import {getDog,getDogs} from '../actions/dog'
 import db from '../config/firebase'
 
 class Login extends React.Component {
@@ -142,7 +142,7 @@ class Login extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updateEmail, updatePassword, login, getUser, facebookLogin,getDog }, dispatch)
+  return bindActionCreators({ updateEmail, updatePassword, login, getUser, facebookLogin,getDog,getDogs }, dispatch)
 }
 
 const mapStateToProps = (state) => {

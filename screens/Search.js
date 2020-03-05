@@ -7,7 +7,7 @@ import db from '../config/firebase';
 import { getDog } from '../actions/dog'
 import DogInfo from './DogInfo';
 import BreedSearch from './BreedSearch';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native';
 const  { width,height } = Dimensions.get('window');
 import { getBreedPosts } from '../actions/post'
 

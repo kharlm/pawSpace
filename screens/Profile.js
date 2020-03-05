@@ -326,7 +326,7 @@ const styles1 = StyleSheet.create({
     fontSize: 40, 
   },
   paragraph1: {
-    paddingHorizontal: 100,
+    paddingLeft: (width/2)-300,
     paddingTop: 15,
     position: 'absolute',
     top: 0,

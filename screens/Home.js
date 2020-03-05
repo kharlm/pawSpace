@@ -12,6 +12,7 @@ import * as Location from 'expo-location'
 const PET_API = 'http://api.petfinder.com/pet.getRandom?key=' + 'm0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs' + '&animal=cat&location=' + '34758' + '&output=basic&format=json'
 import Adopt from "./Adopt";
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
+//https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Museum%20of%20Contemporary%20Art%20Australia&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=YOUR_API_KEY
 const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+'
 const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
 import moment from 'moment'
@@ -26,10 +27,7 @@ const { width } = Dimensions.get('window');
 import Constants from 'expo-constants';
 import {NavigationEvents} from 'react-navigation';
 
-
-
-
-
+let imageUnavailable = 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'
 
 class Home extends React.Component {
 
@@ -49,6 +47,7 @@ class Home extends React.Component {
       showWebView: false,
       currentUri: '',
       refreshing: false,
+      webPage: ''
     }
 
   
@@ -141,10 +140,6 @@ class Home extends React.Component {
         .catch((error) => {
           console.error(error);
         })
-        
-
-  
-
   }
 
   getAdopt = async () => {
@@ -159,11 +154,14 @@ class Home extends React.Component {
   getDogParks = async () => {
     console.log("city"+this.state.city)
 
-    const response = await fetch(GOOGLE_PLACEAPI+this.state.zipCode+'&key='+key)
+    const response = await fetch(GOOGLE_PLACEAPI+this.state.city+'&key='+key)
     const data = await response.json()
     this.setState({
       DogParks: data.results
     });
+
+    let res = JSON.stringify(this.state.DogParks[3])
+  
    this.getDogParkPhoto()
     
 
@@ -180,33 +178,35 @@ class Home extends React.Component {
 
   getDogParkPhoto = async () => {
 
-    console.log("in get Dog park photo")
+   let response1
+   let response2
+   let response3
+   let response4
 
-    const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[0].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
-    const response1 = await fetch(url1)
-   //const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[1].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
-   // const response2 = await fetch(url2)
-    const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[2].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
-    const response3 = await fetch(url3)
-    const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[3].photos[0].photo_reference}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
-    const response4 = await fetch(url4)
+    const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+     response1 = await fetch(url1)
+     
+    const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+     response2 = await fetch(url2)
+
+    const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+     response3 = await fetch(url3)
+    
+    const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+     response4 = await fetch(url4)
 
     this.setState({
       
-      DogParkPhotos: [response1,response3,response4],
+      DogParkPhotos: [response1,response2,response3,response4],
       loadingPark: true
       
     
     })
 
     
-
-   console.log("photo url: "+response1)
+    let res  =JSON.stringify(response1)
+   //console.log("photo url: "+res)
    
-   
-   
-   
-
   }
 
   getMyLocation = async () => {
@@ -242,16 +242,15 @@ class Home extends React.Component {
     }
     let res = JSON.stringify(data.results[0].address_components[6].types[0])
     
-    
-   
-
     this.setState({
-        myLocation: JSON.stringify(location),
+        myLocation: location,
         zipCode: ind,
         locationLoading: true,
         city: ind1
         
     },() => {
+      let res =JSON.stringify(this.state.myLocation)
+      //console.log("my location: "+res)
       this.getAdoptToken();
       this.getDogParks();
   });
@@ -283,12 +282,6 @@ class Home extends React.Component {
     })
   }
 
-  openWebView = (url )=> {
-
-  }
-
-
-
   render() {   
     if(this.props.userprofile.dogs){
     //  getDog(this.props.userprofile.dogs[0],'DOGLOGIN')
@@ -299,8 +292,12 @@ class Home extends React.Component {
       console.log('inside webview')
       return (
         
+        
         <View style={{ flex: 1 }}>
-        <WebView source={{ uri: "https://twitter.com" }} />
+          <TouchableOpacity onPress={()=> {this.setState({showWebView: false}) }}>
+    <Text style={{fontSize: 25, color:'#0000ff',paddingLeft: 7}}>x</Text>
+  </TouchableOpacity>
+        <WebView source={{ uri: this.state.webPage }} />
         
       </View>
       )
@@ -332,26 +329,37 @@ class Home extends React.Component {
               showsHorizontalScrollIndicator={false}
               data={this.state.dataSource}
             >
+               <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage:this.state.cleanDataSource[0].url})}>
               <Adopt
-                imageUri= {this.state.cleanDataSource[0].photos[0] ? this.state.cleanDataSource[0].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+                imageUri= {this.state.cleanDataSource[0].photos[0] ? this.state.cleanDataSource[0].photos[0].medium : imageUnavailable}
                 name={this.state.cleanDataSource[0].name}
                 breed={this.state.cleanDataSource[0].breeds.primary}
               />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage:this.state.cleanDataSource[1].url})}>
               <Adopt
-                imageUri={this.state.cleanDataSource[1].photos[0] ? this.state.cleanDataSource[1].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+                imageUri={this.state.cleanDataSource[1].photos[0] ? this.state.cleanDataSource[1].photos[0].medium : imageUnavailable}
                 name={this.state.cleanDataSource[1].name}
                 breed={this.state.cleanDataSource[1].breeds.primary}
               />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage:this.state.cleanDataSource[2].url})}>
               <Adopt
-                imageUri={this.state.cleanDataSource[2].photos[0] ? this.state.cleanDataSource[2].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+                imageUri={this.state.cleanDataSource[2].photos[0] ? this.state.cleanDataSource[2].photos[0].medium : imageUnavailable}
                 name={this.state.cleanDataSource[2].name}
                 breed={this.state.cleanDataSource[2].breeds.primary}
               />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage:this.state.cleanDataSource[3].url})}>
               <Adopt
-                imageUri={this.state.cleanDataSource[3].photos[0] ? this.state.cleanDataSource[3].photos[0].medium : 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+                imageUri={this.state.cleanDataSource[3].photos[0] ? this.state.cleanDataSource[3].photos[0].medium : imageUnavailable}
                 name={this.state.cleanDataSource[3].name}
                 breed={this.state.cleanDataSource[3].breeds.primary}
               />
+              </TouchableOpacity>
             </ScrollView>
           </View>
 
@@ -378,25 +386,25 @@ class Home extends React.Component {
               >
 
           <DogParks
-            imageUri={this.state.DogParkPhotos[0] ? this.state.DogParkPhotos[0].url: 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+            imageUri={this.state.DogParkPhotos[0] ? this.state.DogParkPhotos[0].url: imageUnavailable}
             width={width}
             name={this.state.DogParks[0] ? this.state.DogParks[0].name : "No dog Park Available"}
             type={this.state.DogParks[0] ? this.state.DogParks[0].formatted_address :"No dog Park Available"}
           />
           <DogParks
-            imageUri={this.state.DogParkPhotos[1] ? this.state.DogParkPhotos[1].url: 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+            imageUri={this.state.DogParkPhotos[1] ? this.state.DogParkPhotos[1].url: imageUnavailable}
             width={width}
             name={this.state.DogParks[1] ? this.state.DogParks[1].name :"No dog Park Available"}
             type={this.state.DogParks[1] ? this.state.DogParks[1].formatted_address :"No dog Park Available"}
           />
           <DogParks
-            imageUri={this.state.DogParkPhotos[2] ? this.state.DogParkPhotos[2].url: 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+            imageUri={this.state.DogParkPhotos[2] ? this.state.DogParkPhotos[2].url: imageUnavailable}
             width={width}
             name={this.state.DogParks[2] ? this.state.DogParks[2].name : "No dog Park Available"}
             type={this.state.DogParks[2] ? this.state.DogParks[2].formatted_address: "No dog Park Available"}
           />
           <DogParks
-          imageUri={this.state.DogParkPhotos[3] ? this.state.DogParkPhotos[3].url: 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'}
+          imageUri={this.state.DogParkPhotos[3] ? this.state.DogParkPhotos[3].url: imageUnavailable}
             width={width}
             name={this.state.DogParks[3] ? this.state.DogParks[3].name : "No dog Park Available"}
             type={this.state.DogParks[3] ? this.state.DogParks[3].formatted_address: "No dog Park Available"}
@@ -471,73 +479,6 @@ class Home extends React.Component {
 
   }
 }
-
-/*
-  componentDidMount() {
-    this.props.getPosts()
-  }
-
-  likePost = (post) => {
-    const { uid } = this.props.user
-    if(post.likes.includes(uid)){
-      this.props.unlikePost(post)
-    } else {
-      this.props.likePost(post)
-    }
-  }
-
-  navigateMap = (item) => {
-    this.props.navigation.navigate('Map', { 
-      location: item.postLocation 
-    })
-  }
-
-  render() {
-    if(this.props.post === null) return null
-    return (
-      <View style={styles.container}>
-        <FlatList
-          onRefresh={() => this.props.getPosts()}
-          refreshing={false}
-          data={this.props.post.feed}
-          keyExtractor={(item) => item.id}
-          renderItem={({item}) => {
-            const liked = item.likes.includes(this.props.user.uid)
-            return (
-              <View>
-                <View style={[styles.row, styles.space]}>
-                  <View style={[styles.row, styles.center]}>
-                    <Image style={styles.roundImage} source={{uri: this.props.post.feed}}/>
-                    <View>
-                      <Text style={styles.bold}>{item.username}</Text>
-                      <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
-                      <TouchableOpacity onPress={() => this.navigateMap(item)} >
-                        <Text>{item.postLocation ? item.postLocation.name : null}</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                  <Ionicons style={{margin: 5}} name='ios-flag' size={25} />
-                </View>
-                <TouchableOpacity onPress={() => this.likePost(item)} >
-                  <Image style={styles.postPhoto} source={{uri: item.postPhoto}}/>
-                </TouchableOpacity>
-                <View style={styles.row}>
-                  <Ionicons style={{margin: 5}} color={liked ? '#db565b' : '#000'} name={ liked ? 'ios-heart' : 'ios-heart-empty'} size={25} />
-                  <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
-                    <Ionicons style={{margin: 5}} name='ios-chatbubbles' size={25} />
-                  </TouchableOpacity>
-                  <Ionicons style={{margin: 5}} name='ios-send' size={25} />
-                </View>
-                <Text>{item.postDescription}</Text>
-              </View>
-            )
-          }}
-        />
-      </View>
-    );
-  }
-}
-*/
 
 const mapDispatchToProps = (dispatch) => {
   return bindActionCreators({ getPosts, likePost, unlikePost, getUser, getAdopt,getDog }, dispatch)
