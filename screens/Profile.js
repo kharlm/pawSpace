@@ -20,30 +20,14 @@ import Icon from './Icon';
 import Demo from './demo.js';
 import ProfileItem from './ProfileItem';
 
-const {
-    age,
-    image,
-    info1,
-    info2,
-    info3,
-    info4,
-    location,
-    match,
-    name
-  } = Demo[7];
+
 class Profile extends React.Component {
-  /*const {
-    age,
-    image,
-    info1,
-    info2,
-    info3,
-    info4,
-    location,
-    match,
-    name
-  } = Demo[7];
-  */
+
+    viewPost = (item) => {
+        this.props.getPost(item.id)
+        this.props.navigation.navigate('PostView') 
+      
+      }
  render(){
     let dog = {}
     const { state, navigate } = this.props.navigation
@@ -67,7 +51,6 @@ class Profile extends React.Component {
         </ImageBackground>
 
         <ProfileItem
-          matches={match}
           name={dog.dogname}
           dogTag={dog.dogTag}
           breed={dog.breed}

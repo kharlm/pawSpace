@@ -189,11 +189,12 @@ export default StyleSheet.create({
 		shadowOffset: { height: 0, width: 0 }
 	},
 	matchesProfileItem: {
-		width: 145,
+        width: null,
+        paddingLeft: 5,
+        paddingRight: 5,
 		marginTop: -15,
 		backgroundColor: PRIMARY_COLOR,
 		paddingVertical: 7,
-		paddingHorizontal: 5 ,
 		borderRadius: 20,
 		textAlign: "center",
 		alignSelf: "center"
