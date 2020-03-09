@@ -14,6 +14,8 @@ import Adopt from "./Adopt";
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
 //https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Museum%20of%20Contemporary%20Art%20Australia&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=YOUR_API_KEY
 const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+'
+//const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/nearbysearch/json?query=dog park'
+const GOOGLE_DETAILSAPI='https://maps.googleapis.com/maps/api/place/details/json?query='
 const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
 import moment from 'moment'
 import DogParks from './DogParks';
@@ -44,6 +46,7 @@ class Home extends React.Component {
       DogParks:{},
       loadingPark: false,
       DogParkPhotos:[],
+      dogParkDetails:[],
       showWebView: false,
       currentUri: '',
       refreshing: false,
@@ -154,17 +157,12 @@ class Home extends React.Component {
   getDogParks = async () => {
     console.log("city"+this.state.city)
 
-    const response = await fetch(GOOGLE_PLACEAPI+this.state.city+'&key='+key)
+    const response = await fetch(GOOGLE_PLACEAPI+'&location='+this.state.myLocation.coords.latitude+','+this.state.myLocation.coords.longitude+'&key='+key)
     const data = await response.json()
     this.setState({
       DogParks: data.results
     });
-
-    let res = JSON.stringify(this.state.DogParks[3])
-  
    this.getDogParkPhoto()
-    
-
   }
   
   signOutUser = async () => {
@@ -183,29 +181,25 @@ class Home extends React.Component {
    let response3
    let response4
 
-    const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
      response1 = await fetch(url1)
      
-    const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
      response2 = await fetch(url2)
 
-    const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
      response3 = await fetch(url3)
     
-    const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
      response4 = await fetch(url4)
 
     this.setState({
       
       DogParkPhotos: [response1,response2,response3,response4],
       loadingPark: true
-      
-    
     })
 
-    
-    let res  =JSON.stringify(response1)
-   //console.log("photo url: "+res)
+    this.getPlaceDetails()
    
   }
 
@@ -249,14 +243,31 @@ class Home extends React.Component {
         city: ind1
         
     },() => {
-      let res =JSON.stringify(this.state.myLocation)
-      //console.log("my location: "+res)
       this.getAdoptToken();
       this.getDogParks();
   });
   
-   
 };
+
+getPlaceDetails = async () => {
+  const dogParkDetailResponse1 = await fetch(GOOGLE_DETAILSAPI+'&place_id='+this.state.DogParks[0].place_id+'&key='+key)
+  const dogParkDetailData1 = await dogParkDetailResponse1.json()
+
+  const dogParkDetailResponse2 = await fetch(GOOGLE_DETAILSAPI+'&place_id='+this.state.DogParks[1].place_id+'&key='+key)
+  const dogParkDetailData2 = await dogParkDetailResponse2.json()
+
+  const dogParkDetailResponse3 = await fetch(GOOGLE_DETAILSAPI+'&place_id='+this.state.DogParks[2].place_id+'&key='+key)
+  const dogParkDetailData3 = await dogParkDetailResponse3.json()
+
+  const dogParkDetailResponse4 = await fetch(GOOGLE_DETAILSAPI+'&place_id='+this.state.DogParks[3].place_id+'&key='+key)
+  const dogParkDetailData4 = await dogParkDetailResponse4.json()
+
+  this.setState({
+    dogParkDetails: [dogParkDetailData1,dogParkDetailData2,dogParkDetailData3,dogParkDetailData4]
+  })
+
+
+}
 
 
   likePost = (post) => {
@@ -384,31 +395,38 @@ class Home extends React.Component {
                   justifyContent: "space-between"
                 }}
               >
-
+        <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[0].result.url})}>
           <DogParks
             imageUri={this.state.DogParkPhotos[0] ? this.state.DogParkPhotos[0].url: imageUnavailable}
             width={width}
             name={this.state.DogParks[0] ? this.state.DogParks[0].name : "No dog Park Available"}
             type={this.state.DogParks[0] ? this.state.DogParks[0].formatted_address :"No dog Park Available"}
           />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[1].result.url})}>
           <DogParks
             imageUri={this.state.DogParkPhotos[1] ? this.state.DogParkPhotos[1].url: imageUnavailable}
             width={width}
             name={this.state.DogParks[1] ? this.state.DogParks[1].name :"No dog Park Available"}
             type={this.state.DogParks[1] ? this.state.DogParks[1].formatted_address :"No dog Park Available"}
           />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[2].result.url})}>
           <DogParks
             imageUri={this.state.DogParkPhotos[2] ? this.state.DogParkPhotos[2].url: imageUnavailable}
             width={width}
             name={this.state.DogParks[2] ? this.state.DogParks[2].name : "No dog Park Available"}
             type={this.state.DogParks[2] ? this.state.DogParks[2].formatted_address: "No dog Park Available"}
           />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[3].result.url})}>
           <DogParks
           imageUri={this.state.DogParkPhotos[3] ? this.state.DogParkPhotos[3].url: imageUnavailable}
             width={width}
             name={this.state.DogParks[3] ? this.state.DogParks[3].name : "No dog Park Available"}
             type={this.state.DogParks[3] ? this.state.DogParks[3].formatted_address: "No dog Park Available"}
           />
+          </TouchableOpacity>
           </View>
 
           <View style={{ marginTop: 10, paddingHorizontal: 20 }}>

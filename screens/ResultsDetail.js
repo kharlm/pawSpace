@@ -1,16 +1,23 @@
-import React from 'react';
+import React, {Component} from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
+import { Rating } from 'react-native-elements';
 
 
-const ResultsDetail = ({ result,photo }) => {
+class ResultsDetail extends Component {
+  render(){
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={{ uri:'https://images.unsplash.com/photo-1534361960057-19889db9621e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80' }} />
-      <Text style={styles.name}>{result.name}</Text>
-      <Text>Stars, 5 Reviews</Text>
+      <Image style={styles.image} source={{ uri: this.props.image }} />
+      <Text style={styles.name}>{this.props.name}</Text>
+      <View style={{flexDirection: 'row'}}>
+      <Text style={{fontSize: 12}}>{this.props.rating} </Text><Rating imageSize={14} readonly startingValue={this.props.rating}/><Text style={{fontSize: 12}}> {this.props.reviews} Reviews</Text>
+      </View>
+
+      
     </View>
   );
 };
+}
 
 const styles = StyleSheet.create({
   container: {

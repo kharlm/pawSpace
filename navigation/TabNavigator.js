@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
-import { HomeNavigator, SearchNavigator, PostNavigator, ActivityNavigator, ProfileNavigator,ExploreNavigator,MatchNavigator } from './StackNavigator'
+import { HomeNavigator, SearchNavigator, PostNavigator, ActivityNavigator, ProfileNavigator,ExploreNavigator,MatchNavigator,EssentialsNavigator } from './StackNavigator'
 import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
 
 const TabNavigator = createBottomTabNavigator(
@@ -15,6 +15,7 @@ const TabNavigator = createBottomTabNavigator(
         ) 
       } 
     },
+    /*
     Match: { 
       screen: MatchNavigator,
       navigationOptions: {
@@ -24,6 +25,7 @@ const TabNavigator = createBottomTabNavigator(
         ) 
       }
     },
+    */
     Search: { 
       screen: SearchNavigator,
       navigationOptions: {
@@ -42,12 +44,21 @@ const TabNavigator = createBottomTabNavigator(
         ) 
       }
     },
+    Essentials: { 
+      screen: EssentialsNavigator,
+      navigationOptions: {
+        tabBarLabel: ' ',
+        tabBarIcon: ({focused}) => (
+          <MaterialCommunityIcons name={focused ? 'map-marker' : 'map-marker-outline'} size={32} />
+        ) 
+      }
+    },
     Activity: { 
       screen: ActivityNavigator,
       navigationOptions: {
         tabBarLabel: ' ',
         tabBarIcon: ({focused}) => (
-          <Ionicons name={focused ? 'ios-heart' : 'ios-heart-empty'} size={32} />
+          <Ionicons name={focused ? 'ios-heart': 'ios-heart-empty'} size={32} />
         ) 
       }
     },

@@ -12,11 +12,12 @@ import GlobeScreen from '../screens/Globe'
 import ExploreScreen from '../screens/Explore'
 import BreedScreen from '../screens/BreedPosts'
 import EditScreen from '../screens/Signup'
-import MatchScreen from '../screens/SearchScreen'
+import MatchScreen from '../screens/ResultsList'
 import ItsAMatchScreen from '../screens/ItsAMatch'
 import MatchesScreen from '../screens/ChatMatch'
 import MatchesChatScreen from '../screens/MatchesChat'
 import MatchProfileScreen from '../screens/MatchProfile'
+import EssentialsScreen from '../screens/ResultsList'
 import DogEditScreen from '../screens/DogSignUp'
 import CommentScreen from '../screens/Comment'
 import ChatScreen from '../screens/Chat'
@@ -198,6 +199,17 @@ export const ExploreNavigator = createAppContainer(createStackNavigator(
   }
 ));
 
+export const EssentialsNavigator = createAppContainer(createStackNavigator(
+  {
+    Essentials: { 
+      screen: EssentialsScreen,
+      navigationOptions: {
+        title: 'Essentials'
+      }
+    }
+  }
+
+));
 export const MatchNavigator = createAppContainer(createStackNavigator(
   {
     Match: { 
