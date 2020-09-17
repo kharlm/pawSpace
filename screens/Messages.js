@@ -14,7 +14,7 @@ class Messages extends React.Component {
   }
 
   goToChat = (members) => {
-    const dogId = members.filter(id => id !== this.props.dog.dogId)
+    const dogId = members.filter(id => id !== '56bcfdeb-9d83-4159-929e-7b4fb43787cc')
     this.props.navigation.navigate('Chat', dogId[0])
   }
 

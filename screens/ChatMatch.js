@@ -22,16 +22,29 @@ class ChatMatch extends Component {
        
       }
     render(){
-
+     
         return(
             <View style={styles.container} >
             <ScrollView>
               {this.state.chats.map((uri)=>{
                 if(uri.user){
                   return (
-                    <TouchableOpacity style={styles.imgRow } onPress={() => this.props.navigation.navigate('MatchesChat', {user: uri.user})}>
+                    <TouchableOpacity style={styles.imgRow } onPress={() => this.props.navigation.navigate('Chat', {user: uri.user,page:'ChatMatch'})}>
                       <Image style={styles.img} source={{uri: uri.user.photoUrl}} />
                       <Text style={[styles.bold, styles.center]}>{uri.user.name}</Text>
+                    </TouchableOpacity>
+                  );
+                }
+                else{
+                return null
+                }
+              })}
+              {this.state.chats.map((uri)=>{
+                if(uri.me){
+                  return (
+                    <TouchableOpacity style={styles.imgRow } onPress={() => this.props.navigation.navigate('Chat', {user: uri.me,page:'ChatMatch'})}>
+                      <Image style={styles.img} source={{uri: uri.me.photoUrl}} />
+                      <Text style={[styles.bold, styles.center]}>{uri.me.name}</Text>
                     </TouchableOpacity>
                   );
                 }
@@ -60,7 +73,7 @@ getChat = async() => {
           items.push(dogs[0].chat[i])
       }
         let res = JSON.stringify(items)
-        console.log("items: "+res)
+        //console.log("items: "+res)
         this.setState({ chats: items.reverse() });
 }
 }

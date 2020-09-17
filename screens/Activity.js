@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../styles'
+import styles1 from '../styles1'
 import { connect } from 'react-redux'
 import { Text, View, FlatList, ActivityIndicator, Image} from 'react-native';
 import db from '../config/firebase';
@@ -32,10 +33,15 @@ class Activity extends React.Component {
             <Image style={styles.roundImage} source={{uri: item.likerPhoto}}/>
             <View style={[styles.container, styles.left]}>
               <Text style={styles.bold}>{item.likerName}</Text>
-              <Text style={styles.gray}>Liked Your Photo</Text>
+              {item.isVideo===true ?
+              <Text style={styles.gray}>Licked Your Video</Text>:
+              <Text style={styles.gray}>Licked Your photo</Text>}
               <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
             </View>
-            <Image style={styles.roundImage} source={{uri: item.postPhoto}}/>
+            {
+            item.isVideo===true ?
+            <Image style={styles.roundImage} source={{uri: item.thumbnail}}/> :
+            <Image style={styles.roundImage} source={{uri: item.postPhoto}}/> }
           </View>
         )
       case 'COMMENT':
@@ -47,7 +53,10 @@ class Activity extends React.Component {
               <Text style={styles.gray}>{item.comment}</Text>
               <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
             </View>
-            <Image style={styles.roundImage} source={{uri: item.postPhoto}}/>
+            {
+            item.isVideo===true ?
+            <Image style={styles.roundImage} source={{uri: item.thumbnail}}/> :
+            <Image style={styles.roundImage} source={{uri: item.postPhoto}}/> }
           </View>
         )
       default: null

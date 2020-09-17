@@ -11,6 +11,7 @@ import * as Location from 'expo-location'
 const  { width,height } = Dimensions.get('window');
 import { Rating } from 'react-native-elements';
 import { WebView } from 'react-native-webview';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 let imageUnavailable = 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
 const GOOGLE_DETAILSAPI='https://maps.googleapis.com/maps/api/place/details/json?query='
@@ -32,8 +33,10 @@ class ResultList extends React.Component  {
       groomerDetails:[],
       storeDetails:[],
       loadingData: false,
+      loadingImage: false,
       showWebView: false,
-      webPage: ''
+      webPage: '',
+      locationStatus:''
       
     };
 
@@ -46,13 +49,17 @@ class ResultList extends React.Component  {
   }
 
   getMyLocation = async () => {
+    
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== 'granted') {
         this.setState({
             myLocation: 'Permission denied',
+            locationStatus:'Permission denied'
         });
     }
     let location = await Location.getCurrentPositionAsync({});
+   // location.coords.latitude=62.999
+    //location.coords.longitude=-154.420
     const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'}`
     
     const response = await fetch(url)
@@ -76,7 +83,6 @@ class ResultList extends React.Component  {
       }
      
     }
-    let res = JSON.stringify(data.results[0].address_components[6].types[0])
     
     this.setState({
         myLocation: location,
@@ -128,47 +134,116 @@ getPhotos = async () => {
   let storeResponse3
   let storeResponse4
 
+  if(this.state.vet[0].photos){
    const vetUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[0]?this.state.vet[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     vetResponse1 = await fetch(vetUrl1)
+  }
+
+  else{
+    vetResponse1 = {url: imageUnavailable};
+  }
     
+    if(this.state.vet[1].photos){
    const vetUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[1]?this.state.vet[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     vetResponse2 = await fetch(vetUrl2)
+    }
 
+    else{
+      vetResponse2 = {url: imageUnavailable};
+    }
+    if(this.state.vet[2].photos){
    const vetUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[2]?this.state.vet[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     vetResponse3 = await fetch(vetUrl3)
-   
+    }
+
+    else{
+      vetResponse3 = {url: imageUnavailable};
+    }
+
+    if(this.state.vet[3].photos){
    const vetUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[3]?this.state.vet[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     vetResponse4 = await fetch(vetUrl4)
+    }
+    else{
+        vetResponse4 = {url: imageUnavailable};
+    }
 
+    if(this.state.groomer[2].photos){
     const groomerUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[0]?this.state.groomer[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     groomerResponse1 = await fetch(groomerUrl1)
-    
+    }
+    else{
+      groomerResponse1 = {url: imageUnavailable};
+    }
+    if(this.state.groomer[2].photos){
    const groomerUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[1]?this.state.groomer[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     groomerResponse2 = await fetch(groomerUrl2)
-
+    }
+    else{
+      groomerResponse2 = {url: imageUnavailable};
+    }
+    if(this.state.groomer[2].photos){
    const groomerUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[2]?this.state.groomer[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     groomerResponse3 = await fetch(groomerUrl3)
-   
+    }
+
+    else {
+      groomerResponse3 = {url: imageUnavailable};
+    }
+
+    if(this.state.groomer[3].photos){
    const groomerUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[3]?this.state.groomer[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     groomerResponse4 = await fetch(groomerUrl4)
+    }
 
+    else {
+      groomerResponse4 = {url: imageUnavailable};
+    }
+
+    if(this.state.store[1].photos){
     const storeUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[0]?this.state.store[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     storeResponse1 = await fetch(storeUrl1)
-    
+    }
+
+    else {
+      storeResponse1 = {url: imageUnavailable};
+    }
+
+    if(this.state.store[1].photos){
    const storeUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[1]?this.state.store[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     storeResponse2 = await fetch(storeUrl2)
+    }
+    else {
+      storeResponse2 = {url: imageUnavailable};
+    }
 
+    if(this.state.store[2].photos){
    const storeUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[2]?this.state.store[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     storeResponse3 = await fetch(storeUrl3)
-   
-   const storeUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[3]?this.state.store[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    
+    }
+
+    else{
+      storeResponse3 = {url: imageUnavailable};
+    }
+    
+    
+    if(this.state.store[3].photos){
+      
+   const storeUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[3].photos?this.state.store[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
     storeResponse4 = await fetch(storeUrl4)
+    
+    }
+    else{
+      storeResponse4 = {url: imageUnavailable};
+    }
+  
 
    this.setState({
      vetPhotos: [vetResponse1,vetResponse2,vetResponse3,vetResponse4],
      groomerPhotos: [groomerResponse1,groomerResponse2,groomerResponse3,groomerResponse4],
      storePhotos: [storeResponse1,storeResponse2,storeResponse3,storeResponse4],
-     //loadingData: true
+     loadingImage: true
    })
 
    this.getPlaceDetails()
@@ -225,13 +300,33 @@ getPhotos = async () => {
   
 
 render(){
-if(this.state.loadingData==false){
+  if(this.state.locationStatus=="Permission denied"){
+    return(
+     <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
+     <Text
+       style={{
+         fontSize: 50,
+         fontWeight: "700",
+         paddingHorizontal: 20
+       }}
+     >
+       Please enable Permissions in order to use this Feature
+   </Text>
+   </View>
+    )
+  
+   }
+if(this.state.loadingData==false && this.state.loadingImage==false){
   return(
-  <View style={styles.container}>
+  <View style={styles.loadingPage}>
    <ActivityIndicator size="large" color="#0000ff"/>
+   <Text style= {{fontWeight:'bold'}}>Please wait the page is loading...</Text>
   </View>
   )
 }
+
+
+
 
 if(this.state.showWebView){
   console.log('inside webview')
@@ -251,8 +346,9 @@ else{
   //console.log("data:"+res)
   return (
     <ScrollView>
-
+ <View style={styles.mainTitle}>
   <Text style={styles.mainTitle}>Dog Essentials in Your Area</Text>
+  </View>
     <View style={styles.container}>
       <Text style={styles.title}>Vets</Text>
       <ScrollView
@@ -391,13 +487,20 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-   marginLeft: 50,
-    marginBottom: 5,
+    alignItems: 'center',
+    justifyContent: 'center'
 
   },
   container: {
     marginTop: 10,
     marginBottom: 10
+  },
+
+  loadingPage: {
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });
 

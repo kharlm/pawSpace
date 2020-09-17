@@ -4,16 +4,21 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import * as ImagePicker from 'expo-image-picker'
 import * as Permissions from 'expo-permissions'
-import { Text, View, TextInput, TouchableOpacity, Image, Alert, ScrollView,KeyboardAvoidingView} from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, Image, Alert, ScrollView,KeyboardAvoidingView, Platform} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
+import CheckBox from 'react-native-check-box'
 import { Tooltip } from 'react-native-elements';
-import { updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog, dogsignup } from '../actions/dog'
+import { updateDogname, updateBreed, updateColor, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog, dogsignup } from '../actions/dog'
 import {updateEmail, updatePassword, updateUsername,signup, updateUser, getUser} from '../actions/user'
 import { getPosts} from '../actions/post'
 import { uploadPhoto } from '../actions'
 import {updatePhoto} from '../actions/dog'
 import db from '../config/firebase'
 import Toast from 'react-native-root-toast'
+import {noDog} from '../actions/nodog'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+
+
 
 class DogSignup extends React.Component {
 
@@ -23,19 +28,17 @@ class DogSignup extends React.Component {
     super(props);
     const { routeName } = this.props.navigation.state
 
-
     if(routeName==='Edit'){
-      console.log("inside edit routename")
-     
       this.state = { dogNumber: 1 ,
         dogName: this.props.dog.dogname,
         dogAge:this.props.dog.age,
         dogBio:this.props.dog.bio,
         dogBreed:this.props.dog.breed,
+        dogColor: this.props.dog.color,
         dogGender:this.props.dog.gender,
         dogWeight:this.props.dog.weight,
         dogTag:this.props.dog.dogTag,
-       
+        image: this.props.dog.photo
   }
     }
     else{
@@ -43,16 +46,19 @@ class DogSignup extends React.Component {
     this.state = { dogNumber: 1 ,
           dogName:'',
           dogAge:'',
+          dogColor:'Color',
           dogBio:'',
           dogBreed:'Breed',
           dogGender:'Gender',
           dogWeight:'',
           dogTag:'',
+          image:'',
           moreThanOneDog: false,
           dogTagExists: false,
           login: false,
           search: '',
-		      query: ''
+          query: '',
+          isChecked: false
     }
   }
 }
@@ -71,8 +77,6 @@ class DogSignup extends React.Component {
     else{
       this.setState({query:""},this.addDog)
     }
-    let res= JSON.stringify(this.state.query)
-    console.log("query: "+res)
 	}
   
   searchDogTag1 = async () => {
@@ -92,6 +96,10 @@ class DogSignup extends React.Component {
     console.log("query: "+res)
 	}
   
+  noDog = () => {
+    this.props.noDog()
+    this.props.navigation.navigate('Home')
+  }
 
   onPress = () => {  
 
@@ -114,6 +122,13 @@ class DogSignup extends React.Component {
           'Please Enter a dog Breed',
         );
       }
+
+      else if(this.state.dogColor =='Color'){
+        Alert.alert(
+          'Please Enter a dog Color',
+        );
+      }
+      
      else if(this.state.dogGender =='Gender'){
         Alert.alert(
           'Please Enter a dog Gender',
@@ -139,34 +154,42 @@ class DogSignup extends React.Component {
 
       }
 
-      else if(this.state.dogTag == this.state.query && routeName==='DogSignUp'){
-        console.log("roouto: "+routeName)
+      else if(this.state.dogTag == this.state.query && (routeName==='DogSignUp' || routeName==='DogEdit')){
         Alert.alert(
           'This dogTag is already in use please enter a different one ',
       );
 
       }
 
-      else if(typeof this.props.dog.photo === 'undefined'){
-        console.log("in undefined")
+      else if(this.state.image == ''){
         Alert.alert(
           'Please Upload a profile photo for your dog ',
       );
 
       }
 
-      else if(routeName==='DogSignUp'){
+      else if(this.state.isChecked==false){
+
+        Alert.alert(
+          'Please read and agree to the End User License Agreement before you can continue',
+      );
+  
+      }
+
+      else if(routeName==='DogSignUp' || routeName==='DogEdit'){
 
         this.setState({
           dogNumber: this.state.dogNumber+1,
         })
          this.props.updateDogname(this.state.dogName)
          this.props.updateAge(this.state.dogAge)
+         this.props.updateColor(this.state.dogColor)
          this.props.updateBio(this.state.dogBio)
          this.props.updateGender(this.state.dogGender)
          this.props.updateWeight(this.state.dogWeight)
          this.props.updateBreed(this.state.dogBreed)
-         this.props.updateDogtag(this.state.dogTag.toLowerCase())
+         this.props.updateDogtag(this.state.dogTag.replace(/\s/g, '').toLowerCase())
+         this.props.updatePhoto(this.state.image)
 
         this.props.dogsignup()
         let res = JSON.stringify(this.props.user)
@@ -181,10 +204,12 @@ class DogSignup extends React.Component {
      else {
        this.props.updateDogname(this.state.dogName)
       this.props.updateAge(this.state.dogAge)
+      this.props.updateColor(this.state.dogColor)
       this.props.updateBio(this.state.dogBio)
       this.props.updateGender(this.state.dogGender)
       this.props.updateWeight(this.state.dogWeight)
       this.props.updateBreed(this.state.dogBreed)
+      this.props.updatePhoto(this.state.image)
       this.props.updateDog()
       this.props.getPosts()
       this.props.navigation.goBack()
@@ -206,6 +231,11 @@ class DogSignup extends React.Component {
     else if(this.state.dogAge ==''){
       Alert.alert(
         'Please Enter a dog Age',
+      );
+    }
+    else if(this.state.dogColor =='Color'){
+      Alert.alert(
+        'Please Enter a dog Color',
       );
     }
     else if(this.state.dogBreed =='Breed'){
@@ -238,31 +268,32 @@ class DogSignup extends React.Component {
     }
 
     else if(this.state.dogTag === this.state.query){
-      console.log("in wrong dogtag")
       Alert.alert(
         'This dogTag is already in use please enter a different one ',
     );
 
     }
 
-    else if(typeof this.props.dog.photo === 'undefined'){
+    else if(this.state.image == ''){
       Alert.alert(
         'Please Upload a profile photo for your dog ',
     );
 
-    }
-
-    else if(this.state.dogName!=null && this.state.dogWeight!=null && this.state.dogAge!=null && this.state.dogGender!='Gender' && this.state.dogBreed!='Breed' && this.state.dogTag!=null && this.state.dogBio!=null){
+      }
+    
+    else if(this.state.dogName!=null && this.state.dogWeight!=null && this.state.dogAge!=null && this.state.dogColor!='Color' && this.state.dogGender!='Gender' && this.state.dogBreed!='Breed' && this.state.dogTag!=null && this.state.dogBio!=null){
       this.setState({
         dogNumber: this.state.dogNumber+1,
       })
          this.props.updateDogname(this.state.dogName)
          this.props.updateAge(this.state.dogAge)
+         this.props.updateColor(this.state.dogColor)
          this.props.updateBio(this.state.dogBio)
          this.props.updateGender(this.state.dogGender)
          this.props.updateBreed(this.state.dogBreed)
          this.props.updateWeight(this.state.dogWeight)
-         this.props.updateDogtag(this.state.dogTag.toLowerCase())
+         this.props.updateDogtag(this.state.dogTag.replace(/\s/g, '').toLowerCase())
+         this.props.updatePhoto(this.state.image)
        
         this.props.dogsignup()
       
@@ -270,6 +301,7 @@ class DogSignup extends React.Component {
         this.setState({
           dogName:'',
           dogAge:'',
+          dogColor:'Color',
           dogBio:'',
           dogBreed:'Breed',
           dogGender:'Gender',
@@ -287,13 +319,14 @@ class DogSignup extends React.Component {
       const image = await ImagePicker.launchImageLibraryAsync({allowsEditing: true})
       if(!image.cancelled ){
         const url = await this.props.uploadPhoto(image)
-        this.props.updatePhoto(url)
+        this.setState({
+          image: url
+        })
       }
     }
   }
 
   touchDogTag = () => {
-    console.log("in touch")
     let toast = Toast.show('dogtag is a unique identifier for your dog. It\'s like your dog\'s username', {
       duration: Toast.durations.LONG,
       position: Toast.positions.CENTER,
@@ -306,7 +339,7 @@ class DogSignup extends React.Component {
     // You can manually hide the Toast, or it will automatically disappear after a `duration` ms timeout.
     setTimeout(function () {
       Toast.hide(toast);
-    }, 3000);
+    }, 5000);
   }
 
   dogLengthMoreThanOne = async (id) => {
@@ -346,28 +379,37 @@ class DogSignup extends React.Component {
       this.props.navigation.navigate('DogPicker')
       )
     }
-
     if(this.state.moreThanOneDog===false && this.state.login===true){
+      console.log("nodog1: "+this.props.nodog)
       return(
-      this.props.navigation.navigate('Home')
+       
+      
+     this.props.navigation.navigate('Home')
       )
     }
 
     else{
-
-    
-    
     return (
-      <KeyboardAvoidingView enabled behavior='padding'>
+      <KeyboardAwareScrollView
+      style={{ backgroundColor: '#4c69a5' }}
+      resetScrollToCoords={{ x: 0, y: 0 }}
+      contentContainerStyle={styles.container}
+      scrollEnabled={false}
+    >
       <ScrollView>
       <View style={[styles.container, styles.center]}>
         <TouchableOpacity style={styles.center} onPress={this.openLibrary} >
-          <Image style={styles.roundImage} source={{uri: this.props.dog.photo}}/>
+          <Image style={styles.roundImage} source={{uri: this.state.image}}/>
           <Text>Upload Photo</Text>     
         </TouchableOpacity>
         <Text style={{paddingTop: 10,fontSize: 20}}>Add Info for Dog # {this.state.dogNumber}</Text>
+        {
+          routeName === 'DogSignUp' ?
+        <TouchableOpacity style={styles.button} onPress={()=>this.noDog()}>
+      		<Text>I dont have a dog</Text>
+      	</TouchableOpacity>:<View/>
+        }
         <TextInput
-        
           style={styles.border}
           value={this.state.dogName}
           onChangeText={dogName => this.setState({dogName})}
@@ -375,15 +417,12 @@ class DogSignup extends React.Component {
         />
 
          <TextInput
-         
           style={styles.border}
           value={this.state.dogAge}
           onChangeText={dogAge => this.setState({dogAge})}
           placeholder='Age'
           keyboardType='numeric'
-          
         />
-
         <View style={[styles.center, styles.pickerBorder]}>
          <RNPickerSelect
              placeholder={{
@@ -393,6 +432,17 @@ class DogSignup extends React.Component {
             onValueChange={(dogBreed) => this.setState({dogBreed})}
            
             items={breeds}
+        />
+        </View>
+        <View style={[styles.center, styles.pickerBorder]}>
+         <RNPickerSelect
+             placeholder={{
+              label: 'Color',
+              color: 'red',
+            }}
+            onValueChange={(dogColor) => this.setState({dogColor})}
+           
+            items={colors}
         />
         </View>
         <View style={[styles.center, styles.pickerBorder]}>
@@ -409,10 +459,6 @@ class DogSignup extends React.Component {
             ]}
         />
         </View>
-   
-
-       
-        
          <TextInput
           style={styles.border}
           value={this.state.dogWeight}
@@ -426,43 +472,100 @@ class DogSignup extends React.Component {
           onChangeText={dogBio => this.setState({dogBio})}
           placeholder='Bio'
         />
-        
         <TextInput
           style={styles.border}
-        	value={this.state.dogTag.toLowerCase()}
+        	value={this.state.dogTag.replace(/\s/g, '').toLowerCase()}
           onChangeText={dogTag => this.setState({dogTag})}
-          editable={routeName === 'DogSignUp' ? true : false}
+          editable={routeName === 'DogSignUp' || 'DogEdit' ? true : false}
           placeholder='Dog Tag'
           autoCapitalize='none'
           onFocus={ () => this.touchDogTag() }
         />
-      
+        <View style={{flexDirection:'row',paddingTop: 15,paddingBottom: 5,alignItems:'center', justifyContent:'center'}}>
+         <CheckBox
+          onClick={()=>{
+            this.setState({
+                isChecked:!this.state.isChecked
+            })
+          }}
+          isChecked={this.state.isChecked} 
+        />
+        <TouchableOpacity onPress={() => { Alert.alert(
+        'This End User License Agreement (“Agreement”) is between you and pawSpace and governs use of this app made available through the Apple App Store. By installing the pawSpace App, you agree to be bound by this Agreement and understand that there is no tolerance for objectionable content. If you do not agree with the terms and conditions of this Agreement, you are not entitled to use the pawSpace App.'+
+        
+        'In order to ensure pawSpace provides the best experience possible for everyone, we strongly enforce a no tolerance policy for objectionable content. If you see inappropriate content, please use the "Report as offensive" feature found under each post.'+
+        
+        '1. Parties This Agreement is between you and pawSpace only, and not Apple, Inc. (“Apple”). Notwithstanding the foregoing, you acknowledge that Apple and its subsidiaries are third party beneficiaries of this Agreement and Apple has the right to enforce this Agreement against you. pawSpace, not Apple, is solely responsible for the pawSpace App and its content.'+
+        
+        '2. Privacy pawSpace may collect and use information about your usage of the pawSpace App, including certain types of information from and about your device. pawSpace may use this information, as long as it is in a form that does not personally identify you, to measure the use and performance of the pawSpace App.'+
+        
+        '3. Limited License pawSpace grants you a limited, non-exclusive, non-transferable, revocable license to use the pawSpace App for your personal, non-commercial purposes. You may only use thepawSpace App on Apple devices that you own or control and as permitted by the App Store Terms of Service.'+
+        
+        '4. Age Restrictions By using the pawSpace App, you represent and warrant that (a) you are 17 years of age or older and you agree to be bound by this Agreement; (b) if you are under 17 years of age, you have obtained verifiable consent from a parent or legal guardian; and (c) your use of the pawSpace App does not violate any applicable law or regulation. Your access to the pawSpace App may be terminated without warning if pawSpace believes, in its sole discretion, that you are under the age of 17 years and have not obtained verifiable consent from a parent or legal guardian. If you are a parent or legal guardian and you provide your consent to your child\'s use of the pawSpace App, you agree to be bound by this Agreement in respect to your child\'s use of the pawSpace App.'+
+        
+        '5. Objectionable Content Policy Content may not be submitted to pawSpace, who will moderate all content and ultimately decide whether or not to post a submission to the extent such content includes, is in conjunction with, or alongside any, Objectionable Content. Objectionable Content includes, but is not limited to: (i) sexually explicit materials; (ii) obscene, defamatory, libelous, slanderous, violent and/or unlawful content or profanity; (iii) content that infringes upon the rights of any third party, including copyright, trademark, privacy, publicity or other personal or proprietary right, or that is deceptive or fraudulent; (iv) content that promotes the use or sale of illegal or regulated substances, tobacco products, ammunition and/or firearms; and (v) gambling, including without limitation, any online casino, sports books, bingo or poker.'+
+        
+        '6. Warranty pawSpace disclaims all warranties about the pawSpace App to the fullest extent permitted by law. To the extent any warranty exists under law that cannot be disclaimed, pawSpace, not Apple, shall be solely responsible for such warranty.'+
+        
+        '7. Maintenance and Support pawSpace does provide minimal maintenance or support for it but not to the extent that any maintenance or support is required by applicable law, pawSpace, not Apple, shall be obligated to furnish any such maintenance or support.'+
+        
+        '8. Product Claims pawSpace, not Apple, is responsible for addressing any claims by you relating to the pawSpace App or use of it, including, but not limited to: (i) any product liability claim; (ii) any claim that the pawSpace App fails to conform to any applicable legal or regulatory requirement; and (iii) any claim arising under consumer protection or similar legislation. Nothing in this Agreement shall be deemed an admission that you may have such claims.'+
+        
+       '9. Third Party Intellectual Property Claims pawSpace shall not be obligated to indemnify or defend you with respect to any third party claim arising out or relating to the pawSpace App. To the extent pawSpace is required to provide indemnification by applicable law, pawSpace, not Apple, shall be solely responsible for the investigation, defense, settlement and discharge of any claim that the pawSpace App or your use of it infringes any third party intellectual property right.'
+    );}}>
+        <Text style={{color: 'blue'}}> Agree to End User License Agreement</Text>
+        </TouchableOpacity>
+        </View>
       	<TouchableOpacity style={styles.button} onPress={()=> {this.searchDogTag1(); }}>
       		<Text>Done</Text>
       	</TouchableOpacity>
 
         {
           routeName === 'DogSignUp' ?
-
-          
           <View>
-
-        <Text style={{marginTop:12,paddingLeft: 90}}>OR</Text>
+        <Text style={{marginLeft: 85,paddingTop: 5}}>OR</Text>
+        <View>
         <TouchableOpacity style={styles.button} onPress={() => { this.searchDogTag();}}>
       		<Text>Add Another Dog</Text>
       	</TouchableOpacity> 
+      </View>
         </View>:
          <View></View>
         }
-
       </View>
       </ScrollView>
-      </KeyboardAvoidingView>
+     </KeyboardAwareScrollView>
     );
   }
 }
 }
+
+let colors =[ {label: 'Apricot',value: 'Apricot'},
+{label: 'Beige',value: 'Beige'},
+{label: 'Black',value: 'Black'},
+{label: 'Blue',value: 'Blue'},
+{label: 'Brown',value: 'Brown'},
+{label: 'Chesnut',value: 'Chesnut'},
+{label: 'Cream',value: 'Cream'},
+{label: 'Dark Blue',value: 'Dark Blue'},
+{label: 'Dark Brown',value: 'Dark Brown'},
+{label: 'Fawn',value: 'Fawn'},
+{label: 'Gold',value: 'Gold'},
+{label: 'Gray',value: 'Gray'},
+{label: 'Light Brown',value: 'Light Brown'},
+{label: 'Light Silver',value: 'Light Silver'},
+{label: 'Lilac',value: 'Lilac'},
+{label: 'Orange',value: 'Orange'},
+{label: 'Red',value: 'Red'},
+{label: 'Rust',value: 'Rust'},
+{label: 'Silver',value: 'Silver'},
+{label: 'Tan',value: 'Tan'},
+{label: 'Wheaten',value: 'Wheaten'},
+{label: 'White',value: 'White'},
+{label: 'Yellow',value: 'Yellow'}]
+
 let breeds =[
+{label: 'Mixed',value: 'Mixed'},
 {label: 'Affenpinscher',value: 'Affenpinscher'},
 {label: 'Afghan Hound',value: 'Afghan Hound'},
 {label: 'Aidi',value: 'Aidi'},
@@ -917,108 +1020,15 @@ let breeds =[
 {label: 'Wirehaired Vizsla',value: 'Wirehaired Vizsla'},
 {label: 'Yorkshire Terrier',value: 'Yorkshire Terrier'},
 {label: 'Šarplaninac',value: 'Šarplaninac'}]
-/*let breeds = [
-  
-  { label: 'Affenpinscher',value: 'Affenpinscher'},
-  { label: 'Affenpoo',value: 'Affenpoo'},
-  { label: 'Afghan Hound',value: 'Afghan Hound'},
-  { label: 'Airedale Terrier',value: 'Airedale Terrier'},
-  { label: 'Airedoodle',value: 'Airedoodle'},
-  { label: 'Akbash Dog',value: 'Akbash Dog'},
-  { label: 'Aki-Poo',value: 'Aki-Poo'},
-  { label: 'Akita',value: 'Akita'},
-  { label: 'Akita Mix',value: 'Akita Mix'},
-  { label: 'Alapaha Blue Blood Bulldog',value: 'Alapaha Blue Blood Bulldog'},
-  {label: 'Alaskan Klee Kai', value:'Alaskan Klee Kai'},
-  {label: 'Alaskan Klee Kai', value:'Alaskan Klee Kai'},
-  {label: 'Alaskan Malamute', value:'Alaskan Malamute'},
-  {label: 'Alaskan Malamute Mix', value:'Alaskan Malamute Mix'},
-  {label: 'American Bulldog', value:'American Bulldog'},
-  {label: 'American Bulldog Hybrid', value:'American Bulldog Hybrid'},
-  {label: 'American Bully', value:'American Bully'},
-  {label: 'American Bully Hybrid', value:'American Bully Hybrid'},
-  {label: 'American Eskimo', value:'American Eskimo'},
-  {label: 'American Foxhound', value:'American Foxhound'},
-  {label: 'American Leopard Hound', value:'American Leopard Hound'},
-  {label: 'American Pit Bull Terrier', value:'American Pit Bull Terrier'},
-  {label: 'American Staffordshire Terrier', value:'American Staffordshire Terrier'},
-  {label: 'American Water Spaniel', value:'American Water Spaniel'},
-  {label: 'Anatolian Shepherd', value:'Anatolian Shepherd'},
-  {label: 'Anatolian Shepherd Hybrid', value:'Anatolian Shepherd Hybrid'},
-  {label: 'Aussiedoodle', value:'Aussiedoodle'},
-  {label: 'Australian Cattle Dog', value:'Australian Cattle Dog'},
-  {label: 'Australian Cattle Dog Hybrid', value:'Australian Cattle Dog Hybrid'},
-  {label: 'Australian Shepherd', value:'Australian Shepherd'},
-  {label: 'Australian Shepherd Mix', value:'Australian Shepherd Mix'},
-  {label: 'Australian Terrier', value:'Australian Terrier'},
-  {label: 'Basenji', value:'Basenji'},
-  {label: 'Basset Hound', value:'Basset Hound'},
-  {label: 'Basset Mix', value:'Basset Mix'},
-  {label: 'Beabull', value:'Beabull'},
-  {label: 'Beagle', value:'Beagle'},
-  {label: 'Beagle Mix', value:'Beagle Mix'},
-  {label: 'Beaglier', value:'Beaglier'},
-  {label: 'Bearded Collie', value:'Bearded Collie'},
-  {label: 'Beauceron', value:'Beauceron'},
-  {label: 'Bedlington Terrier', value:'Bedlington Terrier'},
-  {label: 'Belgian Malinois', value:'Belgian Malinois'},
-  {label: 'Belgian Malinois Hybrid', value:'Belgian Malinois Hybrid'},
-  {label: 'Belgian Sheepdog', value:'Belgian Sheepdog'},
-  {label: 'Bengal Kitten', value:'Bengal Kitten'},
-  {label: 'Bernedoodle', value:'Bernedoodle'},
-  {label: 'Bernese Mountain Dog', value:'Bernese Mountain Dog'},
-  {label: 'Bernese Mountain Dog Mini', value:'Bernese Mountain Dog Mini'},
-  {label: 'Bernese Mountain Dog Mix', value:'Bernese Mountain Dog Mix'},
-  {label: 'Bichon Frise', value:'Bichon Frise'},
-  {label: 'Bichon Mix', value:'Bichon Mix'},
-  {label: 'Bichpoo', value:'Bichpoo'},
-  {label: 'Biewer Terrier', value:'Biewer Terrier'},
-  {label: 'Black and Tan Coonhound', value:'Black and Tan Coonhound'},
-  {label: 'Black and Tan Coonhound Hybrid', value:'Black and Tan Coonhound Hybrid'},
-  {label: 'Black Russian Terrier', value:'Black Russian Terrier'},
-  {label: 'Bloodhound', value:'Bloodhound'},
-  {label: 'Bloodhound Poodle Hybrid', value:'Bloodhound Poodle Hybrid'},
-  {label: 'Blue Heeler', value:'Blue Heeler'},
-  {label: 'Blue Heeler Mix', value:'Blue Heeler Mix'},
-  {label: 'Border Collie', value:'Border Collie'},
-  {label: 'Border Collie Mix', value:'Border Collie Mix'},
-  {label: 'Border Terrier', value:'Border Terrier'},
-  {label: 'Borzoi', value:'Borzoi'},
-  {label: 'Boston Terrier', value:'Boston Terrier'},
-  {label: 'Boston Terrier Mix', value:'Boston Terrier Mix'},
-  {label: 'Bouvier des Flandres', value:'Bouvier des Flandres'},
-  {label: 'Boxer', value:'Boxer'},
-  {label: 'Boxer Mix', value:'Boxer Mix'},
-  {label: 'Boxer/Bulldog', value:'Boxer/Bulldog'},
-  {label: 'Briard', value:'Briard'},
-  {label: 'Briquet Griffon Vendéen', value:'Briquet Griffon Vendéen'},
-  {label: 'Brittany Mix', value:'Brittany Mix'},
-  {label: 'Brittany Spaniel', value:'Brittany Spaniel'},
-  {label: 'Brittnepoo', value:'Brittnepoo'},
-  {label: 'Broodle Griffon', value:'Broodle Griffon'},
-  {label: 'Brussels Griffon', value:'Brussels Griffon'},
-  {label: 'Brussels Griffon Mix', value:'Brussels Griffon Mix'},
-  {label: 'Bugg', value:'Bugg'},
-  {label: 'Bull Mastiff Hybrid', value:'Bull Mastiff Hybrid'},
-  {label: 'Bull Terrier', value:'Bull Terrier'},
-  {label: 'Bullmastiff', value:'Bullmastiff'},
-  {label: 'Bully Bassets', value:'Bully Bassets'},
- 
-  
-  
-
-  {label: 'Labrador Retriever', value:'Labrador Retriever'},
-  {label:'Golden Retriever', value:'Golden Retriever'}
-]
-*/
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updateDogname, updateBreed, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog,dogsignup,signup,updateUser,getUser,uploadPhoto,updatePhoto,getPosts}, dispatch)
+  return bindActionCreators({ updateDogname, updateBreed, updateAge, updateColor, updateGender, updateDogtag, updateWeight,updateBio, updateDog,dogsignup,signup,updateUser,getUser,uploadPhoto,updatePhoto,getPosts,noDog}, dispatch)
 }
 
 const mapStateToProps = (state) => {
   return {
     dog: state.dog,
-    user: state.user
+    user: state.user,
+    nodog: state.nodog
   }
 }
 

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import uuid from 'uuid'
 import styles from '../styles'
 import { View, Text, StyleSheet, Image, Dimensions, Platform,ScrollView, TouchableOpacity} from "react-native";
 import {getDog,getDogs} from '../actions/dog'
@@ -20,83 +21,81 @@ class MatchesChat extends Component {
         messages: [],
       }
 
-      componentWillMount(){
+      componentDidMount(){
       
         this.getMessages()
     
       }
 
       getMessages = async () => {
-        console.log("in get  Matches chat")
-        let dogs = []
+        let items1 = []
+        let items=[]
+
+        try{
         const query = await db.collection('dogs').where('dogId', '==', this.props.dog.dogId).get()
-        
         query.forEach(function(response) {
-          dogs.push(response.data())
+          items.push(response.data())
           })
-          let items=[]
-
-          console.log("user id: "+ this.props.navigation.state.params.user.id)
+         
           
-          for(let i=0; i<dogs[0].chat.length;i++){
 
-
-            if(dogs[0].chat[i].user.id===this.props.navigation.state.params.user.id){
-            
-              items.push(dogs[0].chat[i].messages)
-            }
+         for(let i=0;i<items[0].messages.length;i++){
+           if(items[0].messages[i].user._id===this.props.navigation.state.params.user.id){
+             items1.push(items[0].messages[i])
+           }
+         }
+          for(let i=0;i<items1.length;i++){
+            items1[i].createdAt=items1[i].createdAt.toDate()
           }
+        
           this.setState({
-            messages: [
-              {
-                _id: 1,
-                text: 'Hello developer',
-                createdAt: new Date(),
-                user: {
-                  _id: 2,
-                  name: 'React Native',
-                  avatar: 'https://placeimg.com/140/140/any',
-                },
-              },
-            ],
-          })    
-    }
+            messages: items1       
+    })
+  }
+  catch{
+    alert(e)
+  }
+    
+  }
 
-    onSend = async (messages = []) => {
+    onSend(messages = []){
         //this.props.dispatch(sendNotification(this.props.navigation.state.params.user.id, messages[0].user.name, messages[0].text))
         this.setState(previousState => ({
           messages: GiftedChat.append(previousState.messages, messages),
         }))
-     let mess = messages[0]
-     console.log("message ZERO: "+mess)
-        const query = await db.collection('dogs').where('dogId', '==', this.props.dog.dogId).get()
+
+        let res = JSON.stringify(this.state.messages)
+       console.log("gifted: "+res)
+
+
+			try {
+        console.log("inside try")
+				
+        db.collection('dogs').doc(this.props.dog.dogId).update({
+          messages: firebase.firestore.FieldValue.arrayUnion(messages[0])
+       
+      })
+
+      db.collection('dogs').doc(this.props.navigation.state.params.user.id).update({
+        messages: firebase.firestore.FieldValue.arrayUnion(messages[0])
+     
+    })
+    
+    } 
+			catch(e) {
+			  console.log("block dog error")
+			alert(e)
+			}
+		
+		  
+     
         
-        query.forEach(function(response) {
-          dogs.push(response.data())
-          })
-
-          for(let i=0; i<dogs[0].chat.length;i++){
-
-
-            if(dogs[0].chat[i].user.id===this.props.navigation.state.params.user.id){
-            
-                db.collection('dogs').doc(this.props.dog.dogId).update({
-                    ['chat[' + i +']'+ '.messages']:  firebase.firestore.FieldValue.arrayUnion({
-                        mess
-                       }
-                       )
-                    
-                  })
-            }
-          }
-
-        
-      }
+  }
     
     render(){
 
-       
-        console.log("message: "+ this.state.messages)
+       let res = JSON.stringify(this.state.messages)
+       //console.log("messy: "+res)
         return(
             <GiftedChat
             messages={this.state.messages}
@@ -108,9 +107,7 @@ class MatchesChat extends Component {
             }}
           />
         )
-        }
-
-    
+        }  
 }
 
 const mapDispatchToProps = (dispatch) => {

@@ -8,7 +8,7 @@ class DogParks extends Component {
           width: this.props.width / 2 - 25,
           height: this.props.width / 2 - 45,
           borderWidth: 1,
-          borderColor: "#dddddd",
+          borderColor: "#b0b0b0",
           marginBottom: 15,
           borderRadius: 5
         }}

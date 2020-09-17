@@ -8,9 +8,9 @@
       "ios",
       "android"
     ],
-    "version": "2.1.0",
+    "version": "6.5.1",
     "orientation": "portrait",
-    "icon": "./assets/download.png",
+    "icon": "./assets/paws.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
@@ -24,10 +24,28 @@
     ],
     "ios": {
       "bundleIdentifier": "com.kharlmccatty.pawSpace",
-      "supportsTablet": true
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Allow pawSpace to use your location in order to find other dogs in your area, view local dog parks and businesses in your area, and add location to photos uploaded",
+        "NSPhotoLibraryUsageDescription":"Allow pawSpace to access your photo library so that you can upload your dog pictures"
+      }
     },
     "android": {
       "package": "com.kharlmccatty.pawSpace"
+    },
+    "packagerOpts": {
+      "sourceExts": [
+        "expo.ts",
+        "expo.tsx",
+        "expo.js",
+        "expo.jsx",
+        "ts",
+        "tsx",
+        "js",
+        "jsx",
+        "json",
+        "wasm",
+        "svg"
+      ]
     }
   }
 }

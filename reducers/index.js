@@ -20,6 +20,27 @@ const user = (state = {}, action) => {
 }
 
 
+const guest = ( state = false, action) => {
+  switch(action.type) {
+    case 'GUEST':
+      return state = true
+    case 'NO_GUEST':
+      return state = false
+    default:
+      return state;
+  }
+}
+
+const nodog = ( state = false, action) => {
+  switch(action.type) {
+    case 'NO_DOG':
+      return state = true
+    case 'YES_DOG':
+    return state = false
+    default:
+      return state;
+  }
+}
 
 
 const signupError = ( state = false, action) => {
@@ -37,10 +58,14 @@ const dog = (state = {}, action) => {
   switch (action.type) {
     case 'DOGLOGIN':
       return action.payload
+      case 'POST_PAGE':
+        return { ...state, postPage: action.payload }
     case 'UPDATE_DOGNAME':
       return { ...state, dogname: action.payload } 
     case 'UPDATE_BREED':
       return { ...state, breed: action.payload } 
+    case 'UPDATE_COLOR':
+      return { ...state, color: action.payload } 
     case 'UPDATE_AGE':
       return { ...state, age: action.payload } 
     case 'UPDATE_GENDER':
@@ -94,11 +119,20 @@ const cards = (state = {}, action) => {
 const messages = (state = {}, action) => {
   switch (action.type) {
     case 'GET_MESSAGES':
+      console.log("IN GET MESSAGES")
       return action.payload
     default:
       return state
   }
 }
+/*const postPage = (state = 'false', action) => {
+  switch (action.type) {
+    case 'POST_PAGE':
+      return { ...state, postPage: action.payload }
+    default:
+      return state
+  }
+}*/
 
 const post = (state = null, action) => {
   switch (action.type) {
@@ -114,6 +148,8 @@ const post = (state = null, action) => {
       return { ...state, postFeed: action.payload }
     case 'GET_DOGPOSTS':
       return { ...state, breedFeed: action.payload }
+    case 'GET_EXPLOREPOSTS':
+        return { ...state, exploreFeed: action.payload }
     case 'GET_COMMENTS': 
       return { ...state, comments: action.payload }
     default:
@@ -140,7 +176,10 @@ const rootReducer = combineReducers({
   profile,
   messages,
   dogprofile,
-  signupError,cards
+  signupError,
+  cards,
+  guest,
+  nodog
 })
 
 export default rootReducer

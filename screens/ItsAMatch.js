@@ -29,8 +29,10 @@ class ItsAMatch extends Component {
         }
     }
 
-    componentDidMount(){
+    componentDidMount = () => {
         this.getMyLocation()
+        const card = this.props.navigation.getParam('card','')
+       
     }
 
     getMyLocation = async () => {
@@ -100,16 +102,16 @@ class ItsAMatch extends Component {
         let response3
         let response4
      
-         const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+         const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
           response1 = await fetch(url1)
           
-         const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+         const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
           response2 = await fetch(url2)
      
-         const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+         const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
           response3 = await fetch(url3)
          
-         const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=150&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+         const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
           response4 = await fetch(url4)
      
          this.setState({
@@ -121,14 +123,12 @@ class ItsAMatch extends Component {
 
      render(){
         const card = this.props.navigation.getParam('card','');
-         let res = JSON.stringify(card)
-         console.log("card: "+res)
         return(
             <View >
             <ScrollView style={{paddingTop: 5}}>
                  
             <Text style={{fontWeight: 'bold',color:'#ff0000', fontSize: 40,paddingLeft: (width/2)-100}}>Its a Match!</Text>
-            <Text style={{paddingLeft: 75,paddingTop: 10}}>You and {card.dogname} Liked each other</Text>
+            <Text style={{paddingLeft: (width/2)-100,paddingTop: 10, fontWeight:'bold'}}>You and {card.dogname} Liked each other</Text>
             <View
             style={{
              flexDirection: "row",
@@ -148,7 +148,7 @@ class ItsAMatch extends Component {
         <Text style={styles1.caption}>{card.breed}</Text>
         </View>
         </View>
-        <Text style={{paddingTop: 8, paddingHorizontal: 25,paddingBottom: 10}}>Plan a play date at the nearest dog park which is:</Text>
+        <Text style={{paddingTop: 8, paddingHorizontal: 25,paddingBottom: 10,fontWeight:'bold'}}>Plan a play date at the nearest dog park which is:</Text>
         <View style={{paddingLeft: 100}}>
         <DogParks
             imageUri={this.state.DogParkPhotos[0] ? this.state.DogParkPhotos[0].url: imageUnavailable}
@@ -164,7 +164,7 @@ class ItsAMatch extends Component {
              justifyContent: "space-between",
            }}
          >
-         <TouchableOpacity style={styles1.button}>
+         <TouchableOpacity style={styles1.button} onPress={() => this.props.navigation.navigate('MatchesScreen', {user: card, page:'ItsaMatch'})}>
               <Text style={styles.bold}>Chat</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles1.button} onPress={() => this.props.navigation.goBack()}>

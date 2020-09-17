@@ -2,7 +2,7 @@ import React from 'react';
 import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { Text, View, TextInput, FlatList, Image, KeyboardAvoidingView } from 'react-native';
+import { Text, View, TextInput, FlatList, Image, KeyboardAvoidingView, Alert } from 'react-native';
 import { addComment, getComments } from '../actions/post';
 import moment from 'moment'
 
@@ -17,9 +17,34 @@ class Comment extends React.Component {
   }
 
   postComment = () => {
+    // this if checks if the user doesnt have an account
+    if(this.props.guest == true){
+      Alert.alert(
+        'No Account',
+        'To use this feature you must create an account, would you like to create an account?',
+        [
+          {text: 'No'},
+          {text: 'Yes', onPress: ()=> this.props.navigation.navigate('Signup')},
+        ],
+        { cancelable: false }
+      )
+    }
+    else if(this.props.nodog == true){
+      Alert.alert(
+        'No Dog',
+        'To use this feature you must add a dog, would you like to add a dog?',
+        [
+          {text: 'No'},
+          {text: 'Yes', onPress: ()=> this.props.navigation.navigate('DogSignUp')},
+        ],
+        { cancelable: false }
+      )
+    }
+    else{
   	const { params } = this.props.navigation.state
   	this.props.addComment(this.state.comment, params)
-  	this.setState({comment: ''})
+    this.setState({comment: ''})
+    }
   }
 
   render() {
@@ -57,7 +82,9 @@ const mapDispatchToProps = (dispatch) => {
 const mapStateToProps = (state) => {
   return {
     user: state.user,
-    post: state.post
+    post: state.post,
+    nodog: state.nodog,
+    guest: state.guest
   }
 }
 

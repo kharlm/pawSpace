@@ -34,7 +34,7 @@ export const login = () => {
 			//const userQuery = await db.collection('users').doc(response.user.uid).get()
 			//let user = userQuery.data()	
 			console.log("in log before dispatch allow notifications")
-			dispatch(allowNotifications(response.user.uid))
+			//dispatch(allowNotifications(response.user.uid))
 		} catch (e) {
 			alert(e)
 		}
@@ -82,6 +82,7 @@ export const getUser = (uid, type) => {
 			//let res = JSON.stringify(user);
 
 			///console.log('USER QUERY'+res);
+	
 
       let posts = []
       const postsQuery = await db.collection('posts').where('uid', '==', uid).get()
@@ -92,13 +93,16 @@ export const getUser = (uid, type) => {
 
 			if(type === 'LOGIN'){
 				dispatch({type: 'LOGIN', payload: user })
+				if(user.dogs.length>0)
 				dispatch(getDog(user.dogs[0],'DOGLOGIN'))
 			} 
 			else {
 				dispatch({type: 'GET_PROFILE', payload: user })
+				if(user.dogs.length>0)
 				dispatch(getDog(user.dogs[0],'GET_DOGPROFILE'))
 			}
-		} catch (e) {
+
+	}	catch (e) {
 			alert(e)
 		}
 	}
@@ -124,7 +128,6 @@ export const signup = () => {
 			const { email, password, username} = getState().user
 			
 			const response = await firebase.auth().createUserWithEmailAndPassword(email, password)
-			console.log("Setting signupError to false")
 			dispatch({type:'NOSIGNUP_ERROR'})
 			global.signupError = false
 			if(response.user.uid) {
@@ -136,7 +139,9 @@ export const signup = () => {
 					token: null
 				}
 				db.collection('users').doc(response.user.uid).set(user)
+				dispatch({type:'NO_GUEST'})
 				dispatch({type: 'LOGIN', payload: user})
+				//dispatch(allowNotifications(response.user.uid))
 			}
 		} catch (e) {
 			console.log("in sign up error")
@@ -148,7 +153,7 @@ export const signup = () => {
 
 export const followUser = (dog) => {
   return async ( dispatch, getState ) => {
-    const { dogId, photo, dogTag} = getState().dog
+    const { dogId, photo, dogTag, uid} = getState().dog
     try {
 			db.collection('dogs').doc(dog.dogId).update({
 				followers: firebase.firestore.FieldValue.arrayUnion(dogId)
@@ -165,8 +170,10 @@ export const followUser = (dog) => {
         dogTag: dog.dogTag,
         date: new Date().getTime(),
         type: 'FOLLOWER',
-      })
-      dispatch(sendNotification(dog.dogId, 'Started Following You'))
+	  })
+	  let res = JSON.stringify(dog.uid)
+      console.log("dog notification: "+res)
+      dispatch(sendNotification(dog.uid, 'Started Following You'))
 	 dispatch(getDog(dog.dogId))
     } catch(e) {
       console.error(e)

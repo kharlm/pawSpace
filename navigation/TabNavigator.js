@@ -4,6 +4,20 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icon
 import { HomeNavigator, SearchNavigator, PostNavigator, ActivityNavigator, ProfileNavigator,ExploreNavigator,MatchNavigator,EssentialsNavigator } from './StackNavigator'
 import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
 
+const getScreenRegisteredFunctions = navState => {
+  // When we use stack navigators. 
+  // Also needed for react-navigation@2
+  const { routes, index, params } = navState;
+
+  if (navState.hasOwnProperty('index')) {
+    return getScreenRegisteredFunctions(routes[index]);
+  }
+  // When we have the final screen params
+  else {
+    return params;
+  }
+}
+
 const TabNavigator = createBottomTabNavigator(
   {
     Home: { 
@@ -12,20 +26,23 @@ const TabNavigator = createBottomTabNavigator(
         tabBarLabel: ' ',
         tabBarIcon: ({focused}) => (
           <MaterialCommunityIcons name={focused ? 'home' : 'home-outline'} size={32} />
-        ) 
+        ) ,
+        tabBarOnPress: ({ defaultHandler,navigation}) => {
+
+          if (navigation && navigation.isFocused()) {
+            const screenFunctions = getScreenRegisteredFunctions(navigation.state);
+  
+            if (screenFunctions && typeof screenFunctions.tapOnTabNavigator === 'function') {
+              screenFunctions.tapOnTabNavigator()
+            }
+          }
+  
+          // Always call defaultHandler()
+          defaultHandler();
+        },
       } 
     },
-    /*
-    Match: { 
-      screen: MatchNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <Ionicons  name={focused ? 'ios-bonfire' : 'md-bonfire'} size={32} />
-        ) 
-      }
-    },
-    */
+    
     Search: { 
       screen: SearchNavigator,
       navigationOptions: {
@@ -44,7 +61,16 @@ const TabNavigator = createBottomTabNavigator(
         ) 
       }
     },
-    Essentials: { 
+    Match: { 
+      screen: MatchNavigator,
+      navigationOptions: {
+        tabBarLabel: ' ',
+        tabBarIcon: ({focused}) => (
+          <Ionicons  name={focused ? 'ios-bonfire' : 'md-bonfire'} size={32} />
+        ) 
+      }
+    },
+    /*Essentials: { 
       screen: EssentialsNavigator,
       navigationOptions: {
         tabBarLabel: ' ',
@@ -53,7 +79,8 @@ const TabNavigator = createBottomTabNavigator(
         ) 
       }
     },
-    Activity: { 
+    */
+    /*Activity: { 
       screen: ActivityNavigator,
       navigationOptions: {
         tabBarLabel: ' ',
@@ -62,8 +89,9 @@ const TabNavigator = createBottomTabNavigator(
         ) 
       }
     },
+    */
 
-  /* Explore: { 
+   Explore: { 
       screen: ExploreNavigator,
       navigationOptions: {
         tabBarLabel: ' ',
@@ -72,7 +100,7 @@ const TabNavigator = createBottomTabNavigator(
         ) 
       }
     },
-    */
+    
     MyProfile: { 
       screen: ProfileNavigator,
       navigationOptions: {

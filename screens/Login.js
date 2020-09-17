@@ -5,7 +5,10 @@ import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { updateEmail, updatePassword, login, getUser, facebookLogin} from '../actions/user'
+import {guest} from '../actions/guest'
+import {noDog} from '../actions/nodog'
 import {getDog,getDogs} from '../actions/dog'
+import {getPosts} from '../actions/post'
 import db from '../config/firebase'
 
 class Login extends React.Component {
@@ -16,19 +19,18 @@ class Login extends React.Component {
       userData: {},
       loading: true,
       moreThanOneDog: false,
-      login: false
+      login: false,
+      noDog: ""
     }
   }
 
   componentDidMount = () => {
     firebase.auth().onAuthStateChanged((user) => {
       if(user){
-      
         if(this.props.user && global.foo!="dogsignup"){
           this.dogLengthMoreThanOne(user.uid)
-          this.getUserData(user.uid) 
-            user = this.props.getUser(user.uid, 'LOGIN') 
-            
+            //this.getUserData(user.uid) 
+            user = this.props.getUser(user.uid, 'LOGIN')
 
         }
       }
@@ -36,23 +38,32 @@ class Login extends React.Component {
     })
   }
 
+  guest() { 
+    this.props.guest()
+    this.props.navigation.navigate('Home')
+  }
+
    getUserData = async (id) => {
     let dog1;
+    console.log("dog: "+this.props.nodog)
      try{
+
+      if(this.props.nodog!= true){
        const userQuery = await db.collection ('users').doc(id).get()
         user1 = userQuery.data()
         let res = JSON.stringify(user1.dogs[0]);
 
         
         this.props.getDog(user1.dogs[0], 'GET_DOGPROFILE')
-       
+        this.props.getPosts(user1.dogs[0])
         this.setState({
           userData: user1,
           loading: false
         })
+      }
      }
      catch(e){
-       alert(e)
+       //alert(e)
      }
 
      let res1 = JSON.stringify(this.state.loading);
@@ -64,12 +75,17 @@ class Login extends React.Component {
         user = userQuery.data()
         
      
-
+        if(user.dogs.length==0){
+          this.setState({
+            noDog: true
+          })
+        }
         if(user.dogs.length>1){
           
           this.setState({
             moreThanOneDog: true,
-            login: true
+            login: true,
+            noDog: false
           })
         }
 
@@ -91,11 +107,21 @@ class Login extends React.Component {
 
 
   render() {
-    let res1 = JSON.stringify(this.state.loading);
+    const { routeName } = this.props.navigation.state
   
    /* if(this.state.loading===true){
   }
   */
+
+ 
+    if(this.state.noDog===true && routeName!='DogSignUp'){
+      console.log("route: "+routeName)
+      this.props.noDog()
+      return(
+      this.props.navigation.navigate('Home')
+      )
+    }
+  
 
     if(this.state.moreThanOneDog===true){
 
@@ -105,16 +131,18 @@ class Login extends React.Component {
     }
 
     if(this.state.moreThanOneDog===false && this.state.login===true){
-      return(
+     
+      return (
       this.props.getDog(user.dogs[0],'DOGLOGIN'),
       this.props.navigation.navigate('Home')
       )
+      
     }
 
    else{
     return (
       <View style={[styles.container, styles.center]}>
-        <Image style={{width: 300, height: 100}} source={require('../assets/logo.jpg')} />
+        <Image style={{width: 300, height: 100}} source={require('../assets/logo.png')} />
         <TextInput
         	style={styles.border}
         	value={this.props.user.email}
@@ -135,6 +163,10 @@ class Login extends React.Component {
       	<TouchableOpacity style={styles.button} onPress={() => this.props.navigation.navigate('Signup')}>
       		<Text>Signup</Text>
       	</TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => this.guest()}>
+      		<Text>View Without An Account</Text>
+      	</TouchableOpacity>
+
       </View>
     );
   }
@@ -142,7 +174,7 @@ class Login extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updateEmail, updatePassword, login, getUser, facebookLogin,getDog,getDogs }, dispatch)
+  return bindActionCreators({ updateEmail, updatePassword, login, getUser, facebookLogin,getDog,getDogs,getPosts,guest,noDog}, dispatch)
 }
 
 const mapStateToProps = (state) => {
@@ -150,9 +182,8 @@ const mapStateToProps = (state) => {
     user: state.user,
     profile: state.profile,
     dogname: state.dogname,
-    dog: state.dog
-
-   
+    dog: state.dog,
+    nodog: state.nodog
   }
 }
 

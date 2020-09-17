@@ -6,7 +6,7 @@ import { View, Text, SafeAreaView, TextInput, FlatList, Image, TouchableOpacity,
 import db from '../config/firebase';
 import { getDog } from '../actions/dog'
 import DogInfo from './DogInfo';
-import BreedSearch from './BreedSearch';
+import Category from './Category';
 import { ScrollView } from 'react-native';
 const  { width,height } = Dimensions.get('window');
 import { getBreedPosts } from '../actions/post'
@@ -24,7 +24,7 @@ class Search extends React.Component {
     query.forEach((response) => {
       search.push(response.data())
     })
-		this.setState({query: search})
+		this.setState({query: search,onFocus: true})
 	}
 
 	goToDog = (dog) => {
@@ -35,80 +35,76 @@ class Search extends React.Component {
   render() {
     if(this.state.onFocus===false)
     return (
-      <SafeAreaView style={styles.container}>
-	      <TextInput
-	        style={styles.input}
-	        onChangeText={(search) => this.setState({search})}
-	        value={this.state.search.toLowerCase()}
-	        returnKeyType='send'
-          placeholder='Search for DogTag'
-          onFocus={() => this.setState({onFocus: true})}
-          onSubmitEditing={this.searchUser}/>
+   <SafeAreaView style={styles.container}>
+   <TextInput
+     style={styles.input}
+     onChangeText={(search) => this.setState({search})}
+     value={this.state.search.toLowerCase()}
+     returnKeyType='send'
+     placeholder='Search for DogTag'
+     onFocus={() => this.setState({onFocus: true})}
+     onSubmitEditing={this.searchUser}/>
 
-			<ScrollView>
-        <View
-                 style={{
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-         <TouchableOpacity onPress={() => this.props.navigation.navigate('Breeds', {breed: 'Labrador Retriever' })}>
-         <BreedSearch
-            width={width}
-            height={height}
-            info ='Labrador Retriever'
-            infoImage ='https://images.unsplash.com/photo-1572197876411-8a8e0faa2535?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60'
-          />
-          </TouchableOpacity>
+ <ScrollView>
+   <Text style={{fontWeight:"700",fontSize: 24,paddingHorizontal: 5,paddingHorizontal: (width/4) + 15 }}>View Dogs By</Text>
+   <View
+            style={{
+             flexDirection: "row",
+             padding: 10,
+             marginTop: 5,
+             flexWrap: "wrap",
+             justifyContent: "space-between",
+           }}
+         >
+    <TouchableOpacity onPress={() => this.props.navigation.navigate('Weights')}>
+    <Category
+       width={width}
+       height={height}
+       info='Weight'
+       infoImage ={require('../assets/fatdog.jpeg')}
+     />
+     </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('Breeds', {breed: 'Golden Retriever' })}>
-            <BreedSearch
-            width={width}
-            height={height}
-            info ='Golden Retriever'
-            infoImage='https://images.unsplash.com/photo-1558788353-f76d92427f16?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60'
-          />
-          </TouchableOpacity>
+     <TouchableOpacity onPress={() => this.props.navigation.navigate('Breeds')}>
+       <Category
+       width={width}
+       height={height}
+       info ='Breed'
+       infoImage ={require('../assets/breeddog.jpeg')}
+     />
+     </TouchableOpacity>
 
-           <TouchableOpacity onPress={() => this.props.navigation.navigate('Breeds', {breed: 'German Shepherd' })}>
-        	
-            <BreedSearch
-            width={width}
-            height={height}
-            info ='German Shepherd'
-            infoImage='https://images.unsplash.com/photo-1541882430670-a57064b3f448?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80'
-          />
-          </TouchableOpacity>
+      <TouchableOpacity onPress={() => this.props.navigation.navigate('Colors')}>
+     
+       <Category
+       width={width}
+       height={height}
+       info ='Color'
+       infoImage ={require('../assets/colordog.jpeg')}
+     />
+     </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('Breeds', {breed: 'French Bulldog' })}>
-            <BreedSearch
-            width={width}
-            height={height}
-            info ='French Bulldog'
-            infoImage='https://images.unsplash.com/photo-1571339617057-6761e8428fe0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=975&q=80'
-          />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('Breeds', {breed: 'Bulldog' })}>
-           <BreedSearch
-            width={width}
-            height={height}
-            info ='Bulldog'
-            infoImage='https://images.unsplash.com/photo-1546201483-a0fa9e5ed258?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80'
-          />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('Breeds', {breed: 'Poodle' })}>
-            <BreedSearch
-            width={width}
-            height={height}
-            info ='Poodle'
-            infoImage='https://images.unsplash.com/photo-1516371535707-512a1e83bb9a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80'
-          />
-          </TouchableOpacity>
-          </View>
-          </ScrollView>
-      </SafeAreaView>
-    );
+     <TouchableOpacity onPress={() => this.props.navigation.navigate('Genders')}>
+       <Category
+       width={width}
+       height={height}
+       info ='Gender'
+       infoImage ={require('../assets/genderdog.jpg')}
+     />
+     </TouchableOpacity>
+     <TouchableOpacity onPress={() => this.props.navigation.navigate('Ages')}>
+       <Category
+       width={width}
+       height={height}
+       info ='Age'
+       infoImage ={require('../assets/agedog.jpeg')}
+     />
+     </TouchableOpacity>
+     </View>
+     </ScrollView>
+ </SafeAreaView>
+ 
+);
 
     if(this.state.onFocus){
       return(
@@ -120,12 +116,19 @@ class Search extends React.Component {
 	        returnKeyType='send'
           placeholder='Search'
           onSubmitEditing={this.searchUser}/>
+          <TouchableOpacity onPress={()=> {this.setState({onFocus: false}) }}>
+            <Text style={{fontSize: 25, color:'#0000ff', paddingLeft: 7}}>X</Text>
+          </TouchableOpacity>
 				<FlatList
 				  data={this.state.query}
 				  keyExtractor={(item) => JSON.stringify(item.dogId)}
 				  renderItem={({ item }) => (
           <TouchableOpacity onPress={() => this.goToDog(item)} style={[styles.row, styles.space]}>
+            
+             
             <Image style={styles.roundImage} source={{uri: item.photo}}/>
+            
+           
             <View style={[styles.container, styles.left]}>
               <Text style={styles.bold}>{item.dogTag}</Text>
             </View>

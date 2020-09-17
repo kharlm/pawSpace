@@ -1,11 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import styles from '../styles'
+import styles1 from '../styles1'
+import db from '../config/firebase'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import firebase from 'firebase';
-import { Ionicons } from '@expo/vector-icons';
-import { Text, View, Button, Image, FlatList, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Alert, Dimensions,ImageBackground,RefreshControl, } from 'react-native';
-import { getPosts, likePost, unlikePost, getAdopt } from '../actions/post'
+import { Ionicons,AntDesign} from '@expo/vector-icons';
+import { Text, View, Button, Image, FlatList, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Alert, Dimensions,ImageBackground,RefreshControl,Modal,Animated,ActivityIndicator, Platform, Linking} from 'react-native';
+import { getPosts, likePost, unlikePost, getAdopt,flagPost,deletePost} from '../actions/post'
 import { getUser } from '../actions/user'
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
@@ -19,15 +22,23 @@ const GOOGLE_DETAILSAPI='https://maps.googleapis.com/maps/api/place/details/json
 const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
 import moment from 'moment'
 import DogParks from './DogParks';
-import { getDog } from '../actions/dog';
-import { Google } from 'expo';
-//import { WebView } from "react-native";
+import { getDog, getLocation,postPage} from '../actions/dog';
+import { allowNotifications } from '../actions/index';
 import { WebView } from 'react-native-webview';
-//import  WebView  from "react-native-webview";
-//import {ModalizeWebView} from 'react-native-modalize-webview'
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+import DoubleClick from 'react-native-double-tap';
+import Toast from 'react-native-root-toast';
+import { Video, Audio} from 'expo-av';
+import { Viewport } from '@skele/components'
+import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-material-cards'
+import { Notifications } from 'expo';
 import Constants from 'expo-constants';
-import {NavigationEvents} from 'react-navigation';
+import { NavigationEvents } from 'react-navigation';
+
+//https://apps.apple.com/th/app/pawspace/id1496294608
+
+
+const ViewportAwareVideo = Viewport.Aware(Video)
 
 let imageUnavailable = 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'
 
@@ -35,9 +46,11 @@ class Home extends React.Component {
 
   constructor(props) {
     super(props);
+    this.forceUpdateHandler = this.forceUpdateHandler.bind(this);
     this.state = {
       loading: false,
       dataSource: [],
+      adoptList:{},
       cleanDataSource: [],
       myLocation: null,
       zipCode: "",
@@ -50,12 +63,127 @@ class Home extends React.Component {
       showWebView: false,
       currentUri: '',
       refreshing: false,
-      webPage: ''
+      webPage: '',
+      modalVisible: true,
+      locationStatus:'',
+      item: [],
+      theme:{},
+      themeOn: false,
+      themeText: "",
+      themeImage: "",
+      theme: "",
+      themeLoading: false,
+      themeTitle: "", 
+      themeStyle:"",
+      notification: {},
+      isAppUpdated: true,
+      appVersion: 0
     }
-
-  
     
   }
+
+  myCustomAnimatedValue = new Animated.Value(0);
+
+  getPageTransformStyle = index => ({
+    transform: [
+      {
+        scale: this.myCustomAnimatedValue.interpolate({
+          inputRange: [
+            (index - 1) * (width + 8), // Add 8 for dividerWidth
+            index * (width + 8),
+            (index + 1) * (width + 8)
+          ],
+          outputRange: [0, 1, 0],
+          extrapolate: "clamp"
+        })
+      },
+      {
+        rotate: this.myCustomAnimatedValue.interpolate({
+          inputRange: [
+            (index - 1) * (width + 8),
+            index * (width + 8),
+            (index + 1) * (width + 8)
+          ],
+          outputRange: ["180deg", "0deg", "-180deg"],
+          extrapolate: "clamp"
+        })
+      }
+    ]
+  });
+
+
+
+  forceUpdateHandler(){
+    this.forceUpdate();
+  };
+  
+  async play() {
+    
+    const status = await this.video.getStatusAsync();
+    if (status.isPlaying) {
+      return;
+    }
+    return this.video.playAsync();
+  }
+
+  async pause () {
+ 
+   const status = await this.video.getStatusAsync();
+   
+    if (status.isPlaying===false) {
+      return;
+    }
+      this.video.pauseAsync();    
+  }
+
+
+  deletePost = (post) => {
+    this.props.deletePost(post)
+
+    // Add a Toast on screen.
+    let toast = Toast.show('Post Deleted', {
+      duration: Toast.durations.LONG,
+      position: Toast.positions.CENTER,
+      shadow: true,
+      animation: true,
+      hideOnPress: true,
+      delay: 0,
+  });
+
+    // You can manually hide the Toast, or it will automatically disappear after a `duration` ms timeout.
+    setTimeout(function () {
+      Toast.hide(toast);
+    }, 3000);
+
+        this.props.navigation.navigate('Home')
+  }
+
+  pauseVideo = () => {
+    if(this.video) {
+      this.video.pauseAsync();
+
+    }
+  }
+
+  playVideo = () => {
+    if(this.video) {
+      this.video.playAsync();
+    }
+  }
+
+  reportPost = (postId) => {
+
+    this.props.flagPost(postId)
+
+    Alert.alert(
+      'Post Flagged',
+      'This post will be reviewed within 24 hours and if found to be inappropriate will be deleted and the user removed from the app',
+      [
+        
+        {text: 'OK'},
+      ],
+      { cancelable: false }
+  )}
 
   _onRefresh = () => {
     this.setState({refreshing: true});
@@ -64,21 +192,180 @@ class Home extends React.Component {
     });
   }
 
+  async playInSilentMode() {
+    // To get around the fact that audio in a `WebView` will be muted in silent mode
+    // See: https://github.com/expo/expo/issues/211
+    //
+    // Based off crazy hack to get the sound working on iOS in silent mode (ringer muted/on vibrate)
+    // https://github.com/expo/expo/issues/211#issuecomment-454319601
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      allowsRecordingIOS: false,
+      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_MIX_WITH_OTHERS,
+      shouldDuckAndroid: false,
+      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+      playThroughEarpieceAndroid: true,
+      staysActiveInBackground: false
+    });
+    await Audio.setIsEnabledAsync(true);
+    // console.log(" 🔈 done: setIsEnabledAsync");
+    const sound = new Audio.Sound();
+    await sound.loadAsync(
+      require("../assets/500-milliseconds-of-silence.mp3") // from https://github.com/anars/blank-audio
+    );
+    // console.log(" 🔈 done: sound.loadAsync");
+    await sound.playAsync();
+    sound.setIsMutedAsync(true);
+    sound.setIsLoopingAsync(true);
+    // console.log(" 🔈 done: sound.playAsync");
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.isFocused !== this.props.isFocused) {
       // Use the `this.props.isFocused` boolean
       // Call any action
-      console.log("Focused")
     }
   }
 
-  componentDidMount() {
-    //this.createBreed()
-    this.getMyLocation()
-    this.props.getPosts()
-    console.log("inside component did mount")
-   // this.getDogParks()
+  _scrollToTop = () => {
+    // Scroll to top, in this case I am using FlatList
+    if (!!this.scroll) {
+      this.scroll.scrollTo({x: 0, y: 0, animated: true});
+    }
+    this.props.postPage('false')
   }
+
+  navigateMap = (item) => {
+    this.props.navigation.navigate('Map', { 
+      location: item.postLocation 
+    })
+  }
+
+  checkAppVersion = () => {
+
+    var getAppstoreAppVersion = require('react-native-appstore-version-checker').getAppstoreAppVersion;
+      //On IOS u can do
+    getAppstoreAppVersion('1496294608') //put any apps id here
+    .then((appVersion) => {
+      this.setState({ appVersion: appVersion },() => {
+ console.log("manifest version: "+Constants.manifest.version)
+ console.log("app version: "+this.state.appVersion)
+    if(Constants.manifest.version < this.state.appVersion) {
+        Alert.alert(
+          'Please Upgrade Your App',
+          'You don\'t have the latest version of pawSpace to use all the latest features please upgrade the App',
+          [
+            {text: 'OK', onPress: () => Linking.canOpenURL("https://apps.apple.com/th/app/pawspace/id1496294608").then(supported => {
+              if (supported) {
+                Linking.openURL("https://apps.apple.com/th/app/pawspace/id1496294608");
+              } else {
+                console.log("Don't know how to open URI: " + "https://apps.apple.com/th/app/pawspace/id1496294608");
+              }
+            })},
+          ],
+          { cancelable: false }
+        )
+  }
+  else {
+    this.alertPresent = false;
+}
+        
+    });
+    })
+    .catch((err) => {
+      console.log('error occurred', err);
+      this.setState({ appVersion: Constants.manifest.version});
+    });
+
+
+  }
+
+  async componentDidMount ()  {
+
+    this.checkAppVersion()
+    this.props.navigation.setParams({
+      tapOnTabNavigator: this.tapOnTabNavigator
+    })
+    this.getMyLocation()
+    this.props.getDog
+    this.props.getPosts(this.props.dog)
+    this.props.allowNotifications(user.uid)
+    this.getTheme()
+    this._notificationSubscription = Notifications.addListener(this._handleNotification);
+     // Register our local function called by 
+    // tabBarOnPress() in defaultNavigationOptions()
+
+    // this method is a work around to get audio to automatically play when the ringer is off for the phone
+    await this.playInSilentMode()
+
+  }
+  _handleNotification = notification => {
+    // do whatever you want to do with the notification
+
+    this.setState({ notification: notification });
+    let res = JSON.stringify(this.state.notification)
+    console.log("notification: "+res)
+    if(this.state.notification.data.text==='Licked Your Photo' && this.state.notification.origin=='selected'){
+      this.props.navigation.navigate('Activity')
+    }
+
+    else if(this.state.notification.data.text==='Matched With You' && this.state.notification.origin=='selected'){
+
+      this.props.navigation.navigate('ItsAMatch',{ card: this.state.notification.data.data })
+
+    }
+    
+  };
+
+
+  componentWillMount = () => {
+    this.props.navigation.setParams({
+      scrollToTop: this._scrollToTop,
+    });
+
+    this.props.getDog
+    this.props.getPosts(this.props.dog)
+   }
+
+   componentWillUnmount() {
+    this._unsubscribe();
+  }
+
+   async playInSilentMode() {
+    // To get around the fact that audio in a `WebView` will be muted in silent mode
+    // See: https://github.com/expo/expo/issues/211
+    //
+    // Based off crazy hack to get the sound working on iOS in silent mode (ringer muted/on vibrate)
+    // https://github.com/expo/expo/issues/211#issuecomment-454319601
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      allowsRecordingIOS: false,
+      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_MIX_WITH_OTHERS,
+      shouldDuckAndroid: false,
+      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+      playThroughEarpieceAndroid: true,
+      staysActiveInBackground: false
+    });
+    await Audio.setIsEnabledAsync(true);
+    // console.log(" 🔈 done: setIsEnabledAsync");
+    const sound = new Audio.Sound();
+    await sound.loadAsync(
+      require("../assets/500-milliseconds-of-silence.mp3") // from https://github.com/anars/blank-audio
+    );
+    // console.log(" 🔈 done: sound.loadAsync");
+    await sound.playAsync();
+    sound.setIsMutedAsync(true);
+    sound.setIsLoopingAsync(true);
+    // console.log(" 🔈 done: sound.playAsync");
+  }
+
+   // Call on tab bar tap
+  tapOnTabNavigator = () => {
+
+    this._scrollToTop()
+    //this.doSomethingTabWasPressed()
+  }
+
   getAdoptToken = async () => {
     fetch('https://api.petfinder.com/v2/oauth2/token', {
       method: 'POST',
@@ -101,25 +388,20 @@ class Home extends React.Component {
 
 
   getCleanAdoptResponse = () => {
-
     for(let i=0;i<this.state.dataSource.animals.length;i++){
         if(this.state.dataSource.animals[i].photos[0]!=null){
 
           this.setState({ cleanDataSource: [...this.state.cleanDataSource,this.state.dataSource.animals[i] ] }) 
-
         }
-
     }
     this.setState({
       loading: true
     })
-
-    let res = JSON.stringify(this.state.cleanDataSource)
   }
 
   getAdoptResponse = async (a) => { 
       console.log("ZipCode "+this.state.zipCode)
-      fetch('https://api.petfinder.com/v2/animals?type=dog&location='+this.state.zipCode+'&limit=20', {
+      fetch('https://api.petfinder.com/v2/animals?type=dog&location='+this.state.zipCode+'&limit=30', {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -130,13 +412,10 @@ class Home extends React.Component {
         .then((responseJson) => {
           this.setState({
             dataSource: responseJson,
+            adoptList: responseJson.animals
            // loading: true
           })
-
           this.getCleanAdoptResponse()
-
-          let res = JSON.stringify(this.state.dataSource.animals[0].url)
-          console.log(res)
           return responseJson;
 
         })
@@ -146,17 +425,12 @@ class Home extends React.Component {
   }
 
   getAdopt = async () => {
-      
       const url = "https://api.adoptapet.com/search/pets_at_shelters?key=A34F48&v=1&output=xml&shelter_id=2342&shelter_id=17293&shelter_id=8323"
       const response = await fetch(url)
-      //const data = await response.json()
       let res = JSON.stringify(response)
-      //console.log(response)
   }
 
   getDogParks = async () => {
-    console.log("city"+this.state.city)
-
     const response = await fetch(GOOGLE_PLACEAPI+'&location='+this.state.myLocation.coords.latitude+','+this.state.myLocation.coords.longitude+'&key='+key)
     const data = await response.json()
     this.setState({
@@ -180,18 +454,41 @@ class Home extends React.Component {
    let response2
    let response3
    let response4
-
+   if(this.state.DogParks[0].photos){
     const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
      response1 = await fetch(url1)
-     
+     }
+     else {
+      response1 = {url: imageUnavailable};
+    }
+
+    if(this.state.DogParks[1].photos){
     const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
      response2 = await fetch(url2)
 
+    }
+
+    else {
+      response2 = {url: imageUnavailable};
+    }
+
+    if(this.state.DogParks[2].photos){
     const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
      response3 = await fetch(url3)
+    }
+
+    else {
+      response3 = {url: imageUnavailable};
+    }
     
+    if(this.state.DogParks[3].photos){
     const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
      response4 = await fetch(url4)
+    }
+
+    else {
+      response4 = {url: imageUnavailable};
+    }
 
     this.setState({
       
@@ -208,6 +505,10 @@ class Home extends React.Component {
     if (status !== 'granted') {
         this.setState({
             myLocation: 'Permission denied',
+            locationStatus: 'Permission denied',
+            locationLoading: true,
+            loadingPark: true,
+            loading: true
         });
     }
     let location = await Location.getCurrentPositionAsync({});
@@ -234,7 +535,6 @@ class Home extends React.Component {
       }
      
     }
-    let res = JSON.stringify(data.results[0].address_components[6].types[0])
     
     this.setState({
         myLocation: location,
@@ -270,21 +570,67 @@ getPlaceDetails = async () => {
 }
 
 
+ async getTheme ()  {
+
+      const Theme = await db.collection('monthlyTheme').doc('1').get()
+
+      let theme = Theme.data()
+
+      let themeName = theme.theme
+      let themeOn = theme.themeOn
+      let themeText = theme.themeText
+      let themeImage = theme.themeImage
+      let themeTitle = theme.themeTitle
+      let themeStyle = theme.themeStyle
+      
+      this.setState({
+        theme: themeName,
+        themeOn: themeOn,
+        themeText: themeText,
+        themeImage: themeImage, 
+        themeTitle: themeTitle,
+        themeStyle: themeStyle,
+        themeLoading: true
+      })
+}
+
   likePost = (post) => {
+    // this if checks if the user doesnt have an account
+    if(this.props.guest == true){
+      Alert.alert(
+        'No Account',
+        'To use this feature you must create an account, would you like to create an account?',
+        [
+          {text: 'No'},
+          {text: 'Yes', onPress: ()=> this.props.navigation.navigate('Signup')},
+        ],
+        { cancelable: false }
+      )
+    }
+    else if(this.props.nodog == true){
+      Alert.alert(
+        'No Dog',
+        'To use this feature you must add a dog, would you like to add a dog?',
+        [
+          {text: 'No'},
+          {text: 'Yes', onPress: ()=> this.props.navigation.navigate('DogEdit')},
+        ],
+        { cancelable: false }
+      )
+    }
+    else{ 
     const { dogId } = this.props.dog
     if (post.likes.includes(dogId)) {
       this.props.unlikePost(post)
+      
     } else {
       this.props.likePost(post)
     }
   }
+  }
   goToDog = (post) => {
-
-   
-    console.log("in go to user "+post.dogId)
     this.props.getDog(post.dogId)
     this.props.navigation.navigate('Profile')
-
   }
 
   navigateMap = (item) => {
@@ -293,30 +639,46 @@ getPlaceDetails = async () => {
     })
   }
 
-  render() {   
-    if(this.props.userprofile.dogs){
-    //  getDog(this.props.userprofile.dogs[0],'DOGLOGIN')
+  willFocusAction = (payload) => {
+    console.log("in on will focus")
+    let params = payload.state.params;
+    if (params && params.value) {
+      this.setState({value: params.value});
     }
-    if (this.props.post === null || this.state.loading===false || this.state.locationLoading===false ||this.state.loadingPark===false) return null 
-     
-    if(this.state.showWebView){
-      console.log('inside webview')
+  }
+
+  render() {  
+    // this is to scroll to the top of the page after you uplaod a video or else the app will crash as it will
+    //try to render the video before it fetched
+   if(this.props.dog.postPage==='true'){
+     this._scrollToTop()
+   }
+
+  if (this.props.post === null || this.state.loading===false || this.state.locationLoading===false ||this.state.loadingPark===false) return(
+    <View style={styles.loadingPage}>
+     <ActivityIndicator size="large" color="#0000ff"/>
+    </View>
+    )
+    if(this.state.showWebView){ 
       return (
-        
-        
         <View style={{ flex: 1 }}>
           <TouchableOpacity onPress={()=> {this.setState({showWebView: false}) }}>
-    <Text style={{fontSize: 25, color:'#0000ff',paddingLeft: 7}}>x</Text>
+    <Text style={{fontSize: 30, color:'#0000ff',paddingLeft: 8}}>x</Text>
   </TouchableOpacity>
         <WebView source={{ uri: this.state.webPage }} />
         
       </View>
       )
     }
-     
     return (
-
+     // 
+     
+      <Viewport.Tracker>
       <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#F8F8FF"}}
+      onContentSizeChange={(width, height) => {
+        console.log(width, height);
+      }}
+      ref={(c) => {this.scroll = c}}
       refreshControl={
         <RefreshControl
           refreshing={this.state.refreshing}
@@ -324,16 +686,54 @@ getPlaceDetails = async () => {
         />
       }
       >
-        <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
-          <Text
+     
+        <View style={{ flex: 1}}>
+        <ImageBackground
+          source={require('../assets/homebackground1.jpg')}
+          imageStyle= 
+          {{opacity:.12}}
+          style={{width:null,height:null
+          }}
+         resizeMode="repeat"
+        >
+          {
+            this.state.locationStatus=="Permission denied" ?
+            <Text
             style={{
               fontSize: 24,
               fontWeight: "700",
               paddingHorizontal: 20
             }}
           >
-            Dogs in {this.state.city} up for adoption
+            
+            Dogs in your area up for adoption
+        </Text>:
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: "700",
+              paddingHorizontal: 20
+            }}
+          >Dogs in {this.state.city} up for adoption
         </Text>
+          }
+
+          { 
+            this.state.locationStatus=="Permission denied" ?
+            <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "700",
+                    paddingHorizontal: 20,
+                    color: 'blue',
+                  }}
+                >
+                  Please enable Permissions in order to use this Feature
+              </Text>
+            </View>:
+
+
           <View style={{ height: 165, marginTop: 15 }}>
             <ScrollView
               horizontal={true}
@@ -371,8 +771,14 @@ getPlaceDetails = async () => {
                 breed={this.state.cleanDataSource[3].breeds.primary}
               />
               </TouchableOpacity>
+              <View style={{paddingTop: 55,paddingLeft: 1, paddingRight: 10}}>
+              <TouchableOpacity style={[styles1.roundedButton, ]} onPress={() => this.props.navigation.navigate('AdoptList', {adoptList: this.state.adoptList})}>
+              <Text style={styles1.textButton}>More</Text>
+            </TouchableOpacity>
+            </View>
             </ScrollView>
           </View>
+          }
 
           <View style={{ marginTop: 10 }}>
             <Text
@@ -385,7 +791,22 @@ getPlaceDetails = async () => {
               Dog Parks near you
           </Text>
           </View>
+          { 
+            this.state.locationStatus=="Permission denied" ?
 
+            <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "700",
+                    paddingHorizontal: 20,
+                    color: 'blue',
+                    paddingBottom: height*.12
+                  }}
+                >
+                  Please enable Permissions in order to use this Feature
+              </Text>
+            </View>:
           <View
                 style={{
                   padding: 10,
@@ -428,44 +849,100 @@ getPlaceDetails = async () => {
           />
           </TouchableOpacity>
           </View>
-
-          <View style={{ marginTop: 10, paddingHorizontal: 20 }}>
+          }
+          { this.state.themeOn && this.state.themeLoading ?
+         <View>
+          
+        <Text style={{ fontSize: 24, fontWeight: "700", marginLeft: 15, marginBottom: 5,}}>
+              {this.state.themeTitle}
+            </Text>
+          
+         
+          <Card style={{ margin: 10, borderRadius: 20}}>
+            <CardImage source={{ uri: this.state.themeImage }}  style= {{borderTopLeftRadius: 20, borderTopRightRadius: 20, height:this.state.themeStyle }} />
+            <CardTitle title={this.state.theme}/>
+            <CardContent text={this.state.themeText} style={{}}/>
+          </Card>
+          </View>
+           : <View/>}
+          <View style={{ marginTop: 5, paddingHorizontal: 20 }}>
             <Text style={{ fontSize: 24, fontWeight: "700", marginLeft: 10 }}>
               Dogs you follow
      </Text>
             <Text style={{ fontWeight: "100", marginTop: 10 }}>
 
             </Text>
-          </View>
         </View>
-        <View style={styles.container}>
-          <FlatList
-            onRefresh={() => this.props.getPosts()}
-            refreshing={false}
+          <FlatList    
             data={this.props.post.feed}
             keyExtractor={(item) => item.id}
+            onViewableItemsChanged={this._onViewableItemsChanged}
+            viewabilityConfig={this.viewabilityConfig}
             renderItem={({ item }) => {
+              ref=ref => {
+                this.cellRefs[item.id] = ref;
+              }
+             
               let liked = item.likes.includes(this.props.dog.dogId)
+            //Adds the delete button to posts that are mine
+              
               return (
+                
                 <View>
+                  
                   <View style={[styles.row, styles.space]}>
                     <View style={[styles.row, styles.center]}>
                       <TouchableOpacity onPress={() => this.goToDog(item)} >
                         <Image style={styles.roundImage} source={{ uri: item.dog.photo}} />
                       </TouchableOpacity>
                       <View>
+                       <TouchableOpacity onPress={() => this.goToDog(item)} >
                         <Text style={styles.bold}>{item.dogTag}</Text>
+                        </TouchableOpacity>
                         <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
                         <TouchableOpacity onPress={() => this.navigateMap(item)} >
                           <Text>{item.postLocation ? item.postLocation.name : null}</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
-                    <Ionicons style={{ margin: 5, marginRight: 35 }} name='ios-flag' size={25} />
+                    {item.dogId===this.props.dog.dogId ?
+                    <TouchableOpacity onPress={() => Alert.alert(
+                    'Delete Post',
+                    'Would you like to delete this post?',
+                    [
+                      {text: 'No'},
+                      {text: 'Yes', onPress: ()=> this.deletePost(item)},
+                    ],
+                    { cancelable: false }
+                  )}>
+                    <AntDesign style={{margin: 10}} name='delete' size={25} />
+                    </TouchableOpacity>
+                    : <View/> }
                   </View>
-                  <TouchableOpacity onPress={() => this.likePost(item)} >
+                  <DoubleClick
+                      doubleTap={() => {this.likePost(item)}}
+                      delay={200}>
+                      {
+                        item.isVideo===true ?
+                        <ViewportAwareVideo
+                         innerRef={ref => this.video = ref}
+                        onViewportLeave={() => this.pause()} 
+                        onViewportEnter={() => this.play()}
+                        preTriggerRatio={-0.5}
+                        source={{ uri: item.postPhoto }}
+                        rate={1.0}
+                        volume={1.0}
+                        isMuted={true}
+                        resizeMode="cover"
+                        shouldPlay={false}
+                        isLooping
+                        style={styles.homeVideo}
+                        useNativeControls={true}
+                      >
+                      </ViewportAwareVideo>:
                     <Image style={styles.homeImage} source={{ uri: item.postPhoto }} />
-                  </TouchableOpacity>
+                      }
+                  </DoubleClick>
                   <View style={styles.row}>
                   <TouchableOpacity onPress={() => this.likePost(item)} >
                     <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#0000ff' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} 
@@ -476,30 +953,39 @@ getPlaceDetails = async () => {
                     <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
                       <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-chatbubbles' size={25} />
                     </TouchableOpacity>
-                    
-                    <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-send' size={25} />
+                    <TouchableOpacity onPress={() => Alert.alert(
+                      'Report Post',
+                      'Would you like to report this post for inappropriate content?',
+                      [
+                        {text: 'No', onPress: () => console.log('Cancel Pressed!')},
+                        {text: 'Yes', onPress: ()=> this.reportPost(item.id)},
+                      ],
+                      { cancelable: false }
+                    )}>
+                    <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-flag' size={25} />
+                    </TouchableOpacity>
                   </View>
                   
                   <Text style={{ marginLeft: 50, marginTop: 5, marginBottom: 10 }}>{item.postDescription}</Text>
                   <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
-                  <Text style={{color:'#adadad', fontSize:10, marginBottom: 5,marginLeft: 50}}>View Comments</Text>
+                  <Text style={{color:'#585858', fontSize:10, marginBottom: 5,marginLeft: 50}}>View Comments</Text>
                     </TouchableOpacity>
-                    
-                
-                  
                 </View>
               )
-            }}
+          }
+          }
           />
-        </View>
+     </ImageBackground>
+     </View>
       </ScrollView>
+      </Viewport.Tracker>
     )
 
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ getPosts, likePost, unlikePost, getUser, getAdopt,getDog }, dispatch)
+  return bindActionCreators({ getPosts, likePost, unlikePost, getUser, getAdopt,getDog,flagPost,allowNotifications,deletePost,getLocation,postPage}, dispatch)
 }
 
 const mapStateToProps = (state) => {
@@ -507,7 +993,10 @@ const mapStateToProps = (state) => {
     post: state.post,
     user: state.user,
     userprofile: state.profile,
-    dog: state.dog
+    dog: state.dog,
+    postPage: state.postPage,
+    guest: state.guest,
+    nodog: state.nodog
   }
 }
 

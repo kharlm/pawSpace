@@ -11,7 +11,7 @@ import { NavigationEvents } from 'react-navigation';
 import {getDog} from '../actions/dog'
 import {getPost,getPosts} from '../actions/post'
 import Icon from './Icon';
-import { FontAwesome5,FontAwesome} from '@expo/vector-icons';
+import { FontAwesome5,FontAwesome, MaterialCommunityIcons,MaterialIcons} from '@expo/vector-icons';
 
 const ProfileItem = ({
   age,
@@ -20,6 +20,7 @@ const ProfileItem = ({
   gender,
   weight,
   breed,
+  color,
   bio,
   dogTag,
   name
@@ -43,6 +44,13 @@ const ProfileItem = ({
         <FontAwesome5 name={'birthday-cake'} size={20} /> 
         </Text>
         <Text style={styles.infoContent}>Age: {age}</Text>
+      </View>
+
+      <View style={styles.info}>
+        <Text style={styles.iconProfile}>
+        <MaterialIcons name={'color-lens'} size={20} /> 
+        </Text>
+        <Text style={styles.infoContent}>Color: {color}</Text>
       </View>
 
       <View style={styles.info}>

@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux'
 import { View, Text, TextInput, FlatList, KeyboardAvoidingView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { addMessage, getMessages } from '../actions/message';
 import moment from 'moment'
+import db from '../config/firebase';
 
 class Chat extends React.Component {
   state = {
@@ -12,17 +13,51 @@ class Chat extends React.Component {
   }
 
   componentDidMount = () => {
-    this.props.getMessages()
+   
+    const { params } = this.props.navigation.state
+   // this.props.getMessages(params.user.id)
+   
+    
+    let res1 = JSON.stringify(this.props.messages)
+
+  
+
+    //console.log("messages: "+res1)
+
+    if(params.page==='ChatMatch'){
+    this.props.navigation.setParams({headerPic: params.user.photoUrl });
+    this.props.navigation.setParams({headerTitle: params.user.name });
+    this.props.navigation.setParams({headerId: params.user.id });
+
+    this.props.getMessages(params.user.id)
+    }
+    else{
+        this.props.navigation.setParams({headerPic: params.user.photo });
+        this.props.navigation.setParams({headerTitle: params.user.dogname });
+        this.props.navigation.setParams({headerId: params.user.dogId });
+
+        this.props.getMessages(params.user.dogId)
+    }
+    
   }
+
+  
 
   sendMessage = () => {
     const { params } = this.props.navigation.state
+
     this.props.addMessage(params, this.state.message)
     this.setState({message: ''})
   }
 
+  goToDog = (message) => {
+    this.props.getDog(message.dogId)
+    this.props.navigation.navigate('Profile')
+  }
+
   render() {
-    const { params } = this.props.navigation.state
+
+    
     const { dogId } = this.props.dog
     if (!this.props.messages) return <ActivityIndicator style={styles.container}/>
     return (
@@ -30,18 +65,19 @@ class Chat extends React.Component {
         <FlatList
           inverted
           keyExtractor={(item) => JSON.stringify(item.date)}
-          data={this.props.messages.filter(message => message.members.indexOf(params) >= 0 && message.members.indexOf(this.props.dog.dogId) >= 0)}
+          data={this.props.messages}
           renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => this.goToChat(item)} style={[styles.row, styles.space]}>
+          <View style={[styles.row, styles.space]}>
             { item.dogId !== dogId ? <Image style={styles.roundImage} source={{uri: item.photo}}/> : null}
             <View style={[styles.container, item.dogId === dogId ? styles.right : styles.left]}>
               <Text style={styles.bold}>{item.username}</Text>
               <Text style={styles.gray}>{item.message}</Text>
-              <Text style={[styles.gray, styles.small]}>{moment(item.date).format('ll')}</Text>
+              <Text style={[styles.gray, styles.small]}>{moment(item.date).format('lll')}</Text>
             </View>
             { item.dogId === dogId ? <Image style={styles.roundImage} source={{uri: item.photo}}/> : null}
-          </TouchableOpacity>
+          </View>
         )}/> 
+        <KeyboardAvoidingView enabled behavior='padding'>
         <TextInput
           style={styles.input}
           onChangeText={(message) => this.setState({message})}
@@ -49,6 +85,7 @@ class Chat extends React.Component {
           returnKeyType='send'
           placeholder='Send Message'
           onSubmitEditing={this.sendMessage}/>
+          </KeyboardAvoidingView>
       </KeyboardAvoidingView>
     );
   }
@@ -62,7 +99,8 @@ const mapStateToProps = (state) => {
   return {
     user: state.user,
     messages: state.messages,
-    dog: state.dog
+    dog: state.dog,
+    post: state.post
   }
 }
 

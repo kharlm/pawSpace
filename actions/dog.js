@@ -6,10 +6,15 @@ import uuid from 'uuid'
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
 import Geohash from 'latlon-geohash';
+import {getPosts} from '../actions/post'
 
 
 export const updateDogname = (dogname) => {
 	return {type: 'UPDATE_DOGNAME', payload: dogname}
+}
+
+export const postPage = (input) => {
+	return {type: 'POST_PAGE', payload: input}
 }
 
 export const updateBreed = (breed) => {
@@ -18,6 +23,10 @@ export const updateBreed = (breed) => {
 
 export const updateAge = (age) => {
 	return {type: 'UPDATE_AGE', payload: age}
+}
+
+export const updateColor = (color) => {
+	return {type: 'UPDATE_COLOR', payload: color}
 }
 
 export const updateGender = (gender) => {
@@ -30,7 +39,7 @@ export const updateWeight = (weight) => {
 }
 
 export const updateDogtag = (dogTag) => {
-    return {type: 'UPDATE_DOGTAG', payload: dogTag}
+    return {type: 'UPDATE_DOGTAG', payload: dogTag.replace(/\s/g, '')}
     
 }
 
@@ -48,10 +57,7 @@ export const getLocation = (dog) => {
 		Permissions.askAsync(Permissions.LOCATION).then(function(result){
 		  if(result){
 		    Location.getCurrentPositionAsync({}).then(function(location){
-			  var geocode = Geohash.encode(location.coords.latitude, location.coords.longitude, 1)
-			  
-			  
-					
+			  var geocode = Geohash.encode(location.coords.latitude, location.coords.longitude, 3)		
 				try {
 					const id = uuid.v4()	
 					db.collection('dogs').doc(dog.dogId).update({
@@ -61,8 +67,9 @@ export const getLocation = (dog) => {
 
 					alert(e)
 				}
-		      
-		      dispatch({ type: 'GET_LOCATION', payload: geocode });
+				
+			  dispatch({ type: 'GET_LOCATION', payload: geocode });
+			  
 		    })
 		  }
 		})
@@ -89,13 +96,14 @@ export const dogsignup = () => {
 			const response = await firebase.auth().createUserWithEmailAndPassword(email, password)
 			*/
 		
-			const {dogname,breed,age,gender,weight,dogTag,bio,photo} = getState().dog
+			const {dogname,breed,color,age,gender,weight,dogTag,bio,photo} = getState().dog
 		
 			if(id){
 				const dog = {
 					dogname: dogname,
 					breed: breed,
 					age: age,
+					color: color,
 					gender: gender,
 					weight: weight,
 					dogTag: dogTag,
@@ -104,7 +112,9 @@ export const dogsignup = () => {
 					followers: [],
 					following: [],
 					photo: photo,
-					uid: uid
+					uid: uid,
+					blocked: [],
+					geocode:''
 				
 			}
 				
@@ -112,6 +122,8 @@ export const dogsignup = () => {
 				db.collection('dogs').doc(id).set(dog)
 				//db.collection('users').doc(response.user.uid).set(user)
 				dispatch({type: 'DOGLOGIN', payload: dog})
+				dispatch({type:'YES_DOG'})
+				
 		}
 
 			
@@ -123,10 +135,12 @@ export const dogsignup = () => {
 	}
 
 	export const doglogin = () => {
+		console.log("INSIDE DOG LOGIN")
 		
 		return async (dispatch, getState) => {
 			try {
 				const { dogId} = getState().dog
+				const{uid} = getState().user
 				const dogQuery = await db.collection('dogs').doc(dogId).get()
 				let dog = dogQuery.data()
 	
@@ -146,14 +160,6 @@ export const dogsignup = () => {
 				
 				const dogQuery = await db.collection('dogs').doc(dogId).get()
 				let dog = dogQuery.data()
-				    
-				let res = JSON.stringify(dog);
-				
-				
-
-      
-				//console.log("DOG TRY"+res)
-	
 		 let posts = []
 		  const postsQuery = await db.collection('posts').where('dogId', '==', dogId).get()
 		  postsQuery.forEach(function(response) {
@@ -176,14 +182,36 @@ export const dogsignup = () => {
 			}
 		}
 	}
+
+	export const blockDog = (blockedDogId) => {
+		console.log("in major block method")
+		
+		return async (dispatch,getState)  => {
+			const { dogId, photo, dogTag} = getState().dog
+			console.log("dogID: "+dogId)
+			console.log("blocked DogId: "+blockedDogId)
+			try {
+				db.collection('dogs').doc(dogId).update({
+					blocked: firebase.firestore.FieldValue.arrayUnion(blockedDogId)
+				})
+				dispatch(getPosts())
+				dispatch(getDog(dogId))
+			} 
+			catch(e) {
+			  console.log("block dog error")
+			alert(e)
+			}
+		  }
+	}
 	export const updateDog = () => {
 		return async ( dispatch, getState )  => {
-		  const {dogname,breed,age,gender,weight,dogTag,bio,dogId,photo } = getState().dog
+		  const {dogname,breed,color,age,gender,weight,dogTag,bio,dogId,photo } = getState().dog
 		  try {
 				//const {dog} = getState()
 			db.collection('dogs').doc(dogId).update({
 				name: dogname,
 				breed: breed,
+				color: color,
 				age: age,
 				gender: gender,
 				weight: weight,
@@ -203,14 +231,22 @@ export const dogsignup = () => {
 	  }
 
 	  export const getDogs = (dog) => {
+		  
 		return async (dispatch, getState) => {
 			let dogs = []
+			let uniqueDogs = []
 			try {
-				const snapshot = await db.collection('dogs').where('geocode', '==', dog.geocode).get()
+				const dogQuery = await db.collection('dogs').doc(dog.dogId).get()
+				  let dog1 = dogQuery.data()
+				  console.log("dog1 geocde: "+dog1.geocode)
+				const snapshot = await db.collection('dogs').where('geocode', '==', dog1.geocode).get()
 				const query = await db.collection('dogs').where('dogId', '==', dog.dogId).get()
 				const fullSnapshot = await db.collection('dogs').get()
+				
+				
 				let items = []
 				let allItems= []
+				let swipes = []
 
 				let ind;
 
@@ -220,51 +256,11 @@ export const dogsignup = () => {
 
 				allItems = fullSnapshot.docs.map(doc => doc.data());
 				items = snapshot.docs.map(doc => doc.data());
-				
 
-				//let res = JSON.stringify(Object.keys(dogs[0].swipes[0])[0])
-				//Object.keys(dogs[0].swipes[i])[0]===card.dogId)
-				//console.log("Array "+dogs[0].swipes.length)
-
-				//this removes any dogs the user already swiped on from the list of cards
-				let removeId=null;
-				let removeIndex= -1
+				swipes = dogs[0].swipes
+			
 				
-					
-					if(dogs[0].swipes){
-					for(let i = 0; i<allItems.length;i++){
-						console.log("inside first for loop")
-						for(let j=0;j<dogs[0].swipes.length; j++){
-							if(allItems[i].dogId===Object.keys(dogs[0].swipes[j])[0]){
-								console.log("swipeID "+Object.keys(dogs[0].swipes[j])[0])
-								removeId = allItems[i].dogId
-								
-							}
-							//console.log("remove id"+removeId)
-							if(removeId!=null){
-								let res = JSON.stringify(allItems)
-								console.log("item: "+res)
-							removeIndex = items.map(function(item) { return item.dogId; }).indexOf("56bcfdeb-9d83-4159-929e-7b4fb43787cc");
-							console.log("remove id"+removeIndex)
-							}
-							if(removeIndex!=1){
-								//console.log("REMOVE INDEX "+removeIndex)
-							}
-							removeId = null
-							//console.log("array before: "+items.length)
-								items.splice(removeIndex, 1);
-								removeIndex=null
-								let res1 = JSON.stringify(items)
-								//console.log("array after: "+items.length+res1)
-							
-						}
-					}
-						
-					
-				 
-				console.log("remove index: "+removeIndex)
 				
-					}
 					
 
 				// Removes the users profile from a list of cards that returned
@@ -274,6 +270,23 @@ export const dogsignup = () => {
 					}
 				}
 
+				
+			if (typeof swipes != 'undefined'){
+				
+			  
+			 for(let k=0;k<swipes.length;k++){
+				 
+				
+				for(let i=0; i<items.length; i++){
+					
+					if(items[i].dogId===Object.keys(swipes[k])[0]){
+						items.splice(i,1)
+					}
+				}
+			 }
+			}
+			
+			console.log("length: "+items.length)
 				
 				dispatch({ type: 'GET_CARDS', payload: items });
 	

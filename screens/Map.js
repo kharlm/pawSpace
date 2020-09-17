@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../styles'
-import { MapView } from 'expo';
+import MapView from 'react-native-maps'
+import { Marker } from 'react-native-maps'
 
 class Map extends React.Component {
   render() {
@@ -14,7 +15,7 @@ class Map extends React.Component {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}>
-        <MapView.Marker
+        <Marker
           coordinate={{
             latitude: location.coords.lat, 
             longitude: location.coords.lng

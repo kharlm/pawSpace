@@ -35,7 +35,7 @@ export default styles = StyleSheet.create({
     color: '#fff',
   },
   gray: {
-    color: '#adadad',
+    color: '#585858',
   },
   small: {
     fontSize: 10,
@@ -49,6 +49,9 @@ export default styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 50,
     fontSize: 16,
+  },
+  icon: {
+    paddingLeft: 10
   },
   backgroundImage: {
     flex: 1,
@@ -76,6 +79,13 @@ export default styles = StyleSheet.create({
     borderBottomWidth: 1,
     textAlign: 'center'
   },
+  backgroundVideo: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
   border: {
     width: '85%',
     margin: 10,
@@ -102,6 +112,12 @@ export default styles = StyleSheet.create({
     height: 125,
     margin: 3,
     backgroundColor: '#d3d3d3'
+  },
+  container1: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    backgroundColor: '#B0BEC5',
   },
   cameraButton: {
     height: 100, 
@@ -206,7 +222,7 @@ export default styles = StyleSheet.create({
     textAlign: 'center',
     color: '#000',
     borderStyle: 'solid', 
-    borderColor: '#A9A9A9',
+    borderColor: '#696969',
     borderWidth: 1.5,
     paddingTop: 4,
     paddingBottom: 10,
@@ -218,6 +234,13 @@ export default styles = StyleSheet.create({
     marginLeft: 5,
     backgroundColor: "#fff"
   },
+  activityIndicator: {
+    position: 'absolute',
+    top: 100,
+    left: 70,
+    right: 70,
+    height: 50,
+},
   homeImage: {
     flex: 1,
     height: 450,
@@ -228,6 +251,15 @@ export default styles = StyleSheet.create({
     borderColor: "#dddddd",
     borderRadius: 25,
     marginLeft: 10
-    
+  },
+  homeVideo: {
+    flex: 1,
+    height: 510,
+    width: "95%",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#dddddd",
+    borderRadius: 25,
+    marginLeft: 10 
   }
 });

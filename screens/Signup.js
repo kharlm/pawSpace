@@ -7,8 +7,8 @@ import firebase from 'firebase'
 import { Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { updatePhoto, updateEmail, updatePassword, updateUsername,signup, updateUser,signupError } from '../actions/user'
 import { uploadPhoto } from '../actions'
-import { dogsignup} from '../actions/dog'
-;
+import {noDog} from '../actions/nodog'
+
 
 class Signup extends React.Component {
 
@@ -18,19 +18,39 @@ class Signup extends React.Component {
       this.props.signup()
       global.foo="dogsignup";
       firebase.auth().onAuthStateChanged((user) => {
-        if(user){
-        if(this.props.user != null){
-         
+      if(user){
+       if(this.props.user != null){
         this.props.navigation.navigate('DogSignUp')
-          }
+        }
        }
-      })
-      
+     }) 
       }
      else {
       this.props.updateUser()
       this.props.navigation.goBack()
     }
+  }
+
+  noDog = () => {
+    const { routeName } = this.props.navigation.state
+    this.props.noDog()
+    console.log("route on signup page: "+routeName)
+    if(routeName === 'Signup'){
+      this.props.signup()
+      global.foo="dogsignup";
+      firebase.auth().onAuthStateChanged((user) => {
+      if(user){
+       if(this.props.user != null){
+        this.props.navigation.navigate('Home')
+        }
+       }
+     }) 
+      }
+     else {
+      this.props.updateUser()
+      this.props.navigation.goBack()
+    }
+    
   }
 
   openLibrary = async () => {
@@ -43,8 +63,6 @@ class Signup extends React.Component {
       }
     }
   }
-
-
   render() {
     const { routeName } = this.props.navigation.state
     return (
@@ -67,13 +85,16 @@ class Signup extends React.Component {
       	<TouchableOpacity style={styles.button} onPress={()=>this.onPress()}>
       		<Text>Add a Dog</Text>
       	</TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={()=>this.noDog()}>
+      		<Text>I dont have a dog</Text>
+      	</TouchableOpacity>
       </View>
     );
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ updatePhoto, uploadPhoto, updateUser, updateEmail, updatePassword, updateUsername,signup,signupError }, dispatch)
+  return bindActionCreators({ updatePhoto, uploadPhoto, updateUser, updateEmail, updatePassword, updateUsername,signup,signupError,noDog}, dispatch)
 }
 
 const mapStateToProps = (state) => {
