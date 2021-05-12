@@ -21,7 +21,7 @@
     "expo-video-thumbnails": "~3.0.0",
     "fast-deep-equal": "^3.1.1",
     "firebase": "^7.7.0",
-    "grpc": "^1.24.1",
+    "grpc": "^1.24.9",
     "import-env": "^1.1.1",
     "jdk": "0.0.0",
     "latlon-geohash": "^2.0.0",
