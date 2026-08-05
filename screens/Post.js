@@ -17,6 +17,7 @@ import { Video,Audio} from 'expo-av';
 import VideoPlayer from 'expo-video-player'
 import { uploadPhoto, playInSilentMode } from '../actions'
 import { ScrollView } from 'react-native-gesture-handler';
+import { GOOGLE_MAPS_API_KEY } from "@env";
 import * as VideoThumbnails from 'expo-video-thumbnails';
 
 
@@ -233,7 +234,7 @@ setTimeout(function () {
     let output = list.split(/[,]+/).pop();
 
    
-    const url = `${GOOGLE_API1}latlng=${location.geometry.location.lat},${location.geometry.location.lng}&key=${'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'}`
+    const url = `${GOOGLE_API1}latlng=${location.geometry.location.lat},${location.geometry.location.lng}&key=${GOOGLE_MAPS_API_KEY}`
     const response = await fetch(url)
     const data = await response.json()
     
@@ -273,7 +274,7 @@ setTimeout(function () {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status == 'granted') {
      const location = await Location.getCurrentPositionAsync();
-      const url = `${GOOGLE_API}?location=${location.coords.latitude},${location.coords.longitude}&rankby=distance&key=${'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'}`
+      const url = `${GOOGLE_API}?location=${location.coords.latitude},${location.coords.longitude}&rankby=distance&key=${GOOGLE_MAPS_API_KEY}`
       const response = await fetch(url)
       const data = await response.json()
       

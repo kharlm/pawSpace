@@ -8,8 +8,9 @@ import {getDog} from '../actions/dog'
 import {postPage} from '../actions/dog'
 import { connect } from 'react-redux'
 import  { AnimatedRegion } from 'react-native-maps'
+import { GOOGLE_MAPS_API_KEY } from "@env";
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
-const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
+const key = GOOGLE_MAPS_API_KEY
 
 
 

@@ -16,7 +16,8 @@ let imageUnavailable = 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
 const GOOGLE_DETAILSAPI='https://maps.googleapis.com/maps/api/place/details/json?query='
 const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query='
-const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
+import { GOOGLE_MAPS_API_KEY } from "@env";
+const key = GOOGLE_MAPS_API_KEY
 
 class ResultList extends React.Component  {
   constructor(props) {
@@ -60,7 +61,7 @@ class ResultList extends React.Component  {
     let location = await Location.getCurrentPositionAsync({});
    // location.coords.latitude=62.999
     //location.coords.longitude=-154.420
-    const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'}`
+    const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${'${GOOGLE_MAPS_API_KEY}'}`
     
     const response = await fetch(url)
     const response1 = await fetch(GOOGLE_PLACEAPI)
@@ -135,7 +136,7 @@ getPhotos = async () => {
   let storeResponse4
 
   if(this.state.vet[0].photos){
-   const vetUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[0]?this.state.vet[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const vetUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[0]?this.state.vet[0].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     vetResponse1 = await fetch(vetUrl1)
   }
 
@@ -144,7 +145,7 @@ getPhotos = async () => {
   }
     
     if(this.state.vet[1].photos){
-   const vetUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[1]?this.state.vet[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const vetUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[1]?this.state.vet[1].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     vetResponse2 = await fetch(vetUrl2)
     }
 
@@ -152,7 +153,7 @@ getPhotos = async () => {
       vetResponse2 = {url: imageUnavailable};
     }
     if(this.state.vet[2].photos){
-   const vetUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[2]?this.state.vet[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const vetUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[2]?this.state.vet[2].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     vetResponse3 = await fetch(vetUrl3)
     }
 
@@ -161,7 +162,7 @@ getPhotos = async () => {
     }
 
     if(this.state.vet[3].photos){
-   const vetUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[3]?this.state.vet[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const vetUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.vet[3]?this.state.vet[3].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     vetResponse4 = await fetch(vetUrl4)
     }
     else{
@@ -169,21 +170,21 @@ getPhotos = async () => {
     }
 
     if(this.state.groomer[2].photos){
-    const groomerUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[0]?this.state.groomer[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const groomerUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[0]?this.state.groomer[0].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     groomerResponse1 = await fetch(groomerUrl1)
     }
     else{
       groomerResponse1 = {url: imageUnavailable};
     }
     if(this.state.groomer[2].photos){
-   const groomerUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[1]?this.state.groomer[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const groomerUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[1]?this.state.groomer[1].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     groomerResponse2 = await fetch(groomerUrl2)
     }
     else{
       groomerResponse2 = {url: imageUnavailable};
     }
     if(this.state.groomer[2].photos){
-   const groomerUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[2]?this.state.groomer[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const groomerUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[2]?this.state.groomer[2].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     groomerResponse3 = await fetch(groomerUrl3)
     }
 
@@ -192,7 +193,7 @@ getPhotos = async () => {
     }
 
     if(this.state.groomer[3].photos){
-   const groomerUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[3]?this.state.groomer[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const groomerUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.groomer[3]?this.state.groomer[3].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     groomerResponse4 = await fetch(groomerUrl4)
     }
 
@@ -201,7 +202,7 @@ getPhotos = async () => {
     }
 
     if(this.state.store[1].photos){
-    const storeUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[0]?this.state.store[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const storeUrl1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[0]?this.state.store[0].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     storeResponse1 = await fetch(storeUrl1)
     }
 
@@ -210,7 +211,7 @@ getPhotos = async () => {
     }
 
     if(this.state.store[1].photos){
-   const storeUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[1]?this.state.store[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const storeUrl2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[1]?this.state.store[1].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     storeResponse2 = await fetch(storeUrl2)
     }
     else {
@@ -218,7 +219,7 @@ getPhotos = async () => {
     }
 
     if(this.state.store[2].photos){
-   const storeUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[2]?this.state.store[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const storeUrl3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[2]?this.state.store[2].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     storeResponse3 = await fetch(storeUrl3)
     
     }
@@ -230,7 +231,7 @@ getPhotos = async () => {
     
     if(this.state.store[3].photos){
       
-   const storeUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[3].photos?this.state.store[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+   const storeUrl4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.store[3].photos?this.state.store[3].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
     storeResponse4 = await fetch(storeUrl4)
     
     }

@@ -9,11 +9,12 @@ import { getPosts, likePost, unlikePost, getAdopt,getAgePosts,flagPost } from '.
 import { getUser } from '../../actions/user'
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
-const PET_API = 'http://api.petfinder.com/pet.getRandom?key=' + 'm0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs' + '&animal=cat&location=' + '34758' + '&output=basic&format=json'
+import { GOOGLE_MAPS_API_KEY, PETFINDER_CLIENT_ID } from "@env";
+const PET_API = 'http://api.petfinder.com/pet.getRandom?key=' + PETFINDER_CLIENT_ID + '&animal=cat&location=' + '34758' + '&output=basic&format=json'
 import Adopt from "../Adopt";
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
 const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+'
-const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
+const key = GOOGLE_MAPS_API_KEY
 import moment from 'moment'
 import DogParks from '../DogParks';
 import { getDog } from '../../actions/dog';

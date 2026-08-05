@@ -12,14 +12,13 @@ import { getPosts, likePost, unlikePost, getAdopt,flagPost,deletePost} from '../
 import { getUser } from '../actions/user'
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
-const PET_API = 'http://api.petfinder.com/pet.getRandom?key=' + 'm0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs' + '&animal=cat&location=' + '34758' + '&output=basic&format=json'
+import { GOOGLE_MAPS_API_KEY, PETFINDER_CLIENT_ID, PETFINDER_CLIENT_SECRET } from "@env";
+const PET_API = 'http://api.petfinder.com/pet.getRandom?key=' + PETFINDER_CLIENT_ID + '&animal=cat&location=' + '34758' + '&output=basic&format=json'
 import Adopt from "./Adopt";
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
-//https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Museum%20of%20Contemporary%20Art%20Australia&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=YOUR_API_KEY
 const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+'
-//const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/nearbysearch/json?query=dog park'
 const GOOGLE_DETAILSAPI='https://maps.googleapis.com/maps/api/place/details/json?query='
-const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
+const key = GOOGLE_MAPS_API_KEY
 import moment from 'moment'
 import DogParks from './DogParks';
 import { getDog, getLocation,postPage} from '../actions/dog';
@@ -373,7 +372,7 @@ class Home extends React.Component {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ "grant_type": "client_credentials", "client_id": "m0WnJCF0mjps6U8eNmX2V7zbwmoG1ra6ZAOZifDObMnDPxgBgs", "client_secret": "0b4EiJpPbarSYF3CDJTjGxYI0Ccx5kj67kOSc1u4" }),
+      body: JSON.stringify({ "grant_type": "client_credentials", "client_id": PETFINDER_CLIENT_ID, "client_secret": PETFINDER_CLIENT_SECRET }),
     }).then((response) => response.json())
       .then((responseJson) => {
         let res = JSON.stringify(responseJson.access_token)
@@ -455,7 +454,7 @@ class Home extends React.Component {
    let response3
    let response4
    if(this.state.DogParks[0].photos){
-    const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
      response1 = await fetch(url1)
      }
      else {
@@ -463,7 +462,7 @@ class Home extends React.Component {
     }
 
     if(this.state.DogParks[1].photos){
-    const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
      response2 = await fetch(url2)
 
     }
@@ -473,7 +472,7 @@ class Home extends React.Component {
     }
 
     if(this.state.DogParks[2].photos){
-    const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
      response3 = await fetch(url3)
     }
 
@@ -482,7 +481,7 @@ class Home extends React.Component {
     }
     
     if(this.state.DogParks[3].photos){
-    const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+    const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
      response4 = await fetch(url4)
     }
 
@@ -512,7 +511,7 @@ class Home extends React.Component {
         });
     }
     let location = await Location.getCurrentPositionAsync({});
-    const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'}`
+    const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${'${GOOGLE_MAPS_API_KEY}'}`
     
     const response = await fetch(url)
     const response1 = await fetch(GOOGLE_PLACEAPI)

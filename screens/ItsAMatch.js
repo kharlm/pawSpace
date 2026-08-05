@@ -12,8 +12,9 @@ import db from '../config/firebase';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
+import { GOOGLE_MAPS_API_KEY } from "@env";
 const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+'
-const key = 'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'
+const key = GOOGLE_MAPS_API_KEY
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
 const { width,height } = Dimensions.get('window');
 const BOTTOM_BAR_HEIGHT = !Platform.isPad ? 29 : 49 // found from https://stackoverflow.com/a/50318831/6141587
@@ -43,7 +44,7 @@ class ItsAMatch extends Component {
             });
         }
         let location = await Location.getCurrentPositionAsync({});
-        const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'}`
+        const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${'${GOOGLE_MAPS_API_KEY}'}`
         
         const response = await fetch(url)
         const response1 = await fetch(GOOGLE_PLACEAPI)
@@ -102,16 +103,16 @@ class ItsAMatch extends Component {
         let response3
         let response4
      
-         const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+         const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
           response1 = await fetch(url1)
           
-         const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+         const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
           response2 = await fetch(url2)
      
-         const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+         const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
           response3 = await fetch(url3)
          
-         const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk`
+         const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
           response4 = await fetch(url4)
      
          this.setState({

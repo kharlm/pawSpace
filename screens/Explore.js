@@ -8,6 +8,7 @@ import { getlocationPosts, likePost, unlikePost,flagPost,getPosts} from '../acti
 import { getDog } from '../actions/dog';
 import moment from 'moment'
 import DoubleClick from 'react-native-double-tap';
+import { GOOGLE_MAPS_API_KEY } from "@env";
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
 import { Video, Audio} from 'expo-av';
 import { Viewport } from '@skele/components'
@@ -139,7 +140,7 @@ class Explore extends React.Component {
 getLocationData = async (latitude,longitude) => {
 
 
-const url = `${GOOGLE_API}latlng=${latitude},${longitude}&key=${'AIzaSyCKtd8tWSWZ1jMR8tw11c-FgmIPsF9Ycqk'}`
+const url = `${GOOGLE_API}latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`
 const response = await fetch(url)
 const data = await response.json()
 
