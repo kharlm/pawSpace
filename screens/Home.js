@@ -1,43 +1,36 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styles from '../styles'
 import styles1 from '../styles1'
-import db from '../config/firebase'
+import { db, auth } from '../config/firebase'
+import { doc, getDoc } from 'firebase/firestore'
+import { signOut } from 'firebase/auth'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import firebase from 'firebase';
 import { Ionicons,AntDesign} from '@expo/vector-icons';
-import { Text, View, Button, Image, FlatList, TouchableOpacity, TextInput, SafeAreaView, ScrollView, Alert, Dimensions,ImageBackground,RefreshControl,Modal,Animated,ActivityIndicator, Platform, Linking} from 'react-native';
+import { Text, View, Image, FlatList, TouchableOpacity, SafeAreaView, ScrollView, Alert, Dimensions,ImageBackground,RefreshControl,ActivityIndicator, Linking} from 'react-native';
 import { getPosts, likePost, unlikePost, getAdopt,flagPost,deletePost} from '../actions/post'
 import { getUser } from '../actions/user'
-import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
-import { GOOGLE_MAPS_API_KEY, PETFINDER_CLIENT_ID, PETFINDER_CLIENT_SECRET } from "@env";
-const PET_API = 'http://api.petfinder.com/pet.getRandom?key=' + PETFINDER_CLIENT_ID + '&animal=cat&location=' + '34758' + '&output=basic&format=json'
+import * as Notifications from 'expo-notifications'
 import Adopt from "./Adopt";
 const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
 const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+'
 const GOOGLE_DETAILSAPI='https://maps.googleapis.com/maps/api/place/details/json?query='
+const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY
+const PETFINDER_CLIENT_ID = process.env.EXPO_PUBLIC_PETFINDER_CLIENT_ID
+const PETFINDER_CLIENT_SECRET = process.env.EXPO_PUBLIC_PETFINDER_CLIENT_SECRET
 const key = GOOGLE_MAPS_API_KEY
 import moment from 'moment'
 import DogParks from './DogParks';
+import PostVideo from './PostVideo';
 import { getDog, getLocation,postPage} from '../actions/dog';
 import { allowNotifications } from '../actions/index';
 import { WebView } from 'react-native-webview';
 const { width, height } = Dimensions.get('window');
 import DoubleClick from 'react-native-double-tap';
 import Toast from 'react-native-root-toast';
-import { Video, Audio} from 'expo-av';
-import { Viewport } from '@skele/components'
-import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-material-cards'
-import { Notifications } from 'expo';
+import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import Constants from 'expo-constants';
-import { NavigationEvents } from 'react-navigation';
-
-//https://apps.apple.com/th/app/pawspace/id1496294608
-
-
-const ViewportAwareVideo = Viewport.Aware(Video)
 
 let imageUnavailable = 'https://us.123rf.com/450wm/pavelstasevich/pavelstasevich1811/pavelstasevich181101028/112815904-stock-vector-no-image-available-icon-flat-vector-illustration.jpg?ver=6'
 
@@ -45,7 +38,6 @@ class Home extends React.Component {
 
   constructor(props) {
     super(props);
-    this.forceUpdateHandler = this.forceUpdateHandler.bind(this);
     this.state = {
       adoptLoading: false,
       adoptError: false,
@@ -64,83 +56,36 @@ class Home extends React.Component {
       currentUri: '',
       refreshing: false,
       webPage: '',
-      modalVisible: true,
       locationStatus:'',
-      item: [],
       theme:{},
       themeOn: false,
       themeText: "",
       themeImage: "",
       theme: "",
       themeLoading: false,
-      themeTitle: "", 
+      themeTitle: "",
       themeStyle:"",
       notification: {},
       isAppUpdated: true,
-      appVersion: 0
+      appVersion: 0,
+      visiblePostId: null
     }
-    
+
   }
 
-  myCustomAnimatedValue = new Animated.Value(0);
+  viewabilityConfig = { itemVisiblePercentThreshold: 50 };
 
-  getPageTransformStyle = index => ({
-    transform: [
-      {
-        scale: this.myCustomAnimatedValue.interpolate({
-          inputRange: [
-            (index - 1) * (width + 8), // Add 8 for dividerWidth
-            index * (width + 8),
-            (index + 1) * (width + 8)
-          ],
-          outputRange: [0, 1, 0],
-          extrapolate: "clamp"
-        })
-      },
-      {
-        rotate: this.myCustomAnimatedValue.interpolate({
-          inputRange: [
-            (index - 1) * (width + 8),
-            index * (width + 8),
-            (index + 1) * (width + 8)
-          ],
-          outputRange: ["180deg", "0deg", "-180deg"],
-          extrapolate: "clamp"
-        })
-      }
-    ]
-  });
-
-
-
-  forceUpdateHandler(){
-    this.forceUpdate();
+  _onViewableItemsChanged = ({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      this.setState({ visiblePostId: viewableItems[0].item.id });
+    } else {
+      this.setState({ visiblePostId: null });
+    }
   };
-  
-  async play() {
-    
-    const status = await this.video.getStatusAsync();
-    if (status.isPlaying) {
-      return;
-    }
-    return this.video.playAsync();
-  }
-
-  async pause () {
- 
-   const status = await this.video.getStatusAsync();
-   
-    if (status.isPlaying===false) {
-      return;
-    }
-      this.video.pauseAsync();    
-  }
-
 
   deletePost = (post) => {
     this.props.deletePost(post)
 
-    // Add a Toast on screen.
     let toast = Toast.show('Post Deleted', {
       duration: Toast.durations.LONG,
       position: Toast.positions.CENTER,
@@ -150,25 +95,11 @@ class Home extends React.Component {
       delay: 0,
   });
 
-    // You can manually hide the Toast, or it will automatically disappear after a `duration` ms timeout.
     setTimeout(function () {
       Toast.hide(toast);
     }, 3000);
 
-        this.props.navigation.navigate('Home')
-  }
-
-  pauseVideo = () => {
-    if(this.video) {
-      this.video.pauseAsync();
-
-    }
-  }
-
-  playVideo = () => {
-    if(this.video) {
-      this.video.playAsync();
-    }
+    this.props.navigation.navigate('Home')
   }
 
   reportPost = (postId) => {
@@ -179,7 +110,7 @@ class Home extends React.Component {
       'Post Flagged',
       'This post will be reviewed within 24 hours and if found to be inappropriate will be deleted and the user removed from the app',
       [
-        
+
         {text: 'OK'},
       ],
       { cancelable: false }
@@ -195,40 +126,22 @@ class Home extends React.Component {
   async playInSilentMode() {
     // To get around the fact that audio in a `WebView` will be muted in silent mode
     // See: https://github.com/expo/expo/issues/211
-    //
-    // Based off crazy hack to get the sound working on iOS in silent mode (ringer muted/on vibrate)
-    // https://github.com/expo/expo/issues/211#issuecomment-454319601
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      allowsRecordingIOS: false,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_MIX_WITH_OTHERS,
-      shouldDuckAndroid: false,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-      playThroughEarpieceAndroid: true,
-      staysActiveInBackground: false
-    });
-    await Audio.setIsEnabledAsync(true);
-    // console.log(" 🔈 done: setIsEnabledAsync");
-    const sound = new Audio.Sound();
-    await sound.loadAsync(
-      require("../assets/500-milliseconds-of-silence.mp3") // from https://github.com/anars/blank-audio
-    );
-    // console.log(" 🔈 done: sound.loadAsync");
-    await sound.playAsync();
-    sound.setIsMutedAsync(true);
-    sound.setIsLoopingAsync(true);
-    // console.log(" 🔈 done: sound.playAsync");
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.isFocused !== this.props.isFocused) {
-      // Use the `this.props.isFocused` boolean
-      // Call any action
+    try {
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        shouldPlayInBackground: false,
+        interruptionMode: 'mixWithOthers',
+      });
+      this._silentPlayer = createAudioPlayer(require("../assets/500-milliseconds-of-silence.mp3"));
+      this._silentPlayer.volume = 0;
+      this._silentPlayer.loop = true;
+      this._silentPlayer.play();
+    } catch (e) {
+      console.log(e);
     }
   }
 
   _scrollToTop = () => {
-    // Scroll to top, in this case I am using FlatList
     if (!!this.scroll) {
       this.scroll.scrollTo({x: 0, y: 0, animated: true});
     }
@@ -236,21 +149,18 @@ class Home extends React.Component {
   }
 
   navigateMap = (item) => {
-    this.props.navigation.navigate('Map', { 
-      location: item.postLocation 
+    this.props.navigation.navigate('Map', {
+      location: item.postLocation
     })
   }
 
   checkAppVersion = () => {
 
     var getAppstoreAppVersion = require('react-native-appstore-version-checker').getAppstoreAppVersion;
-      //On IOS u can do
-    getAppstoreAppVersion('1496294608') //put any apps id here
+    getAppstoreAppVersion('1496294608')
     .then((appVersion) => {
       this.setState({ appVersion: appVersion },() => {
- console.log("manifest version: "+Constants.manifest.version)
- console.log("app version: "+this.state.appVersion)
-    if(Constants.manifest.version < this.state.appVersion) {
+    if(Constants.expoConfig.version < this.state.appVersion) {
         Alert.alert(
           'Please Upgrade Your App',
           'You don\'t have the latest version of pawSpace to use all the latest features please upgrade the App',
@@ -266,15 +176,11 @@ class Home extends React.Component {
           { cancelable: false }
         )
   }
-  else {
-    this.alertPresent = false;
-}
-        
     });
     })
     .catch((err) => {
       console.log('error occurred', err);
-      this.setState({ appVersion: Constants.manifest.version});
+      this.setState({ appVersion: Constants.expoConfig.version});
     });
 
 
@@ -283,87 +189,36 @@ class Home extends React.Component {
   async componentDidMount ()  {
 
     this.checkAppVersion()
-    this.props.navigation.setParams({
-      tapOnTabNavigator: this.tapOnTabNavigator
-    })
     this.getMyLocation()
-    this.props.getDog
     this.props.getPosts(this.props.dog)
-    this.props.allowNotifications(user.uid)
+    if (this.props.user && this.props.user.uid) {
+      this.props.allowNotifications(this.props.user.uid)
+    }
     this.getTheme()
-    this._notificationSubscription = Notifications.addListener(this._handleNotification);
-     // Register our local function called by 
-    // tabBarOnPress() in defaultNavigationOptions()
+    this._notificationSubscription = Notifications.addNotificationResponseReceivedListener(this._handleNotification);
 
-    // this method is a work around to get audio to automatically play when the ringer is off for the phone
     await this.playInSilentMode()
 
   }
-  _handleNotification = notification => {
-    // do whatever you want to do with the notification
+  _handleNotification = response => {
+    const data = response.notification.request.content.data;
+    this.setState({ notification: data });
 
-    this.setState({ notification: notification });
-    let res = JSON.stringify(this.state.notification)
-    console.log("notification: "+res)
-    if(this.state.notification.data.text==='Licked Your Photo' && this.state.notification.origin=='selected'){
+    if(data.text==='Licked Your Photo'){
       this.props.navigation.navigate('Activity')
     }
-
-    else if(this.state.notification.data.text==='Matched With You' && this.state.notification.origin=='selected'){
-
-      this.props.navigation.navigate('ItsAMatch',{ card: this.state.notification.data.data })
-
+    else if(data.text==='Matched With You'){
+      this.props.navigation.navigate('ItsAMatch',{ card: data.data })
     }
-    
   };
 
-
-  componentWillMount = () => {
-    this.props.navigation.setParams({
-      scrollToTop: this._scrollToTop,
-    });
-
-    this.props.getDog
-    this.props.getPosts(this.props.dog)
-   }
-
    componentWillUnmount() {
-    this._unsubscribe();
-  }
-
-   async playInSilentMode() {
-    // To get around the fact that audio in a `WebView` will be muted in silent mode
-    // See: https://github.com/expo/expo/issues/211
-    //
-    // Based off crazy hack to get the sound working on iOS in silent mode (ringer muted/on vibrate)
-    // https://github.com/expo/expo/issues/211#issuecomment-454319601
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      allowsRecordingIOS: false,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_MIX_WITH_OTHERS,
-      shouldDuckAndroid: false,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-      playThroughEarpieceAndroid: true,
-      staysActiveInBackground: false
-    });
-    await Audio.setIsEnabledAsync(true);
-    // console.log(" 🔈 done: setIsEnabledAsync");
-    const sound = new Audio.Sound();
-    await sound.loadAsync(
-      require("../assets/500-milliseconds-of-silence.mp3") // from https://github.com/anars/blank-audio
-    );
-    // console.log(" 🔈 done: sound.loadAsync");
-    await sound.playAsync();
-    sound.setIsMutedAsync(true);
-    sound.setIsLoopingAsync(true);
-    // console.log(" 🔈 done: sound.playAsync");
-  }
-
-   // Call on tab bar tap
-  tapOnTabNavigator = () => {
-
-    this._scrollToTop()
-    //this.doSomethingTabWasPressed()
+    if (this._notificationSubscription) {
+      this._notificationSubscription.remove();
+    }
+    if (this._silentPlayer) {
+      this._silentPlayer.remove();
+    }
   }
 
   getAdoptToken = async () => {
@@ -424,12 +279,6 @@ class Home extends React.Component {
     }
   }
 
-  getAdopt = async () => {
-      const url = "https://api.adoptapet.com/search/pets_at_shelters?key=A34F48&v=1&output=xml&shelter_id=2342&shelter_id=17293&shelter_id=8323"
-      const response = await fetch(url)
-      let res = JSON.stringify(response)
-  }
-
   getDogParks = async () => {
     const response = await fetch(GOOGLE_PLACEAPI+'&location='+this.state.myLocation.coords.latitude+','+this.state.myLocation.coords.longitude+'&key='+key)
     const data = await response.json()
@@ -438,10 +287,10 @@ class Home extends React.Component {
     });
    this.getDogParkPhoto()
   }
-  
+
   signOutUser = async () => {
     try {
-        await firebase.auth().signOut();
+        await signOut(auth);
         this.props.navigation.navigate('Login')
     } catch (e) {
         console.log(e);
@@ -480,7 +329,7 @@ class Home extends React.Component {
     else {
       response3 = {url: imageUnavailable};
     }
-    
+
     if(this.state.DogParks[3].photos){
     const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
      response4 = await fetch(url4)
@@ -491,62 +340,62 @@ class Home extends React.Component {
     }
 
     this.setState({
-      
+
       DogParkPhotos: [response1,response2,response3,response4],
       loadingPark: true
     })
 
     this.getPlaceDetails()
-   
+
   }
 
   getMyLocation = async () => {
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
         this.setState({
             myLocation: 'Permission denied',
             locationStatus: 'Permission denied',
             locationLoading: true,
-            loadingPark: true,
-            loading: true
+            loadingPark: true
         });
+        return
     }
     let location = await Location.getCurrentPositionAsync({});
-    const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${'${GOOGLE_MAPS_API_KEY}'}`
-    
+    const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`
+
     const response = await fetch(url)
     const response1 = await fetch(GOOGLE_PLACEAPI)
     const data = await response.json()
     const data1 = await response1.json()
-   
+
     let ind;
     let ind1
     for(var i=0;i<data.results.length;++i){
-      
-      
+
+
       if(data.results[i].types[0]=="postal_code"){
-        
-          ind = data.results[i].address_components[0].long_name;  
+
+          ind = data.results[i].address_components[0].long_name;
       }
 
       if(data.results[i].types[0]=="locality"){
 
-          ind1 = data.results[i].address_components[0].long_name; 
+          ind1 = data.results[i].address_components[0].long_name;
       }
-     
+
     }
-    
+
     this.setState({
         myLocation: location,
         zipCode: ind,
         locationLoading: true,
         city: ind1
-        
+
     },() => {
       this.getAdoptToken();
       this.getDogParks();
   });
-  
+
 };
 
 getPlaceDetails = async () => {
@@ -572,9 +421,9 @@ getPlaceDetails = async () => {
 
  async getTheme ()  {
 
-      const Theme = await db.collection('monthlyTheme').doc('1').get()
+      const themeSnap = await getDoc(doc(db, 'monthlyTheme', '1'))
 
-      let theme = Theme.data()
+      let theme = themeSnap.data()
 
       let themeName = theme.theme
       let themeOn = theme.themeOn
@@ -582,12 +431,12 @@ getPlaceDetails = async () => {
       let themeImage = theme.themeImage
       let themeTitle = theme.themeTitle
       let themeStyle = theme.themeStyle
-      
+
       this.setState({
         theme: themeName,
         themeOn: themeOn,
         themeText: themeText,
-        themeImage: themeImage, 
+        themeImage: themeImage,
         themeTitle: themeTitle,
         themeStyle: themeStyle,
         themeLoading: true
@@ -618,11 +467,11 @@ getPlaceDetails = async () => {
         { cancelable: false }
       )
     }
-    else{ 
+    else{
     const { dogId } = this.props.dog
     if (post.likes.includes(dogId)) {
       this.props.unlikePost(post)
-      
+
     } else {
       this.props.likePost(post)
     }
@@ -633,23 +482,7 @@ getPlaceDetails = async () => {
     this.props.navigation.navigate('Profile')
   }
 
-  navigateMap = (item) => {
-    this.props.navigation.navigate('Map', {
-      location: item.postLocation
-    })
-  }
-
-  willFocusAction = (payload) => {
-    console.log("in on will focus")
-    let params = payload.state.params;
-    if (params && params.value) {
-      this.setState({value: params.value});
-    }
-  }
-
-  render() {  
-    // this is to scroll to the top of the page after you uplaod a video or else the app will crash as it will
-    //try to render the video before it fetched
+  render() {
    if(this.props.dog.postPage==='true'){
      this._scrollToTop()
    }
@@ -659,25 +492,19 @@ getPlaceDetails = async () => {
      <ActivityIndicator size="large" color="#0000ff"/>
     </View>
     )
-    if(this.state.showWebView){ 
+    if(this.state.showWebView){
       return (
         <View style={{ flex: 1 }}>
           <TouchableOpacity onPress={()=> {this.setState({showWebView: false}) }}>
     <Text style={{fontSize: 30, color:'#0000ff',paddingLeft: 8}}>x</Text>
   </TouchableOpacity>
         <WebView source={{ uri: this.state.webPage }} />
-        
+
       </View>
       )
     }
     return (
-     // 
-     
-      <Viewport.Tracker>
       <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#F8F8FF"}}
-      onContentSizeChange={(width, height) => {
-        console.log(width, height);
-      }}
       ref={(c) => {this.scroll = c}}
       refreshControl={
         <RefreshControl
@@ -686,11 +513,11 @@ getPlaceDetails = async () => {
         />
       }
       >
-     
+
         <View style={{ flex: 1}}>
         <ImageBackground
           source={require('../assets/homebackground1.jpg')}
-          imageStyle= 
+          imageStyle=
           {{opacity:.12}}
           style={{width:null,height:null
           }}
@@ -705,7 +532,7 @@ getPlaceDetails = async () => {
               paddingHorizontal: 20
             }}
           >
-            
+
             Dogs in your area up for adoption
         </Text>:
           <Text
@@ -718,7 +545,7 @@ getPlaceDetails = async () => {
         </Text>
           }
 
-          { 
+          {
             this.state.locationStatus=="Permission denied" ?
             <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
                 <Text
@@ -777,7 +604,7 @@ getPlaceDetails = async () => {
               Dog Parks near you
           </Text>
           </View>
-          { 
+          {
             this.state.locationStatus=="Permission denied" ?
 
             <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
@@ -838,17 +665,18 @@ getPlaceDetails = async () => {
           }
           { this.state.themeOn && this.state.themeLoading ?
          <View>
-          
+
         <Text style={{ fontSize: 24, fontWeight: "700", marginLeft: 15, marginBottom: 5,}}>
               {this.state.themeTitle}
             </Text>
-          
-         
-          <Card style={{ margin: 10, borderRadius: 20}}>
-            <CardImage source={{ uri: this.state.themeImage }}  style= {{borderTopLeftRadius: 20, borderTopRightRadius: 20, height:this.state.themeStyle }} />
-            <CardTitle title={this.state.theme}/>
-            <CardContent text={this.state.themeText} style={{}}/>
-          </Card>
+
+          <View style={{ margin: 10, borderRadius: 20, borderWidth: 1, borderColor: '#d3d3d3', overflow: 'hidden' }}>
+            <Image source={{ uri: this.state.themeImage }} style={{ width: '100%', height: this.state.themeStyle }} />
+            <View style={{ padding: 10 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700' }}>{this.state.theme}</Text>
+              <Text style={{ marginTop: 5 }}>{this.state.themeText}</Text>
+            </View>
+          </View>
           </View>
            : <View/>}
           <View style={{ marginTop: 5, paddingHorizontal: 20 }}>
@@ -859,23 +687,20 @@ getPlaceDetails = async () => {
 
             </Text>
         </View>
-          <FlatList    
+          <FlatList
             data={this.props.post.feed}
             keyExtractor={(item) => item.id}
             onViewableItemsChanged={this._onViewableItemsChanged}
             viewabilityConfig={this.viewabilityConfig}
             renderItem={({ item }) => {
-              ref=ref => {
-                this.cellRefs[item.id] = ref;
-              }
-             
+
               let liked = item.likes.includes(this.props.dog.dogId)
             //Adds the delete button to posts that are mine
-              
+
               return (
-                
+
                 <View>
-                  
+
                   <View style={[styles.row, styles.space]}>
                     <View style={[styles.row, styles.center]}>
                       <TouchableOpacity onPress={() => this.goToDog(item)} >
@@ -910,34 +735,23 @@ getPlaceDetails = async () => {
                       delay={200}>
                       {
                         item.isVideo===true ?
-                        <ViewportAwareVideo
-                         innerRef={ref => this.video = ref}
-                        onViewportLeave={() => this.pause()} 
-                        onViewportEnter={() => this.play()}
-                        preTriggerRatio={-0.5}
-                        source={{ uri: item.postPhoto }}
-                        rate={1.0}
-                        volume={1.0}
-                        isMuted={true}
-                        resizeMode="cover"
-                        shouldPlay={false}
-                        isLooping
-                        style={styles.homeVideo}
-                        useNativeControls={true}
-                      >
-                      </ViewportAwareVideo>:
+                        <PostVideo
+                          uri={item.postPhoto}
+                          shouldPlay={this.state.visiblePostId === item.id}
+                          style={styles.homeVideo}
+                        />:
                     <Image style={styles.homeImage} source={{ uri: item.postPhoto }} />
                       }
                   </DoubleClick>
                   <View style={styles.row}>
                   <TouchableOpacity onPress={() => this.likePost(item)} >
-                    <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#0000ff' : '#000'} name={liked ? 'ios-heart' : 'ios-heart-empty'} size={25} 
+                    <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#0000ff' : '#000'} name={liked ? 'heart' : 'heart-outline'} size={25}
                     />
                     <Text style={{ fontWeight: 'bold' ,marginTop: 0,marginLeft: 51}}>{item.likes.length} Licks</Text>
-                  
+
                   </TouchableOpacity>
                     <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
-                      <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-chatbubbles' size={25} />
+                      <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='chatbubbles' size={25} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => Alert.alert(
                       'Report Post',
@@ -948,10 +762,10 @@ getPlaceDetails = async () => {
                       ],
                       { cancelable: false }
                     )}>
-                    <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='ios-flag' size={25} />
+                    <Ionicons style={{ marginLeft: 100, marginTop: 5 }} name='flag' size={25} />
                     </TouchableOpacity>
                   </View>
-                  
+
                   <Text style={{ marginLeft: 50, marginTop: 5, marginBottom: 10 }}>{item.postDescription}</Text>
                   <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
                   <Text style={{color:'#585858', fontSize:10, marginBottom: 5,marginLeft: 50}}>View Comments</Text>
@@ -964,7 +778,6 @@ getPlaceDetails = async () => {
      </ImageBackground>
      </View>
       </ScrollView>
-      </Viewport.Tracker>
     )
 
   }
@@ -987,4 +800,3 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home)
-

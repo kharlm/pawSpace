@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import styles from "react-native-masonry/styles/main";
 
 class Adopt extends Component {
 

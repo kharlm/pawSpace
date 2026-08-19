@@ -1,125 +1,79 @@
 import React from 'react';
-import { Text, View } from 'react-native';
-import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
-import { HomeNavigator, SearchNavigator, PostNavigator, ActivityNavigator, ProfileNavigator,ExploreNavigator,MatchNavigator,EssentialsNavigator } from './StackNavigator'
-import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import HomeNavigator from './HomeNavigator';
+import SearchNavigator from './SearchNavigator';
+import ComingSoon from '../screens/ComingSoon';
 
-const getScreenRegisteredFunctions = navState => {
-  // When we use stack navigators. 
-  // Also needed for react-navigation@2
-  const { routes, index, params } = navState;
+const Tab = createBottomTabNavigator();
 
-  if (navState.hasOwnProperty('index')) {
-    return getScreenRegisteredFunctions(routes[index]);
-  }
-  // When we have the final screen params
-  else {
-    return params;
-  }
-}
-
-const TabNavigator = createBottomTabNavigator(
-  {
-    Home: { 
-      screen: HomeNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <MaterialCommunityIcons name={focused ? 'home' : 'home-outline'} size={32} />
-        ) ,
-        tabBarOnPress: ({ defaultHandler,navigation}) => {
-
-          if (navigation && navigation.isFocused()) {
-            const screenFunctions = getScreenRegisteredFunctions(navigation.state);
-  
-            if (screenFunctions && typeof screenFunctions.tapOnTabNavigator === 'function') {
-              screenFunctions.tapOnTabNavigator()
-            }
-          }
-  
-          // Always call defaultHandler()
-          defaultHandler();
+export default function TabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarLabel: '',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          paddingVertical: 5,
+          height: 55,
         },
-      } 
-    },
-    
-    Search: { 
-      screen: SearchNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <Ionicons name={focused ? 'md-search' : 'ios-search'} size={32} />
-        ) 
-      }
-    },
-    Post: { 
-      screen: PostNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <Ionicons name={focused ? 'ios-add-circle' : 'ios-add-circle-outline'} size={32} />
-        ) 
-      }
-    },
-    Match: { 
-      screen: MatchNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <Ionicons  name={focused ? 'ios-bonfire' : 'md-bonfire'} size={32} />
-        ) 
-      }
-    },
-    /*Essentials: { 
-      screen: EssentialsNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <MaterialCommunityIcons name={focused ? 'map-marker' : 'map-marker-outline'} size={32} />
-        ) 
-      }
-    },
-    */
-    /*Activity: { 
-      screen: ActivityNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <Ionicons name={focused ? 'ios-heart': 'ios-heart-empty'} size={32} />
-        ) 
-      }
-    },
-    */
-
-   Explore: { 
-      screen: ExploreNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <Ionicons name={focused ? 'ios-globe' : 'md-globe'} size={32} />
-        ) 
-      }
-    },
-    
-    MyProfile: { 
-      screen: ProfileNavigator,
-      navigationOptions: {
-        tabBarLabel: ' ',
-        tabBarIcon: ({focused}) => (
-          <MaterialCommunityIcons name={focused ? 'dog' : 'dog'} size={32} />
-        ) 
-      }
-    }
-  }, 
-  { 
-    tabBarOptions: {
-      style: {
-        backgroundColor: '#fff',
-        paddingVertical: 5,
-        height: 55
-      }
-    }
-  }
-);
-
-export default createAppContainer(TabNavigator);
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeNavigator}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <MaterialCommunityIcons name={focused ? 'home' : 'home-outline'} size={32} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Search"
+        component={SearchNavigator}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'search' : 'search-outline'} size={32} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Post"
+        component={ComingSoon}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'add-circle' : 'add-circle-outline'} size={32} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Match"
+        component={ComingSoon}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'bonfire' : 'bonfire-outline'} size={32} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Explore"
+        component={ComingSoon}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons name={focused ? 'globe' : 'globe-outline'} size={32} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="MyProfile"
+        component={ComingSoon}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <MaterialCommunityIcons name="dog" size={32} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}

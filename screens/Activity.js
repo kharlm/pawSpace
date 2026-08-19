@@ -3,7 +3,8 @@ import styles from '../styles'
 import styles1 from '../styles1'
 import { connect } from 'react-redux'
 import { Text, View, FlatList, ActivityIndicator, Image} from 'react-native';
-import db from '../config/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore'
+import { db } from '../config/firebase';
 import orderBy from 'lodash/orderBy'
 import moment from 'moment'
 
@@ -18,8 +19,8 @@ class Activity extends React.Component {
 
   getActivity = async () => {
   	let activity = []
-    const query = await db.collection('activity').where('dogId', '==', this.props.dog.dogId).get()
-    query.forEach((response) => {
+    const activitySnap = await getDocs(query(collection(db, 'activity'), where('dogId', '==', this.props.dog.dogId)))
+    activitySnap.forEach((response) => {
       activity.push(response.data())
     })
 		this.setState({activity: orderBy(activity, 'date','desc')})

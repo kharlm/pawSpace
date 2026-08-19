@@ -3,7 +3,8 @@ import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { View, Text, SafeAreaView, TextInput, FlatList, Image, TouchableOpacity,Dimensions } from 'react-native';
-import db from '../config/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore'
+import { db } from '../config/firebase';
 import { getDog } from '../actions/dog'
 import DogInfo from './DogInfo';
 import Category from './Category';
@@ -20,8 +21,8 @@ class Search extends React.Component {
 
 	searchUser = async () => {
   	let search = []
-    const query = await db.collection('dogs').where('dogTag', '>=', this.state.search).get()
-    query.forEach((response) => {
+    const dogSnap = await getDocs(query(collection(db, 'dogs'), where('dogTag', '>=', this.state.search)))
+    dogSnap.forEach((response) => {
       search.push(response.data())
     })
 		this.setState({query: search,onFocus: true})

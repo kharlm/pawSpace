@@ -21,7 +21,8 @@ class Login extends React.Component {
       loading: true,
       moreThanOneDog: false,
       login: false,
-      noDog: ""
+      noDog: "",
+      userDoc: null
     }
   }
 
@@ -49,7 +50,7 @@ class Login extends React.Component {
 
       if(this.props.nodog!= true){
        const userSnap = await getDoc(doc(db, 'users', id))
-        user1 = userSnap.data()
+        const user1 = userSnap.data()
         let res = JSON.stringify(user1.dogs[0]);
 
 
@@ -71,7 +72,7 @@ class Login extends React.Component {
   dogLengthMoreThanOne = async (id) => {
     try{
        const userSnap = await getDoc(doc(db, 'users', id))
-        user = userSnap.data()
+        const user = userSnap.data()
 
 
         if(user.dogs.length==0){
@@ -84,14 +85,16 @@ class Login extends React.Component {
           this.setState({
             moreThanOneDog: true,
             login: true,
-            noDog: false
+            noDog: false,
+            userDoc: user
           })
         }
 
         else{
           this.setState({
             moreThanOneDog: false,
-            login: true
+            login: true,
+            userDoc: user
           })
         }
 
@@ -127,7 +130,7 @@ class Login extends React.Component {
     if(this.state.moreThanOneDog===false && this.state.login===true){
 
       return (
-      this.props.getDog(user.dogs[0],'DOGLOGIN'),
+      this.props.getDog(this.state.userDoc.dogs[0],'DOGLOGIN'),
       this.props.navigation.navigate('Home')
       )
 

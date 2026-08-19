@@ -36,7 +36,7 @@ class DogPicker extends React.Component {
     getUserData = async (id) => {
          try{
            const userSnap = await getDoc(doc(db, 'users', id))
-            user1 = userSnap.data()
+            const user1 = userSnap.data()
 
             user1.dogs.map((data)=>{
                 this.getDogData(data)
@@ -62,7 +62,7 @@ class DogPicker extends React.Component {
     getDogData = async (id) => {
          try{
            const dogSnap = await getDoc(doc(db, 'dogs', id))
-            dog = dogSnap.data()
+            const dog = dogSnap.data()
             let res = JSON.stringify(dog.dogId);
             console.log("dogoo"+dog.dogId)
             this.setState({
@@ -115,7 +115,7 @@ class DogPicker extends React.Component {
     dogLengthMoreThanOne = async (id) => {
         try {
             const userSnap = await getDoc(doc(db, 'users', id))
-            user = userSnap.data()
+            const user = userSnap.data()
 
             this.setState({
                 numberOfDogs: 2

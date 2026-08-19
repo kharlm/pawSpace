@@ -344,7 +344,7 @@ class DogSignup extends React.Component {
   dogLengthMoreThanOne = async (id) => {
     try{
        const userSnap = await getDoc(doc(db, 'users', id))
-        user = userSnap.data()
+        const user = userSnap.data()
         
 
         if(user.dogs.length>1){
