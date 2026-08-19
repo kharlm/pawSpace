@@ -2,12 +2,12 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
-import thunkMiddleware from 'redux-thunk';
+import { thunk } from 'redux-thunk';
 import logger from 'redux-logger';
 import reducer from './reducers';
 import './config/firebase';
 
-const store = createStore(reducer, applyMiddleware(thunkMiddleware, logger));
+const store = createStore(reducer, applyMiddleware(thunk, logger));
 
 export default function App() {
   return (
