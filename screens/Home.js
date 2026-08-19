@@ -283,7 +283,7 @@ class Home extends React.Component {
     const response = await fetch(GOOGLE_PLACEAPI+'&location='+this.state.myLocation.coords.latitude+','+this.state.myLocation.coords.longitude+'&key='+key)
     const data = await response.json()
     this.setState({
-      DogParks: data.results
+      DogParks: data.results || []
     });
    this.getDogParkPhoto()
   }
@@ -299,49 +299,18 @@ class Home extends React.Component {
 
   getDogParkPhoto = async () => {
 
-   let response1
-   let response2
-   let response3
-   let response4
-   if(this.state.DogParks[0].photos){
-    const url1 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[0]?this.state.DogParks[0].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
-     response1 = await fetch(url1)
-     }
-     else {
-      response1 = {url: imageUnavailable};
-    }
+    const dogParks = this.state.DogParks.slice(0, 4)
 
-    if(this.state.DogParks[1].photos){
-    const url2 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[1]?this.state.DogParks[1].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
-     response2 = await fetch(url2)
-
-    }
-
-    else {
-      response2 = {url: imageUnavailable};
-    }
-
-    if(this.state.DogParks[2].photos){
-    const url3 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[2]?this.state.DogParks[2].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
-     response3 = await fetch(url3)
-    }
-
-    else {
-      response3 = {url: imageUnavailable};
-    }
-
-    if(this.state.DogParks[3].photos){
-    const url4 = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${this.state.DogParks[3]?this.state.DogParks[3].photos[0].photo_reference: imageUnavailable}&key=${GOOGLE_MAPS_API_KEY}`
-     response4 = await fetch(url4)
-    }
-
-    else {
-      response4 = {url: imageUnavailable};
-    }
+    const dogParkPhotos = await Promise.all(dogParks.map(async (park) => {
+      if (park.photos && park.photos[0]) {
+        const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${park.photos[0].photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
+        return fetch(url)
+      }
+      return {url: imageUnavailable};
+    }))
 
     this.setState({
-
-      DogParkPhotos: [response1,response2,response3,response4],
+      DogParkPhotos: dogParkPhotos,
       loadingPark: true
     })
 
@@ -399,20 +368,15 @@ class Home extends React.Component {
 };
 
 getPlaceDetails = async () => {
-  const dogParkDetailResponse1 = await fetch(GOOGLE_DETAILSAPI+'&place_id='+this.state.DogParks[0].place_id+'&key='+key)
-  const dogParkDetailData1 = await dogParkDetailResponse1.json()
+  const dogParks = this.state.DogParks.slice(0, 4)
 
-  const dogParkDetailResponse2 = await fetch(GOOGLE_DETAILSAPI+'&place_id='+this.state.DogParks[1].place_id+'&key='+key)
-  const dogParkDetailData2 = await dogParkDetailResponse2.json()
-
-  const dogParkDetailResponse3 = await fetch(GOOGLE_DETAILSAPI+'&place_id='+this.state.DogParks[2].place_id+'&key='+key)
-  const dogParkDetailData3 = await dogParkDetailResponse3.json()
-
-  const dogParkDetailResponse4 = await fetch(GOOGLE_DETAILSAPI+'&place_id='+this.state.DogParks[3].place_id+'&key='+key)
-  const dogParkDetailData4 = await dogParkDetailResponse4.json()
+  const dogParkDetails = await Promise.all(dogParks.map(async (park) => {
+    const response = await fetch(GOOGLE_DETAILSAPI+'&place_id='+park.place_id+'&key='+key)
+    return response.json()
+  }))
 
   this.setState({
-    dogParkDetails: [dogParkDetailData1,dogParkDetailData2,dogParkDetailData3,dogParkDetailData4]
+    dogParkDetails
   })
 
 
@@ -629,7 +593,7 @@ getPlaceDetails = async () => {
                   justifyContent: "space-between"
                 }}
               >
-        <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[0].result.url})}>
+        <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[0]?.result?.url})}>
           <DogParks
             imageUri={this.state.DogParkPhotos[0] ? this.state.DogParkPhotos[0].url: imageUnavailable}
             width={width}
@@ -637,7 +601,7 @@ getPlaceDetails = async () => {
             type={this.state.DogParks[0] ? this.state.DogParks[0].formatted_address :"No dog Park Available"}
           />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[1].result.url})}>
+          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[1]?.result?.url})}>
           <DogParks
             imageUri={this.state.DogParkPhotos[1] ? this.state.DogParkPhotos[1].url: imageUnavailable}
             width={width}
@@ -645,7 +609,7 @@ getPlaceDetails = async () => {
             type={this.state.DogParks[1] ? this.state.DogParks[1].formatted_address :"No dog Park Available"}
           />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[2].result.url})}>
+          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[2]?.result?.url})}>
           <DogParks
             imageUri={this.state.DogParkPhotos[2] ? this.state.DogParkPhotos[2].url: imageUnavailable}
             width={width}
@@ -653,7 +617,7 @@ getPlaceDetails = async () => {
             type={this.state.DogParks[2] ? this.state.DogParks[2].formatted_address: "No dog Park Available"}
           />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[3].result.url})}>
+          <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage: this.state.dogParkDetails[3]?.result?.url})}>
           <DogParks
           imageUri={this.state.DogParkPhotos[3] ? this.state.DogParkPhotos[3].url: imageUnavailable}
             width={width}
