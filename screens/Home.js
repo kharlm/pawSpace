@@ -47,7 +47,8 @@ class Home extends React.Component {
     super(props);
     this.forceUpdateHandler = this.forceUpdateHandler.bind(this);
     this.state = {
-      loading: false,
+      adoptLoading: false,
+      adoptError: false,
       dataSource: [],
       adoptList:{},
       cleanDataSource: [],
@@ -366,61 +367,61 @@ class Home extends React.Component {
   }
 
   getAdoptToken = async () => {
-    fetch('https://api.petfinder.com/v2/oauth2/token', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ "grant_type": "client_credentials", "client_id": PETFINDER_CLIENT_ID, "client_secret": PETFINDER_CLIENT_SECRET }),
-    }).then((response) => response.json())
-      .then((responseJson) => {
-        let res = JSON.stringify(responseJson.access_token)
-        //console.log("Response: "+res)
-        this.getAdoptResponse(responseJson.access_token)
-        return responseJson;
+    try {
+      const response = await fetch('https://api.petfinder.com/v2/oauth2/token', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ "grant_type": "client_credentials", "client_id": PETFINDER_CLIENT_ID, "client_secret": PETFINDER_CLIENT_SECRET }),
       })
-      .catch((error) => {
-        console.error(error);
-      })
+      if (!response.ok) {
+        throw new Error('Petfinder token request failed with status ' + response.status)
+      }
+      const responseJson = await response.json()
+      await this.getAdoptResponse(responseJson.access_token)
+    } catch (error) {
+      console.error(error);
+      this.setState({ adoptLoading: true, adoptError: true });
+    }
   }
 
 
   getCleanAdoptResponse = () => {
-    for(let i=0;i<this.state.dataSource.animals.length;i++){
-        if(this.state.dataSource.animals[i].photos[0]!=null){
-
-          this.setState({ cleanDataSource: [...this.state.cleanDataSource,this.state.dataSource.animals[i] ] }) 
-        }
-    }
+    const animals = (this.state.dataSource && this.state.dataSource.animals) || []
+    const cleanDataSource = animals.filter((animal) => animal.photos && animal.photos[0])
     this.setState({
-      loading: true
+      cleanDataSource,
+      adoptLoading: true,
+      adoptError: false
     })
   }
 
-  getAdoptResponse = async (a) => { 
-      console.log("ZipCode "+this.state.zipCode)
-      fetch('https://api.petfinder.com/v2/animals?type=dog&location='+this.state.zipCode+'&limit=30', {
+  getAdoptResponse = async (a) => {
+    console.log("ZipCode "+this.state.zipCode)
+    try {
+      const response = await fetch('https://api.petfinder.com/v2/animals?type=dog&location='+this.state.zipCode+'&limit=30', {
         method: 'GET',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + a
         },
-      }).then((response) => response.json())
-        .then((responseJson) => {
-          this.setState({
-            dataSource: responseJson,
-            adoptList: responseJson.animals
-           // loading: true
-          })
-          this.getCleanAdoptResponse()
-          return responseJson;
-
-        })
-        .catch((error) => {
-          console.error(error);
-        })
+      })
+      if (!response.ok) {
+        throw new Error('Petfinder animals request failed with status ' + response.status)
+      }
+      const responseJson = await response.json()
+      this.setState({
+        dataSource: responseJson,
+        adoptList: responseJson.animals
+      })
+      this.getCleanAdoptResponse()
+    } catch (error) {
+      console.error(error);
+      this.setState({ adoptLoading: true, adoptError: true });
+    }
   }
 
   getAdopt = async () => {
@@ -653,7 +654,7 @@ getPlaceDetails = async () => {
      this._scrollToTop()
    }
 
-  if (this.props.post === null || this.state.loading===false || this.state.locationLoading===false ||this.state.loadingPark===false) return(
+  if (this.props.post === null || this.state.locationLoading===false || this.state.loadingPark===false) return(
     <View style={styles.loadingPage}>
      <ActivityIndicator size="large" color="#0000ff"/>
     </View>
@@ -734,48 +735,34 @@ getPlaceDetails = async () => {
 
 
           <View style={{ height: 165, marginTop: 15 }}>
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              data={this.state.dataSource}
-            >
-               <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage:this.state.cleanDataSource[0].url})}>
-              <Adopt
-                imageUri= {this.state.cleanDataSource[0].photos[0] ? this.state.cleanDataSource[0].photos[0].medium : imageUnavailable}
-                name={this.state.cleanDataSource[0].name}
-                breed={this.state.cleanDataSource[0].breeds.primary}
-              />
+            { !this.state.adoptLoading ?
+              <ActivityIndicator size="small" color="#0000ff" style={{ marginTop: 20 }} />
+              : this.state.adoptError || this.state.cleanDataSource.length === 0 ?
+              <Text style={{ paddingHorizontal: 20, color: '#585858' }}>
+                Adoptable pets are unavailable right now. Please try again later.
+              </Text>
+              :
+              <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                data={this.state.dataSource}
+              >
+                {this.state.cleanDataSource.slice(0, 4).map((animal, index) => (
+                  <TouchableOpacity key={animal.id || index} onPress={() => this.setState({showWebView: true, webPage: animal.url})}>
+                    <Adopt
+                      imageUri={animal.photos[0] ? animal.photos[0].medium : imageUnavailable}
+                      name={animal.name}
+                      breed={animal.breeds ? animal.breeds.primary : ''}
+                    />
+                  </TouchableOpacity>
+                ))}
+                <View style={{paddingTop: 55,paddingLeft: 1, paddingRight: 10}}>
+                <TouchableOpacity style={[styles1.roundedButton, ]} onPress={() => this.props.navigation.navigate('AdoptList', {adoptList: this.state.adoptList})}>
+                <Text style={styles1.textButton}>More</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage:this.state.cleanDataSource[1].url})}>
-              <Adopt
-                imageUri={this.state.cleanDataSource[1].photos[0] ? this.state.cleanDataSource[1].photos[0].medium : imageUnavailable}
-                name={this.state.cleanDataSource[1].name}
-                breed={this.state.cleanDataSource[1].breeds.primary}
-              />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage:this.state.cleanDataSource[2].url})}>
-              <Adopt
-                imageUri={this.state.cleanDataSource[2].photos[0] ? this.state.cleanDataSource[2].photos[0].medium : imageUnavailable}
-                name={this.state.cleanDataSource[2].name}
-                breed={this.state.cleanDataSource[2].breeds.primary}
-              />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => this.setState({showWebView: true, webPage:this.state.cleanDataSource[3].url})}>
-              <Adopt
-                imageUri={this.state.cleanDataSource[3].photos[0] ? this.state.cleanDataSource[3].photos[0].medium : imageUnavailable}
-                name={this.state.cleanDataSource[3].name}
-                breed={this.state.cleanDataSource[3].breeds.primary}
-              />
-              </TouchableOpacity>
-              <View style={{paddingTop: 55,paddingLeft: 1, paddingRight: 10}}>
-              <TouchableOpacity style={[styles1.roundedButton, ]} onPress={() => this.props.navigation.navigate('AdoptList', {adoptList: this.state.adoptList})}>
-              <Text style={styles1.textButton}>More</Text>
-            </TouchableOpacity>
-            </View>
-            </ScrollView>
+              </View>
+              </ScrollView>
+            }
           </View>
           }
 
