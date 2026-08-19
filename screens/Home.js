@@ -143,7 +143,7 @@ class Home extends React.Component {
 
   _scrollToTop = () => {
     if (!!this.scroll) {
-      this.scroll.scrollTo({x: 0, y: 0, animated: true});
+      this.scroll.scrollToOffset({offset: 0, animated: true});
     }
     this.props.postPage('false')
   }
@@ -488,16 +488,20 @@ getPlaceDetails = async () => {
       )
     }
     return (
-      <ScrollView scrollEventThrottle={16} style={{backgroundColor: "#F8F8FF"}}
-      ref={(c) => {this.scroll = c}}
-      refreshControl={
-        <RefreshControl
-          refreshing={this.state.refreshing}
-          onRefresh={this._onRefresh}
-        />
-      }
-      >
-
+      <FlatList
+        style={{backgroundColor: "#F8F8FF"}}
+        ref={(c) => {this.scroll = c}}
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this._onRefresh}
+          />
+        }
+        data={this.props.post.feed}
+        keyExtractor={(item) => item.id}
+        onViewableItemsChanged={this._onViewableItemsChanged}
+        viewabilityConfig={this.viewabilityConfig}
+        ListHeaderComponent={
         <View style={{ flex: 1}}>
         <ImageBackground
           source={require('../assets/homebackground1.jpg')}
@@ -508,73 +512,55 @@ getPlaceDetails = async () => {
          resizeMode="repeat"
         >
           {
-            this.state.locationStatus=="Permission denied" ?
-            <Text
-            style={{
-              fontSize: 24,
-              fontWeight: "700",
-              paddingHorizontal: 20
-            }}
-          >
-
-            Dogs in your area up for adoption
-        </Text>:
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: "700",
-              paddingHorizontal: 20
-            }}
-          >Dogs in {this.state.city} up for adoption
-        </Text>
-          }
-
-          {
-            this.state.locationStatus=="Permission denied" ?
-            <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
-                <Text
-                  style={{
-                    fontSize: 15,
-                    fontWeight: "700",
-                    paddingHorizontal: 20,
-                    color: 'blue',
-                  }}
-                >
-                  Please enable Permissions in order to use this Feature
-              </Text>
-            </View>:
-
-
-          <View style={{ height: 165, marginTop: 15 }}>
-            { !this.state.adoptLoading ?
-              <ActivityIndicator size="small" color="#0000ff" style={{ marginTop: 20 }} />
-              : this.state.adoptError || this.state.cleanDataSource.length === 0 ?
-              <Text style={{ paddingHorizontal: 20, color: '#585858' }}>
-                Adoptable pets are unavailable right now. Please try again later.
-              </Text>
-              :
-              <ScrollView
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                data={this.state.dataSource}
-              >
-                {this.state.cleanDataSource.slice(0, 4).map((animal, index) => (
-                  <TouchableOpacity key={animal.id || index} onPress={() => this.setState({showWebView: true, webPage: animal.url})}>
-                    <Adopt
-                      imageUri={animal.photos[0] ? animal.photos[0].medium : imageUnavailable}
-                      name={animal.name}
-                      breed={animal.breeds ? animal.breeds.primary : ''}
-                    />
+            this.state.locationStatus=="Permission denied" ? (
+              <>
+                <Text style={{fontSize: 24, fontWeight: "700", paddingHorizontal: 20}}>
+                  Dogs in your area up for adoption
+                </Text>
+                <View style={{ flex: 1, backgroundColor: "#F8F8FF", paddingTop: 20 }}>
+                  <Text style={{fontSize: 15, fontWeight: "700", paddingHorizontal: 20, color: 'blue'}}>
+                    Please enable Permissions in order to use this Feature
+                  </Text>
+                </View>
+              </>
+            ) : !this.state.adoptLoading ? (
+              <>
+                <Text style={{fontSize: 24, fontWeight: "700", paddingHorizontal: 20}}>
+                  Dogs in {this.state.city} up for adoption
+                </Text>
+                <View style={{ height: 165, marginTop: 15 }}>
+                  <ActivityIndicator size="small" color="#0000ff" style={{ marginTop: 20 }} />
+                </View>
+              </>
+            ) : this.state.adoptError || this.state.cleanDataSource.length === 0 ? null : (
+              <>
+                <Text style={{fontSize: 24, fontWeight: "700", paddingHorizontal: 20}}>
+                  Dogs in {this.state.city} up for adoption
+                </Text>
+                <View style={{ height: 165, marginTop: 15 }}>
+                  <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    data={this.state.dataSource}
+                  >
+                    {this.state.cleanDataSource.slice(0, 4).map((animal, index) => (
+                      <TouchableOpacity key={animal.id || index} onPress={() => this.setState({showWebView: true, webPage: animal.url})}>
+                        <Adopt
+                          imageUri={animal.photos[0] ? animal.photos[0].medium : imageUnavailable}
+                          name={animal.name}
+                          breed={animal.breeds ? animal.breeds.primary : ''}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                    <View style={{paddingTop: 55,paddingLeft: 1, paddingRight: 10}}>
+                    <TouchableOpacity style={[styles1.roundedButton, ]} onPress={() => this.props.navigation.navigate('AdoptList', {adoptList: this.state.adoptList})}>
+                    <Text style={styles1.textButton}>More</Text>
                   </TouchableOpacity>
-                ))}
-                <View style={{paddingTop: 55,paddingLeft: 1, paddingRight: 10}}>
-                <TouchableOpacity style={[styles1.roundedButton, ]} onPress={() => this.props.navigation.navigate('AdoptList', {adoptList: this.state.adoptList})}>
-                <Text style={styles1.textButton}>More</Text>
-              </TouchableOpacity>
-              </View>
-              </ScrollView>
-            }
-          </View>
+                  </View>
+                  </ScrollView>
+                </View>
+              </>
+            )
           }
 
           <View style={{ marginTop: 10 }}>
@@ -671,12 +657,10 @@ getPlaceDetails = async () => {
 
             </Text>
         </View>
-          <FlatList
-            data={this.props.post.feed}
-            keyExtractor={(item) => item.id}
-            onViewableItemsChanged={this._onViewableItemsChanged}
-            viewabilityConfig={this.viewabilityConfig}
-            renderItem={({ item }) => {
+     </ImageBackground>
+     </View>
+        }
+        renderItem={({ item }) => {
 
               let liked = item.likes.includes(this.props.dog.dogId)
             //Adds the delete button to posts that are mine
@@ -757,11 +741,8 @@ getPlaceDetails = async () => {
                 </View>
               )
           }
-          }
-          />
-     </ImageBackground>
-     </View>
-      </ScrollView>
+        }
+      />
     )
 
   }
