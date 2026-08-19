@@ -277,12 +277,17 @@ class Home extends React.Component {
   }
 
   getDogParks = async () => {
-    const response = await fetch(GOOGLE_PLACEAPI+'&location='+this.state.myLocation.coords.latitude+','+this.state.myLocation.coords.longitude+'&key='+key)
-    const data = await response.json()
-    this.setState({
-      DogParks: data.results || []
-    });
-   this.getDogParkPhoto()
+    try {
+      const response = await fetch(GOOGLE_PLACEAPI+'&location='+this.state.myLocation.coords.latitude+','+this.state.myLocation.coords.longitude+'&key='+key)
+      const data = await response.json()
+      this.setState({
+        DogParks: data.results || []
+      });
+      this.getDogParkPhoto()
+    } catch (e) {
+      console.log(e)
+      this.setState({ DogParks: [], loadingPark: true })
+    }
   }
 
   signOutUser = async () => {
@@ -295,88 +300,100 @@ class Home extends React.Component {
 }
 
   getDogParkPhoto = async () => {
+    try {
+      const dogParks = this.state.DogParks.slice(0, 4)
 
-    const dogParks = this.state.DogParks.slice(0, 4)
+      const dogParkPhotos = await Promise.all(dogParks.map(async (park) => {
+        if (park.photos && park.photos[0]) {
+          const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${park.photos[0].photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
+          return fetch(url)
+        }
+        return {url: imageUnavailable};
+      }))
 
-    const dogParkPhotos = await Promise.all(dogParks.map(async (park) => {
-      if (park.photos && park.photos[0]) {
-        const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${park.photos[0].photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
-        return fetch(url)
-      }
-      return {url: imageUnavailable};
-    }))
+      this.setState({
+        DogParkPhotos: dogParkPhotos,
+        loadingPark: true
+      })
 
-    this.setState({
-      DogParkPhotos: dogParkPhotos,
-      loadingPark: true
-    })
-
-    this.getPlaceDetails()
-
+      this.getPlaceDetails()
+    } catch (e) {
+      console.log(e)
+      this.setState({ loadingPark: true })
+    }
   }
 
   getMyLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-        this.setState({
-            myLocation: 'Permission denied',
-            locationStatus: 'Permission denied',
-            locationLoading: true,
-            loadingPark: true
-        });
-        return
-    }
-    let location = await Location.getCurrentPositionAsync({});
-    const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+          this.setState({
+              myLocation: 'Permission denied',
+              locationStatus: 'Permission denied',
+              locationLoading: true,
+              loadingPark: true
+          });
+          return
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      const url = `${GOOGLE_API}latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`
 
-    const response = await fetch(url)
-    const response1 = await fetch(GOOGLE_PLACEAPI)
-    const data = await response.json()
-    const data1 = await response1.json()
+      const response = await fetch(url)
+      const data = await response.json()
+      const results = data.results || []
 
-    let ind;
-    let ind1
-    for(var i=0;i<data.results.length;++i){
+      let ind;
+      let ind1
+      for(var i=0;i<results.length;++i){
 
 
-      if(data.results[i].types[0]=="postal_code"){
+        if(results[i].types[0]=="postal_code"){
 
-          ind = data.results[i].address_components[0].long_name;
+            ind = results[i].address_components[0].long_name;
+        }
+
+        if(results[i].types[0]=="locality"){
+
+            ind1 = results[i].address_components[0].long_name;
+        }
+
       }
 
-      if(data.results[i].types[0]=="locality"){
+      this.setState({
+          myLocation: location,
+          zipCode: ind,
+          locationLoading: true,
+          city: ind1
 
-          ind1 = data.results[i].address_components[0].long_name;
-      }
-
-    }
-
-    this.setState({
-        myLocation: location,
-        zipCode: ind,
+      },() => {
+        this.getAdoptToken();
+        this.getDogParks();
+    });
+    } catch (e) {
+      console.log(e)
+      this.setState({
         locationLoading: true,
-        city: ind1
-
-    },() => {
-      this.getAdoptToken();
-      this.getDogParks();
-  });
+        loadingPark: true
+      })
+    }
 
 };
 
 getPlaceDetails = async () => {
-  const dogParks = this.state.DogParks.slice(0, 4)
+  try {
+    const dogParks = this.state.DogParks.slice(0, 4)
 
-  const dogParkDetails = await Promise.all(dogParks.map(async (park) => {
-    const response = await fetch(GOOGLE_DETAILSAPI+'&place_id='+park.place_id+'&key='+key)
-    return response.json()
-  }))
+    const dogParkDetails = await Promise.all(dogParks.map(async (park) => {
+      const response = await fetch(GOOGLE_DETAILSAPI+'&place_id='+park.place_id+'&key='+key)
+      return response.json()
+    }))
 
-  this.setState({
-    dogParkDetails
-  })
-
-
+    this.setState({
+      dogParkDetails
+    })
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 
