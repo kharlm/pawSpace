@@ -24,6 +24,7 @@ export default {
     ios: {
       bundleIdentifier: 'com.kharlmccatty.pawSpace',
       infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
         NSLocationWhenInUseUsageDescription:
           'Allow pawSpace to use your location in order to find other dogs in your area, view local dog parks and businesses in your area, and add location to photos uploaded',
         NSPhotoLibraryUsageDescription:
