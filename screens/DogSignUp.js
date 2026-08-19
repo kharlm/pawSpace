@@ -3,17 +3,16 @@ import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import * as ImagePicker from 'expo-image-picker'
-import * as Permissions from 'expo-permissions'
+import { Ionicons } from '@expo/vector-icons'
+import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore'
 import { Text, View, TextInput, TouchableOpacity, Image, Alert, ScrollView,KeyboardAvoidingView, Platform} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
-import CheckBox from 'react-native-check-box'
-import { Tooltip } from 'react-native-elements';
 import { updateDogname, updateBreed, updateColor, updateAge, updateGender, updateDogtag, updateWeight,updateBio, updateDog, dogsignup } from '../actions/dog'
 import {updateEmail, updatePassword, updateUsername,signup, updateUser, getUser} from '../actions/user'
 import { getPosts} from '../actions/post'
 import { uploadPhoto } from '../actions'
 import {updatePhoto} from '../actions/dog'
-import db from '../config/firebase'
+import { db } from '../config/firebase'
 import Toast from 'react-native-root-toast'
 import {noDog} from '../actions/nodog'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -26,7 +25,7 @@ class DogSignup extends React.Component {
   constructor(props) {
 
     super(props);
-    const { routeName } = this.props.navigation.state
+    const routeName = this.props.route.name
 
     if(routeName==='Edit'){
       this.state = { dogNumber: 1 ,
@@ -66,8 +65,8 @@ class DogSignup extends React.Component {
 
   searchDogTag = async () => {
   	let search = []
-    const query = await db.collection('dogs').where('dogTag', '==', this.state.dogTag).get()
-    query.forEach((response) => {
+    const dogTagQuery = await getDocs(query(collection(db, 'dogs'), where('dogTag', '==', this.state.dogTag)))
+    dogTagQuery.forEach((response) => {
       search.push(response.data())
     })
 
@@ -78,11 +77,11 @@ class DogSignup extends React.Component {
       this.setState({query:""},this.addDog)
     }
 	}
-  
+
   searchDogTag1 = async () => {
   	let search = []
-    const query = await db.collection('dogs').where('dogTag', '==', this.state.dogTag).get()
-    query.forEach((response) => {
+    const dogTagQuery = await getDocs(query(collection(db, 'dogs'), where('dogTag', '==', this.state.dogTag)))
+    dogTagQuery.forEach((response) => {
       search.push(response.data())
     })
 
@@ -101,9 +100,9 @@ class DogSignup extends React.Component {
     this.props.navigation.navigate('Home')
   }
 
-  onPress = () => {  
+  onPress = () => {
 
-    const { routeName } = this.props.navigation.state
+    const routeName = this.props.route.name
 
     console.log("dog Tag: "+this.state.dogTag)
       if(this.state.dogName ==''){
@@ -314,11 +313,11 @@ class DogSignup extends React.Component {
   }
 
   openLibrary = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (status === 'granted') {
-      const image = await ImagePicker.launchImageLibraryAsync({allowsEditing: true})
-      if(!image.cancelled ){
-        const url = await this.props.uploadPhoto(image)
+      const result = await ImagePicker.launchImageLibraryAsync({allowsEditing: true})
+      if(!result.canceled){
+        const url = await this.props.uploadPhoto(result.assets[0])
         this.setState({
           image: url
         })
@@ -344,8 +343,8 @@ class DogSignup extends React.Component {
 
   dogLengthMoreThanOne = async (id) => {
     try{
-       const userQuery = await db.collection ('users').doc(id).get()
-        user = userQuery.data()
+       const userSnap = await getDoc(doc(db, 'users', id))
+        user = userSnap.data()
         
 
         if(user.dogs.length>1){
@@ -372,7 +371,7 @@ class DogSignup extends React.Component {
   
 
   render() {
-    const { routeName } = this.props.navigation.state
+    const routeName = this.props.route.name
 
     if(this.state.moreThanOneDog===true){
       return(
@@ -482,14 +481,15 @@ class DogSignup extends React.Component {
           onFocus={ () => this.touchDogTag() }
         />
         <View style={{flexDirection:'row',paddingTop: 15,paddingBottom: 5,alignItems:'center', justifyContent:'center'}}>
-         <CheckBox
-          onClick={()=>{
+         <TouchableOpacity
+          onPress={()=>{
             this.setState({
                 isChecked:!this.state.isChecked
             })
           }}
-          isChecked={this.state.isChecked} 
-        />
+        >
+          <Ionicons name={this.state.isChecked ? 'checkbox' : 'square-outline'} size={24} />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => { Alert.alert(
         'This End User License Agreement (“Agreement”) is between you and pawSpace and governs use of this app made available through the Apple App Store. By installing the pawSpace App, you agree to be bound by this Agreement and understand that there is no tolerance for objectionable content. If you do not agree with the terms and conditions of this Agreement, you are not entitled to use the pawSpace App.'+
         

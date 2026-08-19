@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { connect } from 'react-redux'
-import firebase from 'firebase'
+import { onAuthStateChanged } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import { bindActionCreators } from 'redux'
 import DogPickerComponent from "./DogPickerComponent"
-import db from '../config/firebase'
+import { auth, db } from '../config/firebase'
 import { getDog } from '../actions/dog';
 import { getUser } from '../actions/user'
 
@@ -21,7 +22,7 @@ class DogPicker extends React.Component {
         }
     }
     componentDidMount = () => {
-        firebase.auth().onAuthStateChanged((user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 this.dogLengthMoreThanOne(user.uid)
                 this.props.getUser(user.uid, 'LOGIN')
@@ -31,58 +32,56 @@ class DogPicker extends React.Component {
             }
         })
     }
-   
+
     getUserData = async (id) => {
-        let dog1;
          try{
-           const userQuery = await db.collection ('users').doc(id).get()
-            user1 = userQuery.data()
-           
+           const userSnap = await getDoc(doc(db, 'users', id))
+            user1 = userSnap.data()
+
             user1.dogs.map((data)=>{
                 this.getDogData(data)
 
             })
-            
-          
-           
-            
+
+
+
          }
          catch(e){
            alert(e)
          }
-    
-         
+
+
       }
 
       getUserDog = (id) => {
         console.log("Dog Id"+id)
         this.props.getDog(id,'DOGLOGIN')
         this.props.navigation.navigate('Home')
-    
+
       }
     getDogData = async (id) => {
          try{
-           const dogQuery = await db.collection ('dogs').doc(id).get()
-            dog = dogQuery.data()
+           const dogSnap = await getDoc(doc(db, 'dogs', id))
+            dog = dogSnap.data()
             let res = JSON.stringify(dog.dogId);
             console.log("dogoo"+dog.dogId)
             this.setState({
                 dogs: [...this.state.dogs, dog]
                })
-           
-            
+
+
          }
          catch(e){
            alert(e)
          }
       }
     render() {
-        
+
 
         if (this.props.user.dogs == null) return null
-        
 
-       
+
+
         const dogPicker = this.props.user.dogs.map((data,i) => {
             key={i}
             if(this.state.dogs[i]){
@@ -115,8 +114,8 @@ class DogPicker extends React.Component {
 
     dogLengthMoreThanOne = async (id) => {
         try {
-            const userQuery = await db.collection('users').doc(id).get()
-            user = userQuery.data()
+            const userSnap = await getDoc(doc(db, 'users', id))
+            user = userSnap.data()
 
             this.setState({
                 numberOfDogs: 2

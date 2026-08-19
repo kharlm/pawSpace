@@ -1,4 +1,3 @@
-import firebase from 'firebase'
 import db from '../config/firebase'
 import uuid from 'uuid'
 import cloneDeep from 'lodash/cloneDeep'
@@ -7,10 +6,6 @@ import { sendNotification } from './'
 import {getDog} from '../actions/dog'
 import {postPage} from '../actions/dog'
 import { connect } from 'react-redux'
-import  { AnimatedRegion } from 'react-native-maps'
-import { GOOGLE_MAPS_API_KEY } from "@env";
-const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
-const key = GOOGLE_MAPS_API_KEY
 
 
 

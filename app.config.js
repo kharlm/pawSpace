@@ -12,6 +12,7 @@ export default {
     },
     assetBundlePatterns: ['**/*'],
     plugins: [
+      'expo-font',
       [
         'expo-splash-screen',
         {

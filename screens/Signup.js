@@ -2,8 +2,9 @@ import React from 'react';
 import styles from '../styles'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { ImagePicker, Permissions } from 'expo';
-import firebase from 'firebase'
+import * as ImagePicker from 'expo-image-picker'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '../config/firebase'
 import { Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { updatePhoto, updateEmail, updatePassword, updateUsername,signup, updateUser,signupError } from '../actions/user'
 import { uploadPhoto } from '../actions'
@@ -13,17 +14,17 @@ import {noDog} from '../actions/nodog'
 class Signup extends React.Component {
 
   onPress = () => {
-    const { routeName } = this.props.navigation.state
+    const routeName = this.props.route.name
     if(routeName === 'Signup'){
       this.props.signup()
       global.foo="dogsignup";
-      firebase.auth().onAuthStateChanged((user) => {
+      onAuthStateChanged(auth, (user) => {
       if(user){
        if(this.props.user != null){
         this.props.navigation.navigate('DogSignUp')
         }
        }
-     }) 
+     })
       }
      else {
       this.props.updateUser()
@@ -32,39 +33,39 @@ class Signup extends React.Component {
   }
 
   noDog = () => {
-    const { routeName } = this.props.navigation.state
+    const routeName = this.props.route.name
     this.props.noDog()
     console.log("route on signup page: "+routeName)
     if(routeName === 'Signup'){
       this.props.signup()
       global.foo="dogsignup";
-      firebase.auth().onAuthStateChanged((user) => {
+      onAuthStateChanged(auth, (user) => {
       if(user){
        if(this.props.user != null){
         this.props.navigation.navigate('Home')
         }
        }
-     }) 
+     })
       }
      else {
       this.props.updateUser()
       this.props.navigation.goBack()
     }
-    
+
   }
 
   openLibrary = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (status === 'granted') {
-      const image = await ImagePicker.launchImageLibraryAsync()
-      if(!image.cancelled ){
-        const url = await this.props.uploadPhoto(image)
+      const result = await ImagePicker.launchImageLibraryAsync()
+      if(!result.canceled){
+        const url = await this.props.uploadPhoto(result.assets[0])
         this.props.updatePhoto(url)
       }
     }
   }
   render() {
-    const { routeName } = this.props.navigation.state
+    const routeName = this.props.route.name
     return (
       <View style={[styles.container, styles.center]}>
         <TextInput

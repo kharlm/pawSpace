@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from '../styles'
-import firebase from 'firebase'
+import { onAuthStateChanged } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
@@ -9,10 +10,10 @@ import {guest} from '../actions/guest'
 import {noDog} from '../actions/nodog'
 import {getDog,getDogs} from '../actions/dog'
 import {getPosts} from '../actions/post'
-import db from '../config/firebase'
+import { auth, db } from '../config/firebase'
 
 class Login extends React.Component {
- 
+
   constructor(props) {
     super(props);
     this.state = {
@@ -25,35 +26,33 @@ class Login extends React.Component {
   }
 
   componentDidMount = () => {
-    firebase.auth().onAuthStateChanged((user) => {
+    onAuthStateChanged(auth, (user) => {
       if(user){
         if(this.props.user && global.foo!="dogsignup"){
           this.dogLengthMoreThanOne(user.uid)
-            //this.getUserData(user.uid) 
             user = this.props.getUser(user.uid, 'LOGIN')
 
         }
       }
-      
+
     })
   }
 
-  guest() { 
+  guest() {
     this.props.guest()
     this.props.navigation.navigate('Home')
   }
 
    getUserData = async (id) => {
-    let dog1;
     console.log("dog: "+this.props.nodog)
      try{
 
       if(this.props.nodog!= true){
-       const userQuery = await db.collection ('users').doc(id).get()
-        user1 = userQuery.data()
+       const userSnap = await getDoc(doc(db, 'users', id))
+        user1 = userSnap.data()
         let res = JSON.stringify(user1.dogs[0]);
 
-        
+
         this.props.getDog(user1.dogs[0], 'GET_DOGPROFILE')
         this.props.getPosts(user1.dogs[0])
         this.setState({
@@ -71,17 +70,17 @@ class Login extends React.Component {
 
   dogLengthMoreThanOne = async (id) => {
     try{
-       const userQuery = await db.collection ('users').doc(id).get()
-        user = userQuery.data()
-        
-     
+       const userSnap = await getDoc(doc(db, 'users', id))
+        user = userSnap.data()
+
+
         if(user.dogs.length==0){
           this.setState({
             noDog: true
           })
         }
         if(user.dogs.length>1){
-          
+
           this.setState({
             moreThanOneDog: true,
             login: true,
@@ -95,7 +94,7 @@ class Login extends React.Component {
             login: true
           })
         }
-      
+
      }
      catch(e){
        alert(e)
@@ -107,13 +106,8 @@ class Login extends React.Component {
 
 
   render() {
-    const { routeName } = this.props.navigation.state
-  
-   /* if(this.state.loading===true){
-  }
-  */
+    const routeName = this.props.route.name
 
- 
     if(this.state.noDog===true && routeName!='DogSignUp'){
       console.log("route: "+routeName)
       this.props.noDog()
@@ -121,7 +115,7 @@ class Login extends React.Component {
       this.props.navigation.navigate('Home')
       )
     }
-  
+
 
     if(this.state.moreThanOneDog===true){
 
@@ -131,12 +125,12 @@ class Login extends React.Component {
     }
 
     if(this.state.moreThanOneDog===false && this.state.login===true){
-     
+
       return (
       this.props.getDog(user.dogs[0],'DOGLOGIN'),
       this.props.navigation.navigate('Home')
       )
-      
+
     }
 
    else{

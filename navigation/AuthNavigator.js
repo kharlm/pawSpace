@@ -1,45 +1,23 @@
 import React from 'react';
-import { Ionicons } from '@expo/vector-icons'
-import Login from '../screens/Login'
-import SignupScreen from '../screens/Signup'
-import DogSignUpScreen from '../screens/DogSignUp'
-import DogPickerScreen from '../screens/DogPicker'
-import { createStackNavigator, createAppContainer } from 'react-navigation';
-import { TouchableOpacity } from 'react-native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Login from '../screens/Login';
+import Signup from '../screens/Signup';
+import DogPicker from '../screens/DogPicker';
+import DogSignUp from '../screens/DogSignUp';
 
-const StackNavigator = createStackNavigator(
-  {
-    Login: { 
-      screen: Login,
-      navigationOptions: {
-      	header: null
-      }
-    },
-    Signup: { 
-      screen: SignupScreen,
-      navigationOptions: ({ navigation }) => ({
-        title: 'Signup',
-        headerLeft: (
-          <TouchableOpacity onPress={() => navigation.goBack()} >
-            <Ionicons style={styles.icon} name={'ios-arrow-back'} size={30}/>
-          </TouchableOpacity>
-        )
-      })
-    },
-    DogPicker: { 
-      screen: DogPickerScreen,
-      navigationOptions: ({ navigation }) => ({
-        title: 'DogPicker',
-      })
-    },
-    DogSignUp: { 
-      screen: DogSignUpScreen,
-      navigationOptions: ({ navigation }) => ({
-        title: 'Dog Sign Up',
-        headerLeft: null
-      })
-    }
-  }
-);
+const Stack = createNativeStackNavigator();
 
-export default createAppContainer(StackNavigator);
+export default function AuthNavigator() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+      <Stack.Screen name="Signup" component={Signup} options={{ title: 'Signup' }} />
+      <Stack.Screen name="DogPicker" component={DogPicker} options={{ title: 'DogPicker' }} />
+      <Stack.Screen
+        name="DogSignUp"
+        component={DogSignUp}
+        options={{ title: 'Dog Sign Up', headerBackVisible: false }}
+      />
+    </Stack.Navigator>
+  );
+}

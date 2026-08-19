@@ -1,32 +1,22 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import { thunk } from 'redux-thunk';
 import logger from 'redux-logger';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import reducer from './reducers';
+import RootNavigator from './navigation/RootNavigator';
 import './config/firebase';
 
 const store = createStore(reducer, applyMiddleware(thunk, logger));
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <View style={styles.container}>
-        <Text>pawSpace — SDK 57 migration foundation is up.</Text>
-        <Text>Navigation and screens are ported in the next phase.</Text>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <RootNavigator />
         <StatusBar style="auto" />
-      </View>
-    </Provider>
+      </Provider>
+    </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-});
