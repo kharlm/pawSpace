@@ -1,7 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native';
 const  { width } = Dimensions.get('window');
 
-export default styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F8FF',
@@ -260,6 +260,8 @@ export default styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#dddddd",
     borderRadius: 25,
-    marginLeft: 10 
+    marginLeft: 10
   }
 });
+
+export default styles;
