@@ -154,13 +154,15 @@ class Home extends React.Component {
     })
   }
 
-  checkAppVersion = () => {
+  checkAppVersion = async () => {
+    try {
+      const response = await fetch('https://itunes.apple.com/lookup?id=1496294608')
+      const data = await response.json()
+      const appVersion = data.results && data.results[0] && data.results[0].version
+      if (!appVersion) return
 
-    var getAppstoreAppVersion = require('react-native-appstore-version-checker').getAppstoreAppVersion;
-    getAppstoreAppVersion('1496294608')
-    .then((appVersion) => {
-      this.setState({ appVersion: appVersion },() => {
-    if(Constants.expoConfig.version < this.state.appVersion) {
+      this.setState({ appVersion })
+      if (Constants.expoConfig.version < appVersion) {
         Alert.alert(
           'Please Upgrade Your App',
           'You don\'t have the latest version of pawSpace to use all the latest features please upgrade the App',
@@ -175,15 +177,10 @@ class Home extends React.Component {
           ],
           { cancelable: false }
         )
-  }
-    });
-    })
-    .catch((err) => {
+      }
+    } catch (err) {
       console.log('error occurred', err);
-      this.setState({ appVersion: Constants.expoConfig.version});
-    });
-
-
+    }
   }
 
   async componentDidMount ()  {
