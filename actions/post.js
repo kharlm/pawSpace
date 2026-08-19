@@ -1,11 +1,24 @@
-import db from '../config/firebase'
+import {
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  query,
+  where,
+  arrayUnion,
+  arrayRemove,
+} from 'firebase/firestore'
+import { ref, deleteObject } from 'firebase/storage'
+import { db, storage } from '../config/firebase'
 import uuid from 'uuid'
 import cloneDeep from 'lodash/cloneDeep'
 import orderBy from 'lodash/orderBy'
 import { sendNotification } from './'
 import {getDog} from '../actions/dog'
 import {postPage} from '../actions/dog'
-import { connect } from 'react-redux'
 
 
 
@@ -28,8 +41,7 @@ export const updateDog = () => {
   return async ( dispatch, getState )  => {
     const {dogname,breed,color,age,gender,weight,dogTag,bio,dogId,photo } = getState().dog
     try {
-      //const {dog} = getState()
-    db.collection('dogs').doc(dogId).update({
+    updateDoc(doc(db, 'dogs', dogId), {
       name: dogname,
       breed: breed,
       age: age,
@@ -42,7 +54,7 @@ export const updateDog = () => {
       followers: [],
       following: [],
       photo: photo
-      
+
     })
     } catch(e) {
       console.log("inside update dog error")
@@ -56,8 +68,7 @@ export const updatePosts = () => {
   return async ( dispatch, getState )  => {
     const {id,postPhoto,postDescription,postLocation,dogId,photo,dogTag,dog,likes,comments,date} = getState().post
     try {
-      //const {dog} = getState()
-    db.collection('posts').doc(id).update({
+    updateDoc(doc(db, 'posts', id), {
         id: id,
 				postPhoto: postPhoto,
 				postDescription: postDescription,
@@ -69,7 +80,7 @@ export const updatePosts = () => {
 				likes: likes,
         comments: comments,
         date: date,
-      
+
     })
     } catch(e) {
       console.log("post update error")
@@ -85,8 +96,8 @@ export const uploadPost = (isVideo,thumbnail) => {
     const { post,dog} = getState()
 		try {
       const id = uuid.v4()
-      const dogQuery = await db.collection('dogs').doc(dog.dogId).get()
-      let dog1 = dogQuery.data()
+      const dogSnap = await getDoc(doc(db, 'dogs', dog.dogId))
+      let dog1 = dogSnap.data()
 			const upload = {
 				id: id,
 				postPhoto: post.photo,
@@ -103,12 +114,11 @@ export const uploadPost = (isVideo,thumbnail) => {
         isVideo: isVideo,
         thumbnail: thumbnail
 			}
-      db.collection('posts').doc(id).set(upload)
+      setDoc(doc(db, 'posts', id), upload)
       dispatch(getPosts())
       dispatch(getDog(dog.dogId,'DOGLOGIN'))
       dispatch({type: 'POST_PAGE', payload: 'true' })
-      //dispatch(getDog(dog.dogId,'GET_DOGPROFILE'))
-      
+
 		} catch (e) {
 			console.error(e)
 		}
@@ -120,15 +130,13 @@ export const deletePost = (post) => {
   return async (dispatch, getState) => {
     const {dog} = getState()
 
-    let desertRef = firebase.storage().refFromURL(post.postPhoto)
-    console.log("ref: "+ desertRef)
-    db.collection('posts').doc(post.id).delete()
-
-    desertRef.delete().then(function() {
-      // File deleted successfully
-    }).catch(function(error) {
-      // Uh-oh, an error occurred!
-    });
+    try {
+      const photoRef = ref(storage, post.postPhoto)
+      deleteDoc(doc(db, 'posts', post.id))
+      await deleteObject(photoRef)
+    } catch(e) {
+      console.error(e)
+    }
     dispatch(getPosts())
     dispatch(getDog(dog.dogId,'DOGLOGIN'))
   }
@@ -136,27 +144,19 @@ export const deletePost = (post) => {
 
 export const getPosts = (dog) => {
   return async (dispatch, getState) => {
-   
-    //const { dogId, dogTag, photo } = getState().dog
-   
-    
 		try {
-     
-      const posts = await db.collection('posts').get()
 
-      let rest
-      
-			
+      const posts = await getDocs(collection(db, 'posts'))
+
 			let array = []
 			posts.forEach((post)=>{
-       //if(dog.blocked.include(post.id)!=true)
 				array.push(post.data())
 			})
       dispatch({type: 'GET_POSTS',  payload: orderBy(array, 'date','desc')})
 		} catch (e) {
 			alert(e)
     }
-    
+
   }
 
 }
@@ -164,10 +164,9 @@ export const getPosts = (dog) => {
 export const flagPost = (postId) => {
   return async ()  => {
     try {
-      //const {dog} = getState()
-    db.collection('posts').doc(postId).update({
+    updateDoc(doc(db, 'posts', postId), {
         flagged: 'yes'
-      
+
     })
     } catch(e) {
       console.log("flag post error")
@@ -181,23 +180,20 @@ export const getPost = (id) => {
   return async (dispatch, getState) => {
 		try {
       console.log("post id: "+id)
-      const posts = await db.collection('posts').where('id', '==', id).get()
-      
-     
-			
+      const posts = await getDocs(query(collection(db, 'posts'), where('id', '==', id)))
+
 			let array = []
 			posts.forEach((post)=>{
 
         console.log("posIDS: "+post.data())
 				array.push(post.data())
       })
-      
-     
+
 			dispatch({type: 'GET_POST', payload: array})
 		} catch (e) {
 			alert(e)
     }
-    
+
   }
 
 }
@@ -205,8 +201,8 @@ export const getPost = (id) => {
 export const getBreedPosts = (breed) => {
   return async (dispatch, getState) => {
 		try {
-			const posts = await db.collection('posts').where('dog.breed', '==', breed).get()
-			
+			const posts = await getDocs(query(collection(db, 'posts'), where('dog.breed', '==', breed)))
+
 			let array = []
 			posts.forEach((post)=>{
 				array.push(post.data())
@@ -215,7 +211,7 @@ export const getBreedPosts = (breed) => {
 		} catch (e) {
 			alert(e)
     }
-    
+
   }
 
 }
@@ -223,18 +219,17 @@ export const getBreedPosts = (breed) => {
 export const getColorPosts = (color) => {
   return async (dispatch, getState) => {
 		try {
-			const posts = await db.collection('posts').where('dog.color', '==', color).get()
-			
+			const posts = await getDocs(query(collection(db, 'posts'), where('dog.color', '==', color)))
+
 			let array = []
 			posts.forEach((post)=>{
 				array.push(post.data())
       })
-      let res = JSON.stringify(array)
 			dispatch({type: 'GET_DOGPOSTS', payload: array})
 		} catch (e) {
 			alert(e)
     }
-    
+
   }
 
 }
@@ -242,18 +237,17 @@ export const getColorPosts = (color) => {
 export const getGenderPosts = (gender) => {
   return async (dispatch, getState) => {
 		try {
-			const posts = await db.collection('posts').where('dog.gender', '==', gender).get()
-			
+			const posts = await getDocs(query(collection(db, 'posts'), where('dog.gender', '==', gender)))
+
 			let array = []
 			posts.forEach((post)=>{
 				array.push(post.data())
       })
-      let res = JSON.stringify(array)
 			dispatch({type: 'GET_DOGPOSTS', payload: array})
 		} catch (e) {
 			alert(e)
     }
-    
+
   }
 
 }
@@ -261,50 +255,46 @@ export const getGenderPosts = (gender) => {
 export const getWeightPosts = (firstWeight,secondWeight) => {
   return async (dispatch, getState) => {
 		try {
-			const posts = await db.collection('posts').where('dog.weight', '>=', firstWeight).where('dog.weight', '<=', secondWeight).get()
-			
+			const posts = await getDocs(query(collection(db, 'posts'), where('dog.weight', '>=', firstWeight), where('dog.weight', '<=', secondWeight)))
+
 			let array = []
 			posts.forEach((post)=>{
 				array.push(post.data())
       })
-      let res = JSON.stringify(array)
 			dispatch({type: 'GET_DOGPOSTS', payload: array})
 		} catch (e) {
 			alert(e)
     }
-    
+
   }
 }
 
 export const getAgePosts = (firstAge,secondAge) => {
   return async (dispatch, getState) => {
 		try {
-			const posts = await db.collection('posts').where('dog.age', '>=', firstAge).where('dog.age', '<=', secondAge).get()
-			
+			const posts = await getDocs(query(collection(db, 'posts'), where('dog.age', '>=', firstAge), where('dog.age', '<=', secondAge)))
+
 			let array = []
 			posts.forEach((post)=>{
 				array.push(post.data())
       })
-      let res = JSON.stringify(array)
 			dispatch({type: 'GET_DOGPOSTS', payload: array})
 		} catch (e) {
 			alert(e)
     }
-    
+
   }
 }
 
 export const getlocationPosts = (city,state,country) => {
 
-  
-    
   return async (dispatch, getState) => {
 		try {
       let posts = []
 
       if(country==="United States"){
 
-        const postsQuery = await db.collection('posts').where('postLocation.state', '==', state).get()
+        const postsQuery = await getDocs(query(collection(db, 'posts'), where('postLocation.state', '==', state)))
         postsQuery.forEach(function(response) {
         posts.push(response.data())
 			})
@@ -313,32 +303,31 @@ export const getlocationPosts = (city,state,country) => {
       }
 
       else{
-        const postsQuery = await db.collection('posts').where('postLocation.country', '==', country).get()
+        const postsQuery = await getDocs(query(collection(db, 'posts'), where('postLocation.country', '==', country)))
         postsQuery.forEach(function(response) {
         posts.push(response.data())
 			})
 			dispatch({type: 'GET_EXPLOREPOSTS', payload: posts})
       }
-      
+
 		} catch (e) {
       console.log("in get posts");
 			alert(e)
     }
 
   }
-	
+
 }
 
 export const likePost = (post) => {
   return (dispatch, getState) => {
     const { dogId, dogTag, photo } = getState().dog
-    let falseVideo = false
     console.log("isVideo: "+post.isVideo)
     try {
-      db.collection('posts').doc(post.id).update({
-        likes: firebase.firestore.FieldValue.arrayUnion(dogId)
+      updateDoc(doc(db, 'posts', post.id), {
+        likes: arrayUnion(dogId)
       })
-      db.collection('activity').doc().set({
+      setDoc(doc(collection(db, 'activity')), {
         postId: post.id,
         postPhoto: post.postPhoto,
         likerId: dogId,
@@ -351,7 +340,6 @@ export const likePost = (post) => {
         isVideo: post.isVideo
       })
       dispatch(sendNotification(post.dog.uid, 'Licked Your Photo'))
-     // dispatch({type: 'GET_POSTS', payload: newFeed})
       dispatch(getPosts())
     } catch(e) {
       console.error(e)
@@ -363,12 +351,12 @@ export const unlikePost = (post) => {
   return async (dispatch, getState) => {
     const { dogId } = getState().dog
     try {
-      db.collection('posts').doc(post.id).update({
-        likes: firebase.firestore.FieldValue.arrayRemove(dogId)
+      updateDoc(doc(db, 'posts', post.id), {
+        likes: arrayRemove(dogId)
       })
-      const query = await db.collection('activity').where('postId', '==', post.id).where('likerId', '==', dogId).get()
-      query.forEach((response) => {
-        response.ref.delete()
+      const activitySnap = await getDocs(query(collection(db, 'activity'), where('postId', '==', post.id), where('likerId', '==', dogId)))
+      activitySnap.forEach((response) => {
+        deleteDoc(response.ref)
       })
       dispatch(getPosts())
     } catch(e) {
@@ -395,8 +383,8 @@ export const addComment = (text, post) => {
         commenterName: dogTag,
         date: new Date().getTime(),
       }
-      db.collection('posts').doc(post.id).update({
-        comments: firebase.firestore.FieldValue.arrayUnion(comment)
+      updateDoc(doc(db, 'posts', post.id), {
+        comments: arrayUnion(comment)
       })
       comment.postId = post.id
       comment.postPhoto = post.postPhoto
@@ -405,25 +393,9 @@ export const addComment = (text, post) => {
       comments.push(comment)
       dispatch({ type: 'GET_COMMENTS', payload: comments.reverse() })
 
-      //dispatch(sendNotification(post.dogId, text))
-      db.collection('activity').doc().set(comment)
+      setDoc(doc(collection(db, 'activity')), comment)
     } catch(e) {
       console.error(e)
     }
   }
 }
-
-const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ followUser, unfollowUser,getDog,getUser }, dispatch)
-}
-
-const mapStateToProps = (state) => {
-  return {
-    post: state.post,
-    user: state.user,
-    userprofile: state.profile,
-    dog: state.dog
-  }
-}
-
-export default connect(mapStateToProps,mapDispatchToProps)
