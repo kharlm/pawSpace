@@ -1,6 +1,37 @@
 # Don't track content of these folders
 .env
+.env*.local
 node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Generated native projects (EAS Build regenerates these via prebuild)
+/ios
+/android
+
+# Native credentials — never commit these
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# macOS
+.DS_Store
+*.pem
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 
 
 
