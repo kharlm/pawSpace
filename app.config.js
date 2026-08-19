@@ -2,6 +2,7 @@ export default {
   expo: {
     name: 'pawSpace',
     slug: 'pawSpace',
+    owner: 'kharlm',
     privacy: 'unlisted',
     version: '6.5.1',
     orientation: 'portrait',
@@ -34,8 +35,7 @@ export default {
     },
     extra: {
       eas: {
-        // Fill in via `eas init` once logged into the pawSpace EAS account.
-        projectId: undefined,
+        projectId: '8453032c-3493-4e87-904c-dda6b9a6d1aa',
       },
     },
   },
