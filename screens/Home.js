@@ -385,9 +385,12 @@ getPlaceDetails = async () => {
 
  async getTheme ()  {
 
+    try {
       const themeSnap = await getDoc(doc(db, 'monthlyTheme', '1'))
 
       let theme = themeSnap.data()
+
+      if (!theme) return
 
       let themeName = theme.theme
       let themeOn = theme.themeOn
@@ -405,6 +408,9 @@ getPlaceDetails = async () => {
         themeStyle: themeStyle,
         themeLoading: true
       })
+    } catch (e) {
+      console.log(e)
+    }
 }
 
   likePost = (post) => {
