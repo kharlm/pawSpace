@@ -17,8 +17,6 @@ const GOOGLE_API = 'https://maps.googleapis.com/maps/api/geocode/json?'
 const GOOGLE_PLACEAPI='https://maps.googleapis.com/maps/api/place/textsearch/json?query=dogpark+in+'
 const GOOGLE_DETAILSAPI='https://maps.googleapis.com/maps/api/place/details/json?query='
 const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY
-const PETFINDER_CLIENT_ID = process.env.EXPO_PUBLIC_PETFINDER_CLIENT_ID
-const PETFINDER_CLIENT_SECRET = process.env.EXPO_PUBLIC_PETFINDER_CLIENT_SECRET
 const key = GOOGLE_MAPS_API_KEY
 import moment from 'moment'
 import DogParks from './DogParks';
@@ -220,63 +218,11 @@ class Home extends React.Component {
     }
   }
 
-  getAdoptToken = async () => {
-    try {
-      const response = await fetch('https://api.petfinder.com/v2/oauth2/token', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ "grant_type": "client_credentials", "client_id": PETFINDER_CLIENT_ID, "client_secret": PETFINDER_CLIENT_SECRET }),
-      })
-      if (!response.ok) {
-        throw new Error('Petfinder token request failed with status ' + response.status)
-      }
-      const responseJson = await response.json()
-      await this.getAdoptResponse(responseJson.access_token)
-    } catch (error) {
-      console.error(error);
-      this.setState({ adoptLoading: true, adoptError: true });
-    }
-  }
-
-
-  getCleanAdoptResponse = () => {
-    const animals = (this.state.dataSource && this.state.dataSource.animals) || []
-    const cleanDataSource = animals.filter((animal) => animal.photos && animal.photos[0])
-    this.setState({
-      cleanDataSource,
-      adoptLoading: true,
-      adoptError: false
-    })
-  }
-
-  getAdoptResponse = async (a) => {
-    console.log("ZipCode "+this.state.zipCode)
-    try {
-      const response = await fetch('https://api.petfinder.com/v2/animals?type=dog&location='+this.state.zipCode+'&limit=30', {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + a
-        },
-      })
-      if (!response.ok) {
-        throw new Error('Petfinder animals request failed with status ' + response.status)
-      }
-      const responseJson = await response.json()
-      this.setState({
-        dataSource: responseJson,
-        adoptList: responseJson.animals
-      })
-      this.getCleanAdoptResponse()
-    } catch (error) {
-      console.error(error);
-      this.setState({ adoptLoading: true, adoptError: true });
-    }
-  }
+  // Petfinder's API (previously fetched here and used to populate
+  // dataSource/cleanDataSource/adoptList below) is no longer reachable for
+  // this app - see git history for the removed implementation. The "Dogs up
+  // for adoption" section below is data-source-agnostic: wiring up a working
+  // replacement just means populating that same state shape again.
 
   getDogParks = async () => {
     try {
