@@ -228,6 +228,7 @@ class Home extends React.Component {
     try {
       const response = await fetch(GOOGLE_PLACEAPI+'&location='+this.state.myLocation.coords.latitude+','+this.state.myLocation.coords.longitude+'&key='+key)
       const data = await response.json()
+      console.log('Places API status:', data.status, data.error_message || '')
       this.setState({
         DogParks: data.results || []
       });
@@ -288,6 +289,7 @@ class Home extends React.Component {
 
       const response = await fetch(url)
       const data = await response.json()
+      console.log('Geocoding API status:', data.status, data.error_message || '')
       const results = data.results || []
 
       let ind;
