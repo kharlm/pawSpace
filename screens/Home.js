@@ -39,7 +39,9 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      adoptLoading: false,
+      // Petfinder's API no longer works for this app; adoptLoading starts
+      // resolved (not attempted) so the section just stays hidden below.
+      adoptLoading: true,
       adoptError: false,
       dataSource: [],
       adoptList:{},
@@ -366,7 +368,6 @@ class Home extends React.Component {
           city: ind1
 
       },() => {
-        this.getAdoptToken();
         this.getDogParks();
     });
     } catch (e) {
