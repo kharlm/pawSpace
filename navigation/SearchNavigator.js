@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Search from '../screens/Search';
+import Profile from '../screens/Profile';
 import ComingSoon from '../screens/ComingSoon';
 
 const Stack = createNativeStackNavigator();
@@ -9,7 +10,7 @@ export default function SearchNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Search" component={Search} options={{ headerShown: false }} />
-      <Stack.Screen name="Profile" component={ComingSoon} options={{ title: 'Profile' }} />
+      <Stack.Screen name="Profile" component={Profile} options={{ title: 'Profile' }} />
       <Stack.Screen name="IndividualPosts" component={ComingSoon} options={{ title: 'Single Post' }} />
       <Stack.Screen name="Breeds" component={ComingSoon} options={{ title: 'Breeds' }} />
       <Stack.Screen name="Weights" component={ComingSoon} options={{ title: 'Weights' }} />

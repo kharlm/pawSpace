@@ -1,17 +1,7 @@
 import React from 'react';
 import styles from '../styles1';
-import firebase from 'firebase';
-import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
-import { Text, View, Image, TouchableOpacity, FlatList, ActivityIndicator, StyleSheet, ImageBackground,Dimensions,ScrollView} from 'react-native';
-import { followUser, unfollowUser, getUser } from '../actions/user'
-import Masonry from "react-native-masonry";
-const  { width,height } = Dimensions.get('window');
-import { NavigationEvents } from 'react-navigation';
-import {getDog} from '../actions/dog'
-import {getPost,getPosts} from '../actions/post'
-import Icon from './Icon';
-import { FontAwesome5,FontAwesome, MaterialCommunityIcons,MaterialIcons} from '@expo/vector-icons';
+import { Text, View } from 'react-native';
+import { FontAwesome5, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 
 const ProfileItem = ({
   age,
@@ -41,14 +31,14 @@ const ProfileItem = ({
 
       <View style={styles.info}>
         <Text style={styles.iconProfile}>
-        <FontAwesome5 name={'birthday-cake'} size={20} /> 
+        <FontAwesome5 name={'birthday-cake'} size={20} />
         </Text>
         <Text style={styles.infoContent}>Age: {age}</Text>
       </View>
 
       <View style={styles.info}>
         <Text style={styles.iconProfile}>
-        <MaterialIcons name={'color-lens'} size={20} /> 
+        <MaterialIcons name={'color-lens'} size={20} />
         </Text>
         <Text style={styles.infoContent}>Color: {color}</Text>
       </View>
@@ -81,18 +71,4 @@ const ProfileItem = ({
   );
 };
 
-const mapDispatchToProps = (dispatch) => {
-    return bindActionCreators({ followUser, unfollowUser,getDog,getUser,getPost,getPosts }, dispatch)
-  }
-  
-  const mapStateToProps = (state) => {
-    return {
-      user: state.user,
-      profile: state.profile,
-      dogprofile: state.dogprofile,
-      dog: state.dog
-  
-    }
-  }
-  
-  export default connect(mapStateToProps, mapDispatchToProps)(ProfileItem)
+export default ProfileItem;

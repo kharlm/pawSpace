@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import HomeNavigator from './HomeNavigator';
 import SearchNavigator from './SearchNavigator';
+import ProfileNavigator from './ProfileNavigator';
 import ComingSoon from '../screens/ComingSoon';
 
 const Tab = createBottomTabNavigator();
@@ -67,7 +68,7 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="MyProfile"
-        component={ComingSoon}
+        component={ProfileNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
             <MaterialCommunityIcons name="dog" size={32} />

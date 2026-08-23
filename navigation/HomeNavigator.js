@@ -5,6 +5,7 @@ import Home from '../screens/Home';
 import Activity from '../screens/Activity';
 import Messages from '../screens/Messages';
 import DogSignUp from '../screens/DogSignUp';
+import Profile from '../screens/Profile';
 import ComingSoon from '../screens/ComingSoon';
 
 const Stack = createNativeStackNavigator();
@@ -34,7 +35,7 @@ export default function HomeNavigator() {
       <Stack.Screen name="AdoptList" component={ComingSoon} options={{ title: 'Dogs Up For Adoption' }} />
       <Stack.Screen name="Essentials" component={ComingSoon} options={{ title: 'Dog Essentials' }} />
       <Stack.Screen name="Chat" component={ComingSoon} options={{ title: 'Chat' }} />
-      <Stack.Screen name="Profile" component={ComingSoon} options={{ title: 'Profile' }} />
+      <Stack.Screen name="Profile" component={Profile} options={{ title: 'Profile' }} />
     </Stack.Navigator>
   );
 }
