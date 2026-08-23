@@ -255,11 +255,8 @@ class Home extends React.Component {
       const dogParkPhotos = await Promise.all(dogParks.map(async (park) => {
         if (park.photos && park.photos[0]) {
           const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${park.photos[0].photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
-          const response = await fetch(url)
-          console.log(park.name, '- has photo, fetch ok:', response.ok, 'url:', response.url)
-          return response
+          return fetch(url)
         }
-        console.log(park.name, '- no photos in Places response')
         return {url: imageUnavailable};
       }))
 
