@@ -48,7 +48,7 @@ class Home extends React.Component {
       zipCode: "",
       locationLoading: false,
       city:"",
-      DogParks:{},
+      DogParks:[],
       loadingPark: false,
       DogParkPhotos:[],
       dogParkDetails:[],
@@ -230,8 +230,9 @@ class Home extends React.Component {
       const data = await response.json()
       this.setState({
         DogParks: data.results || []
+      }, () => {
+        this.getDogParkPhoto()
       });
-      this.getDogParkPhoto()
     } catch (e) {
       console.log(e)
       this.setState({ DogParks: [], loadingPark: true })
@@ -265,9 +266,9 @@ class Home extends React.Component {
       this.setState({
         DogParkPhotos: dogParkPhotos,
         loadingPark: true
+      }, () => {
+        this.getPlaceDetails()
       })
-
-      this.getPlaceDetails()
     } catch (e) {
       console.log(e)
       this.setState({ loadingPark: true })
