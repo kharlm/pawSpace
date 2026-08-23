@@ -46,7 +46,6 @@ export const login = () => {
 		try {
 			const { email, password } = getState().user
 			const response = await signInWithEmailAndPassword(auth, email, password)
-			console.log("user id: "+response.user.uid)
 			dispatch(getUser(response.user.uid))
 		} catch (e) {
 			alert(e)
@@ -123,7 +122,6 @@ export const updateUser = () => {
     try {
       updateDoc(doc(db, 'users', uid), { photo: photo })
     } catch(e) {
-			console.log("in update user");
       alert(e)
     }
   }
@@ -150,7 +148,6 @@ export const signup = () => {
 				dispatch({type: 'LOGIN', payload: user})
 			}
 		} catch (e) {
-			console.log("in sign up error")
 			dispatch({type:'SIGNUP_ERROR'})
 			alert(e)
 		}
@@ -177,8 +174,6 @@ export const followUser = (dog) => {
         date: new Date().getTime(),
         type: 'FOLLOWER',
 	  })
-	  let res = JSON.stringify(dog.uid)
-      console.log("dog notification: "+res)
       dispatch(sendNotification(dog.uid, 'Started Following You'))
 	 dispatch(getDog(dog.dogId))
     } catch(e) {

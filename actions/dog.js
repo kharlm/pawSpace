@@ -51,7 +51,6 @@ export const updatePhoto = (photo) => {
 }
 
 export const getLocation = (dog) => {
-	console.log("in get location")
 	return async(dispatch,getState) => {
 		const { status } = await Location.requestForegroundPermissionsAsync()
 		if(status === 'granted'){
@@ -118,8 +117,6 @@ export const dogsignup = () => {
 	}
 
 	export const doglogin = () => {
-		console.log("INSIDE DOG LOGIN")
-
 		return async (dispatch, getState) => {
 			try {
 				const { dogId} = getState().dog
@@ -167,12 +164,8 @@ export const dogsignup = () => {
 	}
 
 	export const blockDog = (blockedDogId) => {
-		console.log("in major block method")
-
 		return async (dispatch,getState)  => {
 			const { dogId, photo, dogTag} = getState().dog
-			console.log("dogID: "+dogId)
-			console.log("blocked DogId: "+blockedDogId)
 			try {
 				updateDoc(doc(db, 'dogs', dogId), {
 					blocked: arrayUnion(blockedDogId)
@@ -181,7 +174,6 @@ export const dogsignup = () => {
 				dispatch(getDog(dogId))
 			}
 			catch(e) {
-			  console.log("block dog error")
 			alert(e)
 			}
 		  }
@@ -206,7 +198,6 @@ export const dogsignup = () => {
 
 			})
 		  } catch(e) {
-				console.log("inside update dog error")
 			alert(e)
 		  }
 		}
@@ -219,7 +210,6 @@ export const dogsignup = () => {
 			try {
 				const dogSnap = await getDoc(doc(db, 'dogs', dog.dogId))
 				  let dog1 = dogSnap.data()
-				  console.log("dog1 geocde: "+dog1.geocode)
 				const snapshot = await getDocs(query(collection(db, 'dogs'), where('geocode', '==', dog1.geocode)))
 				const matchQuery = await getDocs(query(collection(db, 'dogs'), where('dogId', '==', dog.dogId)))
 				const fullSnapshot = await getDocs(collection(db, 'dogs'))
@@ -264,7 +254,6 @@ export const dogsignup = () => {
 			 }
 			}
 
-			console.log("length: "+items.length)
 
 				dispatch({ type: 'GET_CARDS', payload: items });
 

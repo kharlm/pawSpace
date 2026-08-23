@@ -228,7 +228,6 @@ class Home extends React.Component {
     try {
       const response = await fetch(GOOGLE_PLACEAPI+'&location='+this.state.myLocation.coords.latitude+','+this.state.myLocation.coords.longitude+'&key='+key)
       const data = await response.json()
-      console.log('Places API status:', data.status, data.error_message || '')
       this.setState({
         DogParks: data.results || []
       });
@@ -253,13 +252,13 @@ class Home extends React.Component {
       const dogParks = this.state.DogParks.slice(0, 4)
 
       const dogParkPhotos = await Promise.all(dogParks.map(async (park) => {
-        console.log('park photos for', park.name, ':', JSON.stringify(park.photos))
         if (park.photos && park.photos[0]) {
           const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${park.photos[0].photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
           const response = await fetch(url)
-          console.log('photo fetch for', park.name, '- ok:', response.ok, 'status:', response.status, 'url:', response.url)
+          console.log(park.name, '- has photo, fetch ok:', response.ok, 'url:', response.url)
           return response
         }
+        console.log(park.name, '- no photos in Places response')
         return {url: imageUnavailable};
       }))
 
@@ -292,7 +291,6 @@ class Home extends React.Component {
 
       const response = await fetch(url)
       const data = await response.json()
-      console.log('Geocoding API status:', data.status, data.error_message || '')
       const results = data.results || []
 
       let ind;

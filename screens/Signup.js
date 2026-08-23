@@ -35,7 +35,6 @@ class Signup extends React.Component {
   noDog = () => {
     const routeName = this.props.route.name
     this.props.noDog()
-    console.log("route on signup page: "+routeName)
     if(routeName === 'Signup'){
       this.props.signup()
       global.foo="dogsignup";

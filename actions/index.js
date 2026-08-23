@@ -10,8 +10,6 @@ export const uploadPhoto = (image) => {
   if(image.type==="video"){
 
   return async (dispatch) => {
-    console.log("inside video")
-
     try {
       const blob = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()
@@ -26,15 +24,12 @@ export const uploadPhoto = (image) => {
 
       return downloadURL
     } catch(e) {
-      console.log("in upload photo error")
       console.error(e)
     }
   }
   }
   else {
     return async (dispatch) => {
-      console.log("inside image")
-
       try {
         const resize = await ImageManipulator.manipulateAsync(image.uri, [], { format: 'jpeg', compress: 0.1 })
         const blob = await new Promise((resolve, reject) => {
@@ -50,7 +45,6 @@ export const uploadPhoto = (image) => {
 
         return downloadURL
       } catch(e) {
-        console.log("in upload photo error")
         console.error(e)
       }
     }
@@ -64,15 +58,10 @@ export const allowNotifications = (uid) => {
     try {
       const permission = await Notifications.requestPermissionsAsync()
       if (permission.status === 'granted') {
-        console.log("permission granted")
         const token = await Notifications.getExpoPushTokenAsync()
         dispatch({ type: 'GET_TOKEN', payload: token })
-        let res = JSON.stringify(token)
-        console.log("token "+token)
-
 
         updateDoc(doc(db, 'users', uid), { token: token })
-        console.log("uid"+ uid)
       }
     } catch(e) {
       console.error(e)
@@ -85,13 +74,11 @@ export const sendNotification = (uid, text) => {
     const { username } = getState().user
     const { dogTag} = getState().dog
     const {dog} = getState()
-    let res = JSON.stringify(dog)
 
     try {
       const userSnap = await getDoc(doc(db, 'users', uid))
 
       if(userSnap.data().token){
-        console.log("user token1: "+userSnap.data().token)
         fetch(PUSH_ENDPOINT, {
           method: 'POST',
           headers: {

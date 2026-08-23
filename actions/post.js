@@ -57,7 +57,6 @@ export const updateDog = () => {
 
     })
     } catch(e) {
-      console.log("inside update dog error")
     alert(e)
     }
   }
@@ -83,7 +82,6 @@ export const updatePosts = () => {
 
     })
     } catch(e) {
-      console.log("post update error")
     alert(e)
     }
   }
@@ -91,7 +89,6 @@ export const updatePosts = () => {
 }
 
 export const uploadPost = (isVideo,thumbnail) => {
-  console.log("thumb: "+thumbnail)
 	return async (dispatch, getState) => {
     const { post,dog} = getState()
 		try {
@@ -169,7 +166,6 @@ export const flagPost = (postId) => {
 
     })
     } catch(e) {
-      console.log("flag post error")
     alert(e)
     }
   }
@@ -179,13 +175,10 @@ export const flagPost = (postId) => {
 export const getPost = (id) => {
   return async (dispatch, getState) => {
 		try {
-      console.log("post id: "+id)
       const posts = await getDocs(query(collection(db, 'posts'), where('id', '==', id)))
 
 			let array = []
 			posts.forEach((post)=>{
-
-        console.log("posIDS: "+post.data())
 				array.push(post.data())
       })
 
@@ -311,7 +304,6 @@ export const getlocationPosts = (city,state,country) => {
       }
 
 		} catch (e) {
-      console.log("in get posts");
 			alert(e)
     }
 
@@ -322,7 +314,6 @@ export const getlocationPosts = (city,state,country) => {
 export const likePost = (post) => {
   return (dispatch, getState) => {
     const { dogId, dogTag, photo } = getState().dog
-    console.log("isVideo: "+post.isVideo)
     try {
       updateDoc(doc(db, 'posts', post.id), {
         likes: arrayUnion(dogId)

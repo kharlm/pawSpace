@@ -54,7 +54,6 @@ class DogPicker extends React.Component {
       }
 
       getUserDog = (id) => {
-        console.log("Dog Id"+id)
         this.props.getDog(id,'DOGLOGIN')
         this.props.navigation.navigate('Home')
 
@@ -63,8 +62,6 @@ class DogPicker extends React.Component {
          try{
            const dogSnap = await getDoc(doc(db, 'dogs', id))
             const dog = dogSnap.data()
-            let res = JSON.stringify(dog.dogId);
-            console.log("dogoo"+dog.dogId)
             this.setState({
                 dogs: [...this.state.dogs, dog]
                })

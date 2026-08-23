@@ -45,7 +45,6 @@ class Login extends React.Component {
   }
 
    getUserData = async (id) => {
-    console.log("dog: "+this.props.nodog)
      try{
 
       if(this.props.nodog!= true){
@@ -112,7 +111,6 @@ class Login extends React.Component {
     const routeName = this.props.route.name
 
     if(this.state.noDog===true && routeName!='DogSignUp'){
-      console.log("route: "+routeName)
       this.props.noDog()
       return(
       this.props.navigation.navigate('Home')

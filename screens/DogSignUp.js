@@ -41,7 +41,6 @@ class DogSignup extends React.Component {
   }
     }
     else{
-    console.log("routname: "+routeName)
     this.state = { dogNumber: 1 ,
           dogName:'',
           dogAge:'',
@@ -91,8 +90,6 @@ class DogSignup extends React.Component {
     else{
       this.setState({query:""},this.onPress)
     }
-    let res= JSON.stringify(this.state.query)
-    console.log("query: "+res)
 	}
   
   noDog = () => {
@@ -104,7 +101,6 @@ class DogSignup extends React.Component {
 
     const routeName = this.props.route.name
 
-    console.log("dog Tag: "+this.state.dogTag)
       if(this.state.dogName ==''){
         Alert.alert(
           'Please Enter a dog Name',
@@ -217,9 +213,6 @@ class DogSignup extends React.Component {
   }
 
   addDog = () => {
-
-    console.log("query in add dog"+this.state.query)
-    console.log("dog tag in add dog"+this.state.dogTag)
 
     if(this.state.dogName ==''){
       Alert.alert(
@@ -379,7 +372,6 @@ class DogSignup extends React.Component {
       )
     }
     if(this.state.moreThanOneDog===false && this.state.login===true){
-      console.log("nodog1: "+this.props.nodog)
       return(
        
       
