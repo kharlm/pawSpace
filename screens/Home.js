@@ -253,9 +253,12 @@ class Home extends React.Component {
       const dogParks = this.state.DogParks.slice(0, 4)
 
       const dogParkPhotos = await Promise.all(dogParks.map(async (park) => {
+        console.log('park photos for', park.name, ':', JSON.stringify(park.photos))
         if (park.photos && park.photos[0]) {
           const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=${park.photos[0].photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
-          return fetch(url)
+          const response = await fetch(url)
+          console.log('photo fetch for', park.name, '- ok:', response.ok, 'status:', response.status, 'url:', response.url)
+          return response
         }
         return {url: imageUnavailable};
       }))
