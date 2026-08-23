@@ -56,7 +56,7 @@ const ProfileItem = ({
         </Text>
         <Text style={styles.infoContent}>Gender: {gender}</Text>
       </View>
-      <Text style={styles.descriptionProfileItem}>
+      <Text style={[styles.descriptionProfileItem, { fontSize: 14 }]}>
         {bio}
       </Text>
       <View style={{flexDirection:'row',textAlign: "center"}}>

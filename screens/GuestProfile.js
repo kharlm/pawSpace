@@ -48,7 +48,13 @@ class GuestProfile extends React.Component {
  render(){
     const dog = this.props.dogprofile
   return (
-      <ScrollView style={styles.containerProfile}>
+      <FlatList
+        style={styles.containerProfile}
+        numColumns={3}
+        data={dog.posts}
+        keyExtractor={(item) => JSON.stringify(item.date)}
+        ListHeaderComponent={
+        <View>
         <ImageBackground source={{uri: dog.photo}} style={styles.photo}>
         </ImageBackground>
         <View style={{ flex: 1}}>
@@ -97,14 +103,11 @@ class GuestProfile extends React.Component {
               Photos
           </Text>
           </View>
-          <FlatList
-          style={{paddingTop: 5}}
-          horizontal={false}
-          numColumns={3}
-          data={dog.posts}
-          keyExtractor={(item) => JSON.stringify(item.date)}
-
-          renderItem={({ item }) =>
+      </ImageBackground>
+    </View>
+    </View>
+        }
+        renderItem={({ item }) =>
           <TouchableOpacity onPress={() => this.viewPost(item)}>
           <View style={styles1.homeBorder}>
           {
@@ -116,11 +119,8 @@ class GuestProfile extends React.Component {
             </View>
             </TouchableOpacity>
 
-            }/>
-
-      </ImageBackground>
-    </View>
-      </ScrollView>
+            }
+      />
   );
 };
 }

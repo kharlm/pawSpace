@@ -136,7 +136,13 @@ class Profile extends React.Component {
        dog = this.props.dog
      }
   return (
-      <ScrollView style={styles.containerProfile}>
+      <FlatList
+        style={styles.containerProfile}
+        numColumns={3}
+        data={dog.posts}
+        keyExtractor={(item) => JSON.stringify(item.date)}
+        ListHeaderComponent={
+        <View>
         <ImageBackground source={{uri: dog.photo}} style={styles.photo}>
         </ImageBackground>
         <View style={{ flex: 1}}>
@@ -199,17 +205,11 @@ class Profile extends React.Component {
               Photos
           </Text>
           </View>
-
-
-          <FlatList
-
-          style={{paddingTop: 5}}
-          horizontal={false}
-          numColumns={3}
-          data={dog.posts}
-          keyExtractor={(item) => JSON.stringify(item.date)}
-
-          renderItem={({ item }) =>
+      </ImageBackground>
+    </View>
+    </View>
+        }
+        renderItem={({ item }) =>
           <TouchableOpacity onPress={() => this.viewPost(item)}>
           <View style={styles1.homeBorder}>
           {
@@ -221,11 +221,8 @@ class Profile extends React.Component {
             </View>
             </TouchableOpacity>
 
-            }/>
-
-      </ImageBackground>
-    </View>
-      </ScrollView>
+            }
+      />
   );
 };
 }
