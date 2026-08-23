@@ -661,9 +661,9 @@ getPlaceDetails = async () => {
                   </DoubleClick>
                   <View style={styles.row}>
                   <TouchableOpacity onPress={() => this.likePost(item)} >
-                    <Ionicons style={{ marginLeft: 50, marginTop: 5 }} color={liked ? '#0000ff' : '#000'} name={liked ? 'heart' : 'heart-outline'} size={25}
+                    <Ionicons style={{ marginLeft: 30, marginTop: 5 }} color={liked ? '#0000ff' : '#000'} name={liked ? 'heart' : 'heart-outline'} size={25}
                     />
-                    <Text style={{ fontWeight: 'bold' ,marginTop: 0,marginLeft: 51}}>{item.likes.length} Licks</Text>
+                    <Text style={{ fontWeight: 'bold' ,marginTop: 0,marginLeft: 31}}>{item.likes.length} Licks</Text>
 
                   </TouchableOpacity>
                     <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
@@ -682,9 +682,9 @@ getPlaceDetails = async () => {
                     </TouchableOpacity>
                   </View>
 
-                  <Text style={{ marginLeft: 50, marginTop: 5, marginBottom: 10 }}>{item.postDescription}</Text>
+                  <Text style={{ marginLeft: 30, marginTop: 5, marginBottom: 10 }}>{item.postDescription}</Text>
                   <TouchableOpacity onPress={() => this.props.navigation.navigate('Comment', item)} >
-                  <Text style={{color:'#585858', fontSize:10, marginBottom: 5,marginLeft: 50}}>View Comments</Text>
+                  <Text style={{color:'#585858', fontSize:10, marginBottom: 5,marginLeft: 30}}>View Comments</Text>
                     </TouchableOpacity>
                 </View>
               )
