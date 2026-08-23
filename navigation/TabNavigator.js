@@ -1,6 +1,5 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import HomeNavigator from './HomeNavigator';
 import SearchNavigator from './SearchNavigator';
@@ -10,8 +9,6 @@ import ComingSoon from '../screens/ComingSoon';
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
-  const insets = useSafeAreaInsets();
-
   return (
     <Tab.Navigator
       screenOptions={{
@@ -20,8 +17,6 @@ export default function TabNavigator() {
         tabBarStyle: {
           backgroundColor: '#fff',
           paddingTop: 5,
-          paddingBottom: Math.max(insets.bottom, 5),
-          height: 55 + insets.bottom,
         },
       }}
     >
